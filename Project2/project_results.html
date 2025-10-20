@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Computer Vision Project 2 - Image Warping & Rectification</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #e0e0e0;
+            background: #2b2b2b;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: #3a3a3a;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Header and Navigation */
+        header {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            color: white;
+            padding: 1rem 0;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            max-width: 1400px;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        header.hidden {
+            transform: translateY(-100%);
+        }
+
+        header h1 {
+            text-align: center;
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        header h2 {
+            text-align: center;
+            font-size: 1rem;
+            font-weight: normal;
+            margin-top: 0.3rem;
+            opacity: 0.8;
+        }
+
+        nav {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            padding: 0 2rem;
+            margin-top: 0.5rem;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            font-size: 0.9rem;
+            border: 2px solid transparent;
+        }
+
+        nav a:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: white;
+            transform: translateY(-2px);
+        }
+
+        /* Main content padding to account for fixed header */
+        main {
+            padding-top: 140px;
+        }
+
+        /* Section Styling */
+        section {
+            padding: 4rem 2rem;
+            border-bottom: 3px solid #2b2b2b;
+        }
+
+        section:nth-child(even) {
+            background: #444;
+        }
+
+        section h2 {
+            font-size: 2.5rem;
+            color: #4a9eff;
+            margin-bottom: 1rem;
+            text-align: center;
+            position: relative;
+            padding-bottom: 1rem;
+        }
+
+        section h2:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(90deg, #4a9eff, #6ec1ff);
+            border-radius: 2px;
+        }
+
+        section h3 {
+            font-size: 1.8rem;
+            color: #6ec1ff;
+            margin: 2rem 0 1rem;
+        }
+
+        .content-wrapper {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Description Box */
+        .description {
+            background: rgba(74, 158, 255, 0.1);
+            padding: 2rem;
+            border-radius: 15px;
+            margin: 2rem 0;
+            border-left: 5px solid #4a9eff;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .description p {
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: #d0d0d0;
+        }
+
+        .description ul {
+            margin-left: 2rem;
+            margin-top: 1rem;
+        }
+
+        .description li {
+            margin-bottom: 0.5rem;
+            font-size: 1.05rem;
+            color: #d0d0d0;
+        }
+
+        /* Image Grid */
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .image-card {
+            background: #2b2b2b;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .image-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(74, 158, 255, 0.3);
+        }
+
+        .image-card img {
+            width: 100%;
+            max-height: 85vh;
+            height: auto;
+            display: block;
+            object-fit: contain;
+            image-rendering: crisp-edges;
+            image-rendering: -webkit-optimize-contrast;
+        }
+
+        .image-card .caption {
+            padding: 1rem;
+            text-align: center;
+            font-weight: 600;
+            color: #4a9eff;
+            background: #1a1a1a;
+        }
+
+        /* Full-width image for animation */
+        .full-image {
+            margin: 2rem 0;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .full-image img {
+            width: 100%;
+            max-height: 85vh;
+            height: auto;
+            display: block;
+            object-fit: contain;
+            image-rendering: crisp-edges;
+            image-rendering: -webkit-optimize-contrast;
+        }
+
+        .full-image .caption {
+            padding: 1.5rem;
+            text-align: center;
+            font-weight: 600;
+            font-size: 1.2rem;
+            color: white;
+            background: linear-gradient(135deg, #4a9eff, #6ec1ff);
+        }
+
+        /* Comparison Grid for Part 3 */
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        @media (max-width: 768px) {
+            .comparison-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Grand Reveal styling */
+        .grand-reveal {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            color: white;
+            padding: 3rem;
+            border-radius: 15px;
+            text-align: center;
+            margin: 2rem 0;
+            box-shadow: 0 10px 30px rgba(74, 158, 255, 0.3);
+            border: 2px solid #4a9eff;
+        }
+
+        .grand-reveal h3 {
+            color: #4a9eff;
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .grand-reveal p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Footer */
+        footer {
+            background: #1a1a1a;
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            font-size: 0.9rem;
+        }
+
+        /* Smooth scroll */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Code/Math styling */
+        code {
+            background: #2b2b2b;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            color: #ff6b9d;
+        }
+
+        /* Highlight box */
+        .highlight {
+            background: rgba(74, 158, 255, 0.15);
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin: 1.5rem 0;
+            border-left: 5px solid #4a9eff;
+        }
+
+        .highlight strong {
+            color: #6ec1ff;
+        }
+
+        .highlight p {
+            color: #d0d0d0;
+        }
+
+        /* Joke styling */
+        .joke-box {
+            background: rgba(255, 215, 0, 0.1);
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin: 1.5rem 0;
+            border-left: 5px solid #ffd700;
+            font-style: italic;
+        }
+
+        .joke-box p {
+            color: #ffd700;
+            font-size: 1.1rem;
+        }
+
+        /* Method box styling */
+        .method-box {
+            background: rgba(110, 193, 255, 0.08);
+            padding: 2rem;
+            border-radius: 15px;
+            margin: 2rem 0;
+            border: 2px solid rgba(74, 158, 255, 0.3);
+        }
+
+        .method-box h4 {
+            color: #4a9eff;
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+        }
+
+        .method-box p {
+            color: #d0d0d0;
+            margin-bottom: 0.8rem;
+        }
+
+        .method-box ul {
+            margin-left: 1.5rem;
+            color: #d0d0d0;
+        }
+
+        .method-box li {
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header id="header">
+            <h1>Computer Vision Project 2</h1>
+            <h2>Image Homography & Morphing</h2>
+            <nav>
+                <a href="#part1">Part 1: Homography</a>
+                <a href="#part2">Part 2: Practical Application</a>
+                <a href="#part3">Part 3: Warping Comparison</a>
+            </nav>
+        </header>
+
+        <main>
+            <!-- Part 1: Homography and Rectification -->
+            <section id="part1">
+                <div class="content-wrapper">
+                    <h2>Part 1: Image Homography & Warping</h2>
+
+                    <div class="description">
+                        <h3>What is Homography?</h3>
+                        <p>
+                            A <strong>homography</strong> is a transformation that maps points from one plane to another.
+                            In computer vision, homographies are represented by 3x3 matrices that can model perspective
+                            transformations, allowing us to warp one image to align with another using point correspondences.
+                        </p>
+                        <p>
+                            Mathematically, a homography <code>H</code> transforms a point <code>(x, y)</code> to <code>(x', y')</code>
+                            through the equation:
+                        </p>
+                        <div class="highlight">
+                            <strong>H[x, y, 1]<sup>T</sup> = λ[x', y', 1]<sup>T</sup></strong>
+                        </div>
+                        <p>
+                            This transformation has 8 degrees of freedom (the 9 matrix elements minus one scale factor),
+                            meaning we need at least <strong>4 point correspondences</strong> to compute it uniquely using
+                            the Direct Linear Transform (DLT) algorithm.
+                        </p>
+                    </div>
+
+                    <div class="description">
+                        <h3>Warping Process</h3>
+                        <p>
+                            The warping process involves:
+                        </p>
+                        <ul>
+                            <li><strong>Select correspondences:</strong> Choose 4+ matching points between test and target images</li>
+                            <li><strong>Compute homography:</strong> Solve for the 3x3 transformation matrix <code>H</code> using DLT</li>
+                            <li><strong>Warp the test image:</strong> Apply inverse mapping with <code>H<sup>-1</sup></code> using bilinear interpolation</li>
+                        </ul>
+                        <p>
+                            The correspondence points are color-coded for easy tracking: <span style="color: #00ff00; font-weight: bold;">Point 1 = Green</span>,
+                            <span style="color: #0000ff; font-weight: bold;">Point 2 = Blue</span>,
+                            <span style="color: #ff0000; font-weight: bold;">Point 3 = Red</span>,
+                            <span style="color: #ffff00; font-weight: bold;">Point 4 = Yellow</span>
+                        </p>
+                    </div>
+
+                    <!-- Scene 1-b to 1-a -->
+                    <h3>Example 1: Warping Scene 1-b to Scene 1-a</h3>
+
+                    <div class="comparison-grid">
+                        <div class="image-card">
+                            <img src="project_results/scene_1-b_to_scene_1-a_test_no_points.png" alt="Scene 1-b Original">
+                            <div class="caption">Test Image: Scene 1-b</div>
+                        </div>
+                        <div class="image-card">
+                            <img src="project_results/scene_1-b_to_scene_1-a_target_no_points.png" alt="Scene 1-a Original">
+                            <div class="caption">Target Image: Scene 1-a</div>
+                        </div>
+                    </div>
+
+                    <div class="comparison-grid">
+                        <div class="image-card">
+                            <img src="project_results/scene_1-b_to_scene_1-a_test_with_points.png" alt="Scene 1-b with Points">
+                            <div class="caption">Test Image with Correspondence Points</div>
+                        </div>
+                        <div class="image-card">
+                            <img src="project_results/scene_1-b_to_scene_1-a_target_with_points.png" alt="Scene 1-a with Points">
+                            <div class="caption">Target Image with Correspondence Points</div>
+                        </div>
+                    </div>
+
+                    <div class="full-image">
+                        <img src="project_results/scene_1-b_to_scene_1-a_warped_comparison.png" alt="Warped Comparison">
+                        <div class="caption">Warped Result: Scene 1-b Aligned to Scene 1-a</div>
+                    </div>
+
+                    <div class="full-image">
+                        <img src="project_results/scene_1-b_to_scene_1-a_warping_animation.gif" alt="Warping Animation 1-b">
+                        <div class="caption">Animated Warping: Scene 1-b → 1-a Transformation</div>
+                    </div>
+
+                    <!-- Scene 1-c to 1-a -->
+                    <h3>Example 2: Warping Scene 1-c to Scene 1-a</h3>
+
+                    <div class="comparison-grid">
+                        <div class="image-card">
+                            <img src="project_results/scene_1-c_to_scene_1-a_test_no_points.png" alt="Scene 1-c Original">
+                            <div class="caption">Test Image: Scene 1-c</div>
+                        </div>
+                        <div class="image-card">
+                            <img src="project_results/scene_1-c_to_scene_1-a_target_no_points.png" alt="Scene 1-a Original">
+                            <div class="caption">Target Image: Scene 1-a</div>
+                        </div>
+                    </div>
+
+                    <div class="comparison-grid">
+                        <div class="image-card">
+                            <img src="project_results/scene_1-c_to_scene_1-a_test_with_points.png" alt="Scene 1-c with Points">
+                            <div class="caption">Test Image with Correspondence Points</div>
+                        </div>
+                        <div class="image-card">
+                            <img src="project_results/scene_1-c_to_scene_1-a_target_with_points.png" alt="Scene 1-a with Points">
+                            <div class="caption">Target Image with Correspondence Points</div>
+                        </div>
+                    </div>
+
+                    <div class="full-image">
+                        <img src="project_results/scene_1-c_to_scene_1-a_warped_comparison.png" alt="Warped Comparison">
+                        <div class="caption">Warped Result: Scene 1-c Aligned to Scene 1-a</div>
+                    </div>
+
+                    <div class="full-image">
+                        <img src="project_results/scene_1-c_to_scene_1-a_warping_animation.gif" alt="Warping Animation 1-c">
+                        <div class="caption">Animated Warping: Scene 1-c → 1-a Transformation</div>
+                    </div>
+
+                    <!-- Three-way comparison -->
+                    <h3>Combined View: All Warps to Scene 1-a</h3>
+                    <div class="full-image">
+                        <img src="project_results/scene_1_three_way_comparison.png" alt="Three-way Comparison">
+                        <div class="caption">Three-Way Comparison: Warped 1-c | Original 1-a | Warped 1-b</div>
+                    </div>
+
+                    <div class="highlight">
+                        <p>
+                            The homography transformation successfully aligns different viewpoints
+                            of the same scene to a common reference frame (Scene 1-a). The color-coded correspondence points
+                            (Green, Blue, Red, Yellow) track matching features throughout the transformation, demonstrating how
+                            the algorithm maps points from one perspective to another. The animations show the smooth interpolation
+                            from the original viewpoint to the aligned result.
+                        </p>
+                    </div>
+
+                    <!-- Scene 2-a to 2-b -->
+                    <h3>Example 3: Warping Scene 2-a to Scene 2-b</h3>
+
+                    <div class="comparison-grid">
+                        <div class="image-card">
+                            <img src="project_results/scene_2-a_to_scene_2-b_test_no_points.png" alt="Scene 2-a Original">
+                            <div class="caption">Test Image: Scene 2-a</div>
+                        </div>
+                        <div class="image-card">
+                            <img src="project_results/scene_2-a_to_scene_2-b_target_no_points.png" alt="Scene 2-b Original">
+                            <div class="caption">Target Image: Scene 2-b</div>
+                        </div>
+                    </div>
+
+                    <div class="comparison-grid">
+                        <div class="image-card">
+                            <img src="project_results/scene_2-a_to_scene_2-b_test_with_points.png" alt="Scene 2-a with Points">
+                            <div class="caption">Test Image with Correspondence Points</div>
+                        </div>
+                        <div class="image-card">
+                            <img src="project_results/scene_2-a_to_scene_2-b_target_with_points.png" alt="Scene 2-b with Points">
+                            <div class="caption">Target Image with Correspondence Points</div>
+                        </div>
+                    </div>
+
+                    <div class="full-image">
+                        <img src="project_results/scene_2-a_to_scene_2-b_warped_comparison.png" alt="Warped Comparison">
+                        <div class="caption">Warped Result: Scene 2-a Aligned to Scene 2-b</div>
+                    </div>
+
+                    <div class="full-image">
+                        <img src="project_results/scene_2-a_to_scene_2-b_warping_animation.gif" alt="Warping Animation 2-a">
+                        <div class="caption">Animated Warping: Scene 2-a → 2-b Transformation</div>
+                    </div>
+
+                    <div class="highlight">
+                        <p>
+                            Across all three examples, the homography transformation successfully
+                            aligns different viewpoints and scenes using correspondence points (Green, Blue, Red, Yellow).
+                            The animations illustrate the smooth interpolation from the original images to the aligned results, 
+                            demonstrating the effectiveness of homography in image warping and rectification.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Part 2: Practical Application (The Exam Joke) -->
+            <section id="part2">
+                <div class="content-wrapper">
+                    <h2>Part 2: Leaking Exam 2</h2>
+
+                    <div class="description">
+                        <h3>Exam 1 Was Tough...</h3>
+                        <p>
+                            After the challenges of Exam 1, I realized we were in serious need of some advantage on Exam 2. So, I devised
+                            a more practical application
+                            of homography. Could I catch a glimpse of the second exam? 
+                            What better way to demonstrate the power of image homographies than by reconstructing
+                            a sneak peek at Exam 2?
+                        </p>
+                    </div>
+
+                    <div class="description">
+                        <h3>The Mission</h3>
+                        <p>
+                            Through highly sophisticated academic espionage (walking by the professor's office),
+                            I managed to take a picture of what appears to be <strong>Exam 2</strong>. However, the angle
+                            was less than ideal. Using the homography techniques from Part 1, I set out to
+                            rectify this image and leak the exam contents in a clear, readable format.
+                        </p>
+                    </div>
+
+                    <h3>Original Captured Image</h3>
+                    <div class="image-grid">
+                        <div class="image-card">
+                            <img src="project_results/test.jpg" alt="Original Test Image">
+                            <div class="caption">Sneakily Captured Photo of Exam 2</div>
+                        </div>
+                    </div>
+
+                    <div class="grand-reveal">
+                        <h3>The Grand Reveal</h3>
+                        <p>Our homography technique transforms my hastily taken photo into something readable...</p>
+                    </div>
+
+                    <div class="full-image">
+                        <img src="project_results/warping_animation_test.gif" alt="Test Warping Animation">
+                        <div class="caption">Rectification of Exam 2</div>
+                    </div>
+
+                    <h3>Final Rectified Results</h3>
+                    <div class="full-image">
+                        <img src="project_results/rectified_image_test.jpg" alt="Rectified Test Image">
+                        <div class="caption">Rectified Exam 2</div>
+                    </div>
+
+                    <h3>Cropped Result</h3>
+                    <div class="full-image">
+                        <img src="project_results/final_test.png" alt="Cropped Rectified Test Image">
+                        <div class="caption">Cropped and Cleaned Final Result</div>
+                    </div>
+
+                    <div class="description">
+                        <p>
+                            Perfect! Now that we have a clear Exam 2, we can immediately see that the answers to the first
+                            two questions are of course 1) "All of the above" and 2) "All of the above". Feel free to use
+                            this information to study!
+                        </p>
+                        <p>
+                            Overall, this experiment showcases the practical utility of homography transformations. While something
+                            loss in image quality is observed, the exam is fully readable after rectification. The differences in image\
+                            stem from perspective distortion, lighting variations, and interpolation artifacts during warping. Higher
+                            resolution images, such as those taken on a proper camera with high-quality lenses, and more precise point 
+                            correspondences would further improve the results. Additionally, I could likely achieve more realistic-looking
+                            results by projecting the image to an 8.5x11 rectangle rather than a square, better matching the exam paper's 
+                            aspect ratio. However, as the purpose was to provide something readable, this result suffices.
+                            
+                        </p>
+                    </div>
+
+                    <div class="highlight">
+                        <p>
+                            <strong>Disclaimer:</strong> This is obviously a joke demonstration. No actual exams were photographed
+                            or compromised in the making of this project. I doubt he's even made or printed the second exam.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Part 3: Warping Methods Comparison -->
+            <section id="part3">
+                <div class="content-wrapper">
+                    <h2>Part 3: Warping Methods Comparison</h2>
+
+                    <div class="description">
+                        <h3>Comparing Warping Methods</h3>
+                        <p>
+                            While homography works perfectly for planar transformations, what about warping between non-planar shapes
+                            or morphing one object into another? This section compares two nonlinear warping techniques
+                            for point-to-point correspondence-based image deformation.
+                        </p>
+                    </div>
+
+                    <div class="description">
+                        <h3>Method 1: Triangular Mesh Warping</h3>
+                        <p>
+                            <strong>Triangular mesh warping</strong> divides the image into triangular regions using Delaunay
+                            triangulation, then transforms each triangle independently with an affine transformation. Each triangle
+                            receives its own 2x3 affine matrix, allowing triangles to warp separately based on their corner movements.
+                        </p>
+                        <p>
+                            This approach is fast and computationally efficient, preserves straight lines within each triangle, and provides
+                            excellent local control. However, it may show visible seams at triangle boundaries due to discontinuities
+                            in derivatives across triangle edges.
+                        </p>
+                    </div>
+
+                    <div class="description">
+                        <h3>Method 2: Thin-Plate Spline (TPS) Warping</h3>
+                        <p>
+                            <strong>Thin-plate spline warping</strong> creates smooth, global deformations using radial basis
+                            functions. The transformation minimizes bending energy while passing through all control points,
+                            producing the smoothest possible warp with C² continuity everywhere.
+                        </p>
+                        <p>
+                            TPS warping provides perfectly smooth interpolation with no discontinuities, creating natural,
+                            organic-looking deformations ideal for curved surfaces. It is more computationally expensive than
+                            triangular warping, but produces superior visual quality for applications requiring seamless transformations.
+                        </p>
+                    </div>
+
+                    <!-- Example 1a: Digit 3 Morphing -->
+                    <h3>Example 1a: Digit 3 Morphing (3-a ↔ 3-b)</h3>
+
+                    <div class="description">
+                        <p>
+                            This example demonstrates warping between two different handwritten instances of the digit 3.
+                            This showcases how the algorithms handle variations in the same digit's form.
+                        </p>
+                    </div>
+
+                    <h4>Original Images</h4>
+                    <div class="comparison-grid">
+                        <div class="image-card">
+                            <img src="project_results/digit_3-a.jpg" alt="Digit 3-a">
+                            <div class="caption">Source: Digit 3-a</div>
+                        </div>
+                        <div class="image-card">
+                            <img src="project_results/digit_3-b.jpg" alt="Digit 3-b">
+                            <div class="caption">Target: Digit 3-b</div>
+                        </div>
+                    </div>
+
+                    <h4>Triangular Mesh Visualizations</h4>
+                    <div class="comparison-grid">
+                        <div class="image-card">
+                            <img src="project_results/part3_source_mesh_digit3.png" alt="Digit 3-a Mesh">
+                            <div class="caption">Digit 3-a Triangulation</div>
+                        </div>
+                        <div class="image-card">
+                            <img src="project_results/part3_target_mesh_digit3.png" alt="Digit 3-b Mesh">
+                            <div class="caption">Digit 3-b Triangulation</div>
+                        </div>
+                    </div>
+
+                    <h4>Warped Results</h4>
+                    <div class="comparison-grid">
+                        <div class="image-card">
+                            <img src="project_results/part3_triangular_warp_digit3.jpg" alt="Triangular Warp Digit 3">
+                            <div class="caption">Triangular Mesh Warp: 3-a → 3-b</div>
+                        </div>
+                        <div class="image-card">
+                            <img src="project_results/part3_tps_warp_digit3.jpg" alt="TPS Warp Digit 3">
+                            <div class="caption">TPS Warp: 3-a → 3-b</div>
+                        </div>
+                    </div>
+
+                    <h4>Morphing Animations</h4>
+                    <div class="comparison-grid">
+                        <div class="image-card">
+                            <img src="project_results/part3_triangular_morphing_animation_digit3.gif" alt="Triangular Morphing Digit 3">
+                            <div class="caption">Triangular Mesh Morphing: 3-a ↔ 3-b</div>
+                        </div>
+                        <div class="image-card">
+                            <img src="project_results/part3_tps_morphing_animation_digit3.gif" alt="TPS Morphing Digit 3">
+                            <div class="caption">TPS Morphing: 3-a ↔ 3-b</div>
+                        </div>
+                    </div>
+
+                    <!-- Example 1b: Digit 7 Morphing -->
+                    <h3>Example 1b: Digit 7 Morphing (7-a ↔ 7-b)</h3>
+
+                    <div class="description">
+                        <p>
+                            This example demonstrates warping between two different handwritten instances of the digit 7.
+                            This showcases how the algorithms handle variations in the same digit's form with different stroke styles.
+                        </p>
+                    </div>
+
+                    <h4>Original Images</h4>
+                    <div class="comparison-grid">
+                        <div class="image-card">
+                            <img src="project_results/digit_7-a.jpg" alt="Digit 7-a">
+                            <div class="caption">Source: Digit 7-a</div>
+                        </div>
+                        <div class="image-card">
+                            <img src="project_results/digit_7-b.jpg" alt="Digit 7-b">
+                            <div class="caption">Target: Digit 7-b</div>
+                        </div>
+                    </div>
+
+                    <h4>Triangular Mesh Visualizations</h4>
+                    <div class="comparison-grid">
+                        <div class="image-card">
+                            <img src="project_results/part3_source_mesh_digit7.png" alt="Digit 7-a Mesh">
+                            <div class="caption">Digit 7-a Triangulation</div>
+                        </div>
+                        <div class="image-card">
+                            <img src="project_results/part3_target_mesh_digit7.png" alt="Digit 7-b Mesh">
+                            <div class="caption">Digit 7-b Triangulation</div>
+                        </div>
+                    </div>
+
+                    <h4>Warped Results</h4>
+                    <div class="comparison-grid">
+                        <div class="image-card">
+                            <img src="project_results/part3_triangular_warp_digit7.jpg" alt="Triangular Warp Digit 7">
+                            <div class="caption">Triangular Mesh Warp: 7-a → 7-b</div>
+                        </div>
+                        <div class="image-card">
+                            <img src="project_results/part3_tps_warp_digit7.jpg" alt="TPS Warp Digit 7">
+                            <div class="caption">TPS Warp: 7-a → 7-b</div>
+                        </div>
+                    </div>
+
+                    <h4>Morphing Animations</h4>
+                    <div class="comparison-grid">
+                        <div class="image-card">
+                            <img src="project_results/part3_triangular_morphing_animation_digit7.gif" alt="Triangular Morphing Digit 7">
+                            <div class="caption">Triangular Mesh Morphing: 7-a ↔ 7-b</div>
+                        </div>
+                        <div class="image-card">
+                            <img src="project_results/part3_tps_morphing_animation_digit7.gif" alt="TPS Morphing Digit 7">
+                            <div class="caption">TPS Morphing: 7-a ↔ 7-b</div>
+                        </div>
+                    </div>
+
+                    <!-- Example 1c: Digit 3 to 7 Morphing -->
+                    <h3>Example 1c: Cross-Digit Morphing (3 ↔ 7)</h3>
+
+                    <div class="description">
+                        <p>
+                            This example demonstrates warping between different digits (3 and 7), showcasing how
+                            the algorithms handle morphing between fundamentally different shapes.
+                        </p>
+                    </div>
+
+                    <h4>Triangular Mesh Visualizations</h4>
+                    <div class="comparison-grid">
+                        <div class="image-card">
+                            <img src="project_results/part3_source_mesh_3-to-7.png" alt="Digit 3 Mesh">
+                            <div class="caption">Digit 3 Triangulation</div>
+                        </div>
+                        <div class="image-card">
+                            <img src="project_results/part3_target_mesh3-to-7.png" alt="Digit 7 Mesh">
+                            <div class="caption">Digit 7 Triangulation</div>
+                        </div>
+                    </div>
+
+                    <h4>Morphing Animations</h4>
+                    <div class="comparison-grid">
+                        <div class="image-card">
+                            <img src="project_results/part3_triangular_morphing_animation_3-to-7.gif" alt="Triangular Morphing 3 to 7">
+                            <div class="caption">Triangular Mesh Morphing: 3 ↔ 7</div>
+                        </div>
+                        <div class="image-card">
+                            <img src="project_results/part3_tps_morphing_animation_3-to-7.gif" alt="TPS Morphing 3 to 7">
+                            <div class="caption">TPS Morphing: 3 ↔ 7</div>
+                        </div>
+                    </div>
+
+                    <!-- Example 2: Face Morphing -->
+                    <h3>Example 2: Face Morphing (Matt ↔ Monkey)</h3>
+
+                    <div class="description">
+                        <p>
+                            Our second example demonstrates morphing between a human face and a monkey face, showcasing
+                            how the algorithms handle organic shapes with smooth contours and complex features. The photographs 
+                            presented here were both taken by me. The picture of the <strong>monkey</strong> was taken in Kuala Lumpur, Malaysia
+                            during a visit to the Batu Caves, while the picture of <strong>Matt</strong> was taken of the beloved
+                            Mechanical Engineering machine shop supervisor Matt Lowe. 
+                        </p>
+                    </div>
+
+                    <h4>Original Images</h4>
+                    <div class="comparison-grid">
+                        <div class="image-card">
+                            <img src="project_results/matt.jpg" alt="Matt">
+                            <div class="caption">Source: Matt</div>
+                        </div>
+                        <div class="image-card">
+                            <img src="project_results/monkey.jpg" alt="Monkey">
+                            <div class="caption">Target: Monkey</div>
+                        </div>
+                    </div>
+
+                    <h4>Triangular Mesh Visualizations</h4>
+                    <div class="comparison-grid">
+                        <div class="image-card">
+                            <img src="project_results/part3_source_mesh_matt.png" alt="Matt Mesh">
+                            <div class="caption">Matt Triangulation</div>
+                        </div>
+                        <div class="image-card">
+                            <img src="project_results/part3_target_mesh_monkey.png" alt="Monkey Mesh">
+                            <div class="caption">Monkey Triangulation</div>
+                        </div>
+                    </div>
+
+                    <h4>Morphing Animations</h4>
+                    <div class="comparison-grid">
+                        <div class="image-card">
+                            <img src="project_results/part3_triangular_morphing_animation_mattkey.gif" alt="Triangular Morphing Matt">
+                            <div class="caption">Triangular Mesh Morphing: Matt ↔ Monkey</div>
+                        </div>
+                        <div class="image-card">
+                            <img src="project_results/part3_tps_morphing_animation_mattkey.gif" alt="TPS Morphing Matt">
+                            <div class="caption">TPS Morphing: Matt ↔ Monkey</div>
+                        </div>
+                    </div>
+
+                    <div class="description">
+                        <h3>Analysis & Discussion</h3>
+                        <p>
+                            The human to monkey face morphing highlights a key tradeoff between the two warping methods: speed versus smoothness.
+                        </p>
+                        <p>
+                            <strong>Triangular Mesh Warping</strong> is really fast. Each triangle transforms 
+                            independently, making it easy to parallelize. For any pixel, you just find which triangle it's in, compute 
+                            its barycentric coordinates, and apply one affine transformation. Even with high-resolution images, this 
+                            typically runs in milliseconds. I was able to generate the full Matt-Monkey morphing animation at 4000x4000 resolution
+                            without any downsampling.
+                        </p>
+                        <p>
+                            The downside is that triangular warping can produce visible artifacts at triangle boundaries, which is noticeable
+                            during the intermediate frames in the animation, which can look jagged or jumpy. A higher number of landmarks can
+                            help reduce this, but at the cost of more triangles and slightly slower performance. 
+                        </p>
+                        <p>
+                            <strong>Thin-Plate Spline (TPS) Warping</strong> is much more computationally expensive. It requires solving 
+                            a large linear system (O(p³) complexity) and then evaluating radial basis functions for every control point 
+                            at each output pixel. With around 30 facial landmarks (which is a small number for a task of this complexity), 
+                            TPS can be 10-50x slower than triangular mesh warping.
+                            To feasibly create this animation on my laptop, I had to downsample the images from 4000x4000 to 1000x1000.
+                        </p>
+                        <p> 
+                            However, the visual quality of TPS warping is superior. The smooth, continuous deformation eliminates 
+                            artifacts and produces natural-looking transitions, especially for organic shapes like faces. The 
+                            intermediate frames in the TPS animation look fluid and seamless, without the jagged edges seen in 
+                            the triangular mesh method.
+                        </p>
+                        <p>
+                            One potential improvement for these animations would be better handling of the colors during morphing, 
+                            as well as increasing the number of landmarks to improve accuracy. I notice that with the number of landmarks 
+                            used, some facial features (like the eyes and mouth) could be better aligned during the morph, which would
+                            enhance the realism of the morphing.
+                        </p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2025 Computer Vision Project 2 | Image Warping & Rectification</p>
+            <p>Homography Rectification • Triangular Mesh Warping • Thin-Plate Spline Morphing</p>
+        </footer>
+    </div>
+
+    <script>
+        // Header hide/show on scroll
+        let lastScrollTop = 0;
+        const header = document.getElementById('header');
+        const scrollThreshold = 100; // Start hiding after scrolling 100px
+
+        window.addEventListener('scroll', function() {
+            let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+            if (scrollTop > scrollThreshold) {
+                if (scrollTop > lastScrollTop) {
+                    // Scrolling down
+                    header.classList.add('hidden');
+                } else {
+                    // Scrolling up
+                    header.classList.remove('hidden');
+                }
+            } else {
+                // At top of page
+                header.classList.remove('hidden');
+            }
+
+            lastScrollTop = scrollTop;
+        });
+    </script>
+</body>
+</html>

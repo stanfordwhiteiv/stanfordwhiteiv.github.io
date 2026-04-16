@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deep Learning Project 4 - Generative Models: VAE, DCGAN &amp; WGAN</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #e0e0e0;
+            background: #2b2b2b;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: #3a3a3a;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Header and Navigation */
+        header {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            color: white;
+            padding: 1rem 0;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            max-width: 1400px;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        header.hidden {
+            transform: translateY(-100%);
+        }
+
+        header h1 {
+            text-align: center;
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        header h2 {
+            text-align: center;
+            font-size: 1rem;
+            font-weight: normal;
+            margin-top: 0.3rem;
+            color: #aaa;
+        }
+
+        nav {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            padding: 0.5rem 0 0.3rem;
+        }
+
+        nav a {
+            color: #4a9eff;
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        nav a:hover {
+            color: #6ec1ff;
+        }
+
+        /* Main content */
+        main {
+            padding-top: 110px;
+        }
+
+        section {
+            padding: 3rem 0;
+            border-bottom: 2px solid #4a4a4a;
+        }
+
+        section:last-child {
+            border-bottom: none;
+        }
+
+        .content-wrapper {
+            padding: 0 3rem;
+        }
+
+        section h2 {
+            font-size: 2rem;
+            color: #4a9eff;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid #4a9eff;
+        }
+
+        section h3 {
+            font-size: 1.4rem;
+            color: #6ec1ff;
+            margin: 1.5rem 0 1rem;
+        }
+
+        .description {
+            margin-bottom: 1.5rem;
+        }
+
+        .description p {
+            color: #d0d0d0;
+            margin-bottom: 0.8rem;
+        }
+
+        .description ul, .description ol {
+            margin-left: 1.5rem;
+            color: #d0d0d0;
+            margin-top: 0.5rem;
+        }
+
+        .description li {
+            margin-bottom: 0.4rem;
+        }
+
+        /* Section alternating background */
+        section:nth-child(even) {
+            background: #333;
+        }
+
+        section:nth-child(odd) {
+            background: #3a3a3a;
+        }
+
+        section:nth-child(even) .content-wrapper {
+            background: #1a1a1a;
+        }
+
+        /* Full-width image */
+        .full-image {
+            margin: 2rem 0;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .full-image img {
+            width: 100%;
+            max-height: 85vh;
+            height: auto;
+            display: block;
+            object-fit: contain;
+            image-rendering: crisp-edges;
+            image-rendering: -webkit-optimize-contrast;
+        }
+
+        .full-image .caption {
+            padding: 1.5rem;
+            text-align: center;
+            font-weight: 600;
+            font-size: 1.2rem;
+            color: white;
+            background: linear-gradient(135deg, #4a9eff, #6ec1ff);
+        }
+
+        /* Comparison Grid */
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        @media (max-width: 768px) {
+            .comparison-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Results table */
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            font-size: 1rem;
+        }
+
+        .results-table th {
+            background: #4a9eff;
+            color: white;
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+
+        .results-table td {
+            padding: 0.65rem 1rem;
+            border-bottom: 1px solid #555;
+            color: #d0d0d0;
+        }
+
+        .results-table tr:nth-child(even) td {
+            background: rgba(74, 158, 255, 0.05);
+        }
+
+        .results-table tr.best td {
+            color: #6ec1ff;
+            font-weight: 600;
+        }
+
+        /* Footer */
+        footer {
+            background: #1a1a1a;
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            font-size: 0.9rem;
+        }
+
+        /* Smooth scroll */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Code/Math styling */
+        code {
+            background: #2b2b2b;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            color: #ff6b9d;
+        }
+
+        /* Highlight box */
+        .highlight {
+            background: rgba(74, 158, 255, 0.15);
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin: 1.5rem 0;
+            border-left: 5px solid #4a9eff;
+        }
+
+        .highlight strong {
+            color: #6ec1ff;
+        }
+
+        .highlight p {
+            color: #d0d0d0;
+        }
+
+        .highlight ul {
+            margin-left: 1.5rem;
+            color: #d0d0d0;
+            margin-top: 0.5rem;
+        }
+
+        .highlight li {
+            margin-bottom: 0.4rem;
+        }
+
+        /* Method box styling */
+        .method-box {
+            background: rgba(110, 193, 255, 0.08);
+            padding: 2rem;
+            border-radius: 15px;
+            margin: 2rem 0;
+            border: 2px solid rgba(74, 158, 255, 0.3);
+        }
+
+        .method-box h4 {
+            color: #4a9eff;
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+        }
+
+        .method-box p {
+            color: #d0d0d0;
+            margin-bottom: 0.8rem;
+        }
+
+        .method-box ul, .method-box ol {
+            margin-left: 1.5rem;
+            color: #d0d0d0;
+        }
+
+        .method-box li {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Task label */
+        .task-label {
+            display: inline-block;
+            background: #4a9eff;
+            color: white;
+            padding: 0.3rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            letter-spacing: 0.5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header id="header">
+            <h1>Deep Learning Project 4</h1>
+            <h2>Generative Models: Variational Autoencoder, DCGAN &amp; Wasserstein GAN</h2>
+            <nav>
+                <a href="#part1">Part 1: VAE</a>
+                <a href="#part2">Part 2: DCGAN</a>
+                <a href="#part3">Part 3: WGAN</a>
+            </nav>
+        </header>
+
+        <main>
+            <!-- Part 1: VAE -->
+            <section id="part1">
+                <div class="content-wrapper">
+                    <h2>Part 1: Variational Autoencoder (VAE)</h2>
+
+                    <div class="description">
+                        <h3>Overview</h3>
+                        <p>
+                            A basic fully connected autoencoder and a Variational Autoencoder (VAE) are
+                            implemented and trained on MNIST. The autoencoder is trained with MSE
+                            reconstruction loss; the VAE adds a KL divergence term that regularises the
+                            latent distribution towards a standard Gaussian. Both are evaluated across
+                            multiple latent dimensionalities (2, 8, 32) to study the effect on reconstruction
+                            quality and the ability to generate new samples by decoding random noise vectors.
+                        </p>
+                    </div>
+
+                    <!-- Task 1 -->
+                    <span class="task-label">Task 1 - Basic Autoencoder</span>
+                    <h3>Task 1: Autoencoder, Reconstruction and Latent Space Sampling</h3>
+
+                    <div class="description">
+                        <p>
+                            A fully connected encoder-decoder is trained with latent dimensions of 2, 8, and
+                            32. Reconstructions are compared across these configurations, and random vectors
+                            drawn from <code>N(0,1)</code> are decoded to assess sampling quality.
+                        </p>
+                    </div>
+
+                    <div class="full-image">
+                        <img src="results_part1/ae_training_loss.png" alt="AE Training Loss">
+                        <div class="caption">Autoencoder Training Loss by Latent Dimension</div>
+                    </div>
+
+                    <div class="full-image">
+                        <img src="results_part1/ae_reconstructions.png" alt="AE Reconstructions">
+                        <div class="caption">Autoencoder Reconstructions: Original vs dim=2, 8, 32</div>
+                    </div>
+
+                    <div class="comparison-grid">
+                        <div class="full-image">
+                            <img src="results_part1/ae_samples_dim8.png" alt="AE Samples dim=8">
+                            <div class="caption">AE Random Samples (latent dim=8)</div>
+                        </div>
+                        <div class="full-image">
+                            <img src="results_part1/ae_samples_dim32.png" alt="AE Samples dim=32">
+                            <div class="caption">AE Random Samples (latent dim=32)</div>
+                        </div>
+                    </div>
+
+                    <div class="highlight">
+                        <p><strong>Effect of latent dimensionality on reconstruction:</strong></p>
+                        <p>
+                            As latent dimension increases from 2 to 32, reconstruction quality improves
+                            substantially. With <strong>dim=2</strong>, the bottleneck forces extreme
+                            compression: most digits are roughly recognisable, but fine detail is lost and
+                            some classes are confused (e.g., the "4" is reconstructed as a "9"). With
+                            <strong>dim=8</strong>, reconstructions are sharp and correct for all shown
+                            samples. <strong>dim=32</strong> is nearly indistinguishable from the originals,
+                            with pixel-accurate stroke widths and clear digit identity preserved across the
+                            full sample set.
+                        </p>
+                        <p><strong>Why the autoencoder latent space is unsuitable for sampling:</strong></p>
+                        <p>
+                            Despite excellent reconstructions, drawing random vectors from
+                            <code>N(0,1)</code> and decoding them produces severely distorted, artifact-laden
+                            blobs, particularly at dim=8, where the decoded samples resemble tangled loops
+                            and fragmented strokes rather than legible digits. At dim=32 the artifacts are
+                            even more severe: the outputs look like crossed and overlapping stroke fragments
+                            with no clear digit identity. This occurs because a standard autoencoder places
+                            no constraint on the shape or density of the learned latent space. The encoder
+                            maps training examples to clusters that may be scattered, irregularly spaced,
+                            or separated by "gaps" containing no training signal. A random
+                            <code>N(0,1)</code> vector almost certainly falls in such a gap, producing
+                            nonsensical decoder output. This motivates the VAE, which regularises the
+                            latent space to be continuous and centred near the origin.
+                        </p>
+                    </div>
+
+                    <!-- Task 2 -->
+                    <span class="task-label">Task 2 - Variational Autoencoder</span>
+                    <h3>Task 2: VAE, Structured Latent Space and Sampling</h3>
+
+                    <div class="description">
+                        <p>
+                            The VAE encoder outputs a mean <code>μ</code> and log-variance
+                            <code>log σ²</code>. A sample is drawn via the reparameterisation trick
+                            (<code>z = μ + σ·ε</code>, <code>ε ~ N(0,1)</code>) and decoded. The loss
+                            combines binary cross-entropy reconstruction error with a KL divergence term
+                            that pushes the posterior towards a standard Gaussian. The 2D latent space is
+                            visualised by decoding a uniform grid over two ranges: <code>[-1,1]</code>
+                            and <code>[-5,5]</code>.
+                        </p>
+                    </div>
+
+                    <div class="full-image">
+                        <img src="results_part1/vae_training_loss.png" alt="VAE Training Loss">
+                        <div class="caption">VAE Training Loss (Reconstruction + KL) by Latent Dimension</div>
+                    </div>
+
+                    <div class="full-image">
+                        <img src="results_part1/vae_reconstructions.png" alt="VAE Reconstructions">
+                        <div class="caption">VAE Reconstructions: Original vs dim=2, 8, 32</div>
+                    </div>
+
+                    <div class="comparison-grid">
+                        <div class="full-image">
+                            <img src="results_part1/vae_samples_dim8.png" alt="VAE Samples dim=8">
+                            <div class="caption">VAE Random Samples (latent dim=8)</div>
+                        </div>
+                        <div class="full-image">
+                            <img src="results_part1/vae_samples_dim32.png" alt="VAE Samples dim=32">
+                            <div class="caption">VAE Random Samples (latent dim=32)</div>
+                        </div>
+                    </div>
+
+                    <div class="comparison-grid">
+                        <div class="full-image">
+                            <img src="results_part1/ae_vs_vae_samples_dim8.png" alt="AE vs VAE Samples dim=8">
+                            <div class="caption">AE (top) vs VAE (bottom) Samples, latent dim=8</div>
+                        </div>
+                        <div class="full-image">
+                            <img src="results_part1/ae_vs_vae_samples_dim32.png" alt="AE vs VAE Samples dim=32">
+                            <div class="caption">AE (top) vs VAE (bottom) Samples, latent dim=32</div>
+                        </div>
+                    </div>
+
+                    <div class="comparison-grid">
+                        <div class="full-image">
+                            <img src="results_part1/vae_grid_range1.png" alt="VAE Latent Grid [-1,1]">
+                            <div class="caption">VAE 2D Latent Space Grid, range [-1.0, 1.0]</div>
+                        </div>
+                        <div class="full-image">
+                            <img src="results_part1/vae_grid_range5.png" alt="VAE Latent Grid [-5,5]">
+                            <div class="caption">VAE 2D Latent Space Grid, range [-5.0, 5.0]</div>
+                        </div>
+                    </div>
+
+                    <div class="highlight">
+                        <p><strong>VAE vs AE: sampling comparison:</strong></p>
+                        <p>
+                            The contrast between AE and VAE samples is stark. At dim=32, the AE top row
+                            (same <code>N(0,1)</code> vectors decoded through the AE) produces blurry,
+                            crossed-stroke artifacts with no recognisable digit identity. The VAE bottom
+                            row, using the exact same noise vectors, decodes to clean, sharp, clearly
+                            legible digits (9, 1, 6, 9, 9, 8, 9, 8). This directly demonstrates the
+                            core benefit of the VAE's KL regularisation: by forcing the encoder to produce
+                            posteriors close to <code>N(0,1)</code>, the decoder learns to map the entire
+                            unit Gaussian ball to meaningful digit images, making random sampling reliable.
+                        </p>
+                        <p><strong>Latent space grid, range [-1.0, 1.0]:</strong></p>
+                        <p>
+                            The 2D grid traversal over <code>[-1,1]×[-1,1]</code> reveals a well-organised
+                            manifold: digit classes occupy distinct regions and transition smoothly across
+                            the space. The top-left quadrant is dominated by 7s and 9s; moving right
+                            produces 2s and then 6s and 0s; the lower-left region contains 1s; the centre
+                            transitions through 4s, 8s, 3s, and 5s. Every cell in the grid decodes to
+                            a recognisable digit with no blank or artifact cells, confirming that the
+                            unit Gaussian region is densely and continuously covered by the learned
+                            generative model.
+                        </p>
+                        <p><strong>Latent space grid, range [-5.0, 5.0]:</strong></p>
+                        <p>
+                            Extending to <code>[-5,5]×[-5,5]</code> reveals that the meaningful region
+                            is concentrated near the origin: the central portion of the grid still shows
+                            smooth digit transitions (1s, 7s, 0s, 5s, 3s, 2s, 6s), but the extreme
+                            corners become progressively faded, ghostly, and eventually near-blank as
+                            the decoder is queried at points far outside the training distribution's
+                            support. Columns and rows near ±5 decode to dim, barely visible digit
+                            outlines rather than sharp images. This illustrates the boundary of the
+                            prior: the KL term confines the posterior mass within a few standard
+                            deviations of the origin, so the decoder was never trained to handle inputs
+                            far beyond <code>|z|≈1 to 2</code>.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Part 2: DCGAN -->
+            <section id="part2">
+                <div class="content-wrapper">
+                    <h2>Part 2: Deep Convolutional GAN (DCGAN)</h2>
+
+                    <div class="description">
+                        <h3>Overview</h3>
+                        <p>
+                            A DCGAN is implemented and trained on the Pokemon dataset (64×64 RGB images).
+                            The generator uses transposed convolutions with batch normalisation and ReLU
+                            to upsample from a 100-dimensional noise vector to a 64×64 RGB image. The
+                            discriminator mirrors this with strided convolutions, batch normalisation,
+                            and Leaky ReLU activations, outputting a single real/fake probability via
+                            sigmoid. Training uses the standard minimax adversarial objective with binary
+                            cross-entropy loss.
+                        </p>
+                    </div>
+
+                    <!-- Task 1 -->
+                    <span class="task-label">Task 1 - DCGAN Implementation</span>
+                    <h3>Task 1: DCGAN Training with Leaky ReLU Discriminator</h3>
+
+                    <div class="full-image">
+                        <img src="results_part2/dcgan_task1_losses.png" alt="DCGAN Task 1 Losses">
+                        <div class="caption">Task 1 DCGAN: Generator and Discriminator Loss Curves (Leaky ReLU)</div>
+                    </div>
+
+                    <div class="full-image">
+                        <img src="results_part2/dcgan_progression.png" alt="DCGAN Generation Progression">
+                        <div class="caption">Task 1 DCGAN: Generated Pokemon at Epochs 5, 15, and 25</div>
+                    </div>
+
+                    <div class="highlight">
+                        <p><strong>Loss curve dynamics:</strong></p>
+                        <p>
+                            The generator loss begins at approximately 3.35 and falls sharply to a
+                            minimum near 2.0 around epoch 5, corresponding to the phase when the
+                            discriminator is still learning to distinguish real from fake and provides
+                            strong gradient signal to the generator. After epoch 5, the generator loss
+                            rises steadily to around 3.4 by epoch 25. This rising trend indicates the
+                            discriminator is becoming more accurate over time, making it harder for the
+                            generator to fool it, a healthy adversarial dynamic rather than mode collapse.
+                        </p>
+                        <p>
+                            The discriminator loss starts near 0.45 and initially rises to a peak of
+                            approximately 0.68 around epoch 7 as the generator improves, then steadily
+                            decreases to about 0.31 by epoch 25. The discriminator's declining loss
+                            in later epochs reflects it becoming increasingly confident at distinguishing
+                            real Pokemon from generated ones, consistent with the generator loss rising
+                            concurrently.
+                        </p>
+                        <p><strong>Image quality progression:</strong></p>
+                        <p>
+                            Generated images show recognisable Pokemon-like structure even by epoch 5:
+                            distinct creature outlines, varied colour palettes, and consistent 64×64
+                            framing are visible. By epoch 15 the diversity increases and
+                            backgrounds become cleaner. Epoch 25 outputs show a wide variety of Pokemon
+                            body types and colours with generally well-defined silhouettes, though fine
+                            details like faces and limbs remain somewhat blurred, which is typical for 25 epochs
+                            of DCGAN training at this resolution.
+                        </p>
+                    </div>
+
+                    <!-- Task 2 -->
+                    <span class="task-label">Task 2 - GAN Tuning and Evaluation</span>
+                    <h3>Task 2: Leaky ReLU vs Standard ReLU Discriminator</h3>
+
+                    <div class="full-image">
+                        <img src="results_part2/dcgan_comparison.png" alt="DCGAN LeakyReLU vs ReLU Loss Comparison">
+                        <div class="caption">Task 2 DCGAN: Generator and Discriminator Loss, Leaky ReLU vs Standard ReLU</div>
+                    </div>
+
+                    <div class="full-image">
+                        <img src="results_part2/dcgan_sample_comparison.png" alt="DCGAN Sample Comparison">
+                        <div class="caption">Task 2 Final Samples at Epoch 25: Leaky ReLU (left) vs ReLU (right) Discriminator</div>
+                    </div>
+
+                    <div class="highlight">
+                        <p><strong>Leaky ReLU vs standard ReLU: training stability:</strong></p>
+                        <p>
+                            Replacing Leaky ReLU with standard ReLU in the discriminator produces a
+                            notably different loss trajectory. The ReLU discriminator loss (dashed orange)
+                            starts lower and drops more aggressively, reaching approximately 0.30 by
+                            epoch 25, a faster convergence than the Leaky ReLU discriminator (solid blue).
+                            The ReLU generator loss (dashed) stays elevated in the range 2.75 to 3.65
+                            throughout training without the dip seen with Leaky ReLU, which is evidence that the generator is struggling to learn effectively against the ReLU discriminator. The Leaky ReLU variant shows a more typical adversarial dynamic with the generator loss dipping as it learns, then rising as the discriminator improves, while the ReLU variant's loss curves suggest a more unstable training process where the generator receives weaker gradient signal.
+                        </p>
+                        <p>
+                            Standard ReLU clips all negative pre-activations to zero, which can cause
+                            "dying" neurons in the discriminator, with entire feature maps that become
+                            permanently inactive. This is the mechanism Leaky ReLU was designed to fix.
+                            In practice on this dataset and training length, both variants produce
+                            Pokemon images of comparable visual quality at epoch 25, though it is notable that there are more instances of "broken" pokemon that look almost identical. The ReLU variant's
+                            faster discriminator convergence could become problematic in longer runs,
+                            where an overpowering discriminator would starve the generator of gradient
+                            signal and potentially cause mode collapse. Leaky ReLU offers a more
+                            balanced training dynamic that is typically preferable for longer training
+                            regimes.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Part 3: WGAN -->
+            <section id="part3">
+                <div class="content-wrapper">
+                    <h2>Part 3: Wasserstein GAN (WGAN)</h2>
+
+                    <div class="description">
+                        <h3>Overview</h3>
+                        <p>
+                            A WGAN is implemented following Arjovsky et al. (2017). Key differences from
+                            a standard GAN: (1) the discriminator is replaced by an unbounded
+                            <em>critic</em> with no sigmoid output; (2) the loss is the Wasserstein-1
+                            distance estimate (<code>E[C(real)] − E[C(fake)]</code>), not binary
+                            cross-entropy; (3) RMSprop replaces Adam; (4) the critic is updated
+                            <code>n_critic</code> times per generator step; and (5) critic weights are
+                            clipped to <code>[−clip, clip]</code> after each update to enforce the
+                            Lipschitz constraint. Task 1 uses the FC architecture on MNIST; Task 2
+                            extends to convolutional architectures for Pokemon.
+                        </p>
+                        <p>
+                            <strong>Note on computational constraints:</strong> Due to limited GPU resources,
+                            relatively small generator and critic architectures were used across both tasks
+                            to keep training times practical. This directly limits output quality, particularly
+                            for the Pokemon task where larger convolutional capacity would be needed to
+                            capture the dataset's colour and structural diversity. For the same reason,
+                            hyperparameter optimisation was conducted on MNIST rather than Pokemon.
+                        </p>
+                    </div>
+
+                    <!-- Task 1 -->
+                    <span class="task-label">Task 1 - WGAN on MNIST</span>
+                    <h3>Task 1: FC WGAN, MNIST Digit Generation</h3>
+
+                    <div class="full-image">
+                        <img src="results_part3/task1/wgan_mnist_losses.png" alt="WGAN MNIST Losses">
+                        <div class="caption">Task 1 WGAN: Wasserstein Distance Estimate and Generator Loss (MNIST, 50 Epochs)</div>
+                    </div>
+
+                    <div class="full-image">
+                        <img src="results_part3/task1/wgan_mnist_samples.png" alt="WGAN MNIST Samples">
+                        <div class="caption">Task 1 WGAN: Generated MNIST Digits After 50 Epochs</div>
+                    </div>
+
+                    <div class="highlight">
+                        <p><strong>Training dynamics:</strong></p>
+                        <p>
+                            The Wasserstein distance estimate (left panel) starts at approximately 0.75 and
+                            drops rapidly within the first 3 to 5 epochs to near zero, then stabilises in
+                            a narrow band around 0.05 to 0.08 for the remaining 45 epochs. This convergent,
+                            non-oscillatory behaviour is the key stability advantage of the Wasserstein
+                            loss: unlike the BCE losses of a standard GAN, the W-distance provides a
+                            meaningful, monotonically interpretable training signal; a lower value
+                            indicates the critic cannot distinguish real from fake, meaning the generator
+                            has learned the true data distribution well.
+                        </p>
+                        <p>
+                            The generator loss (right panel, <code>−E[C(fake)]</code>) begins highly
+                            negative (around −4.5) as the critic assigns low scores to the generator's
+                            early random outputs, then rises steadily toward 0 as the generator learns
+                            to produce images the critic scores similarly to real data. By epoch 25 the
+                            generator loss has nearly reached 0 and plateaus, indicating a stable
+                            equilibrium between generator and critic, a much cleaner convergence curve
+                            than the oscillating BCE losses seen in DCGAN training.
+                        </p>
+                        <p><strong>Generated sample quality:</strong></p>
+                        <p>
+                            The 64 generated MNIST digits show substantial diversity: all ten digit
+                            classes (0 to 9) are represented across the sample grid with varied writing
+                            styles and stroke widths. Images are somewhat softer than real MNIST digits
+                            (a consequence of the FC architecture and moderate training length), but
+                            digit identities are clearly legible in the large majority of samples with
+                            no evidence of mode collapse onto a single digit class.
+                        </p>
+                    </div>
+
+                    <!-- Task 2 -->
+                    <span class="task-label">Task 2 - WGAN on Pokemon</span>
+                    <h3>Task 2: Convolutional WGAN, Pokemon Generation</h3>
+
+                    <div class="full-image">
+                        <img src="results_part3/task2/wgan_pokemon_losses.png" alt="WGAN Pokemon Losses">
+                        <div class="caption">Task 2 WGAN: Wasserstein Distance and Generator Loss (Pokemon, 50 Epochs)</div>
+                    </div>
+
+                    <div class="full-image">
+                        <img src="results_part3/task2/wgan_pokemon_samples.png" alt="WGAN Pokemon Samples">
+                        <div class="caption">Task 2 WGAN: Generated Pokemon Images After 50 Epochs</div>
+                    </div>
+
+                    <div class="full-image">
+                        <img src="results_part3/wgan_w_distance_both_tasks.png" alt="WGAN W Distance Both Tasks">
+                        <div class="caption">WGAN Wasserstein Distance: MNIST (Task 1) vs Pokemon (Task 2)</div>
+                    </div>
+
+                    <div class="full-image">
+                        <img src="results_part3/task2/wgan_vs_dcgan_comparison.png" alt="WGAN vs DCGAN Comparison">
+                        <div class="caption">Pokemon Generation: DCGAN (left) vs WGAN (right)</div>
+                    </div>
+
+                    <div class="highlight">
+                        <p><strong>Generated image quality and training stability:</strong></p>
+                        <p>
+                            The WGAN converges stably on the Pokemon dataset, with the Wasserstein
+                            distance estimate declining and flattening over 50 epochs without the
+                            oscillation or spikes characteristic of BCE-based GAN training. 
+                        </p>
+                        <p><strong>WGAN vs DCGAN: differences in behaviour and output:</strong></p>
+                        <p>
+                            Comparing the final epoch outputs side-by-side, the DCGAN (left) produces
+                            Pokemon with somewhat sharper edges and more clearly delineated individual
+                            creature bodies, with distinct silhouettes with recognisable anatomical features
+                            are more common. The WGAN outputs (right) tended to be of worse quality, with more blurred edges and more frequent instances of merged or "blob-like" creatures, or strange repeated artifacts.
+                        </p>
+                        <p>
+                            In terms of training behaviour, the WGAN is notably more stable. The DCGAN's
+                            adversarial BCE loss is prone to instability when the discriminator becomes
+                            too strong (vanishing gradients to the generator) or too weak (generator
+                            receives little signal). The WGAN's critic, operating under weight clipping
+                            to enforce the Lipschitz constraint, provides a gradient signal that remains
+                            informative even when the distributions are far apart, which is why the
+                            Wasserstein loss was proposed. The trade-off is that weight clipping is a
+                            crude Lipschitz enforcement mechanism that can limit the critic's expressiveness,
+                            contributing to the slightly softer visual quality relative to DCGAN at the
+                            same epoch count. It is also worth noting that the WGAN was trained for
+                            fewer epochs with a smaller architecture than the DCGAN due to compute
+                            constraints, so the visual gap is not a fair apples-to-apples comparison
+                            of the two approaches; a larger model trained longer would be expected to
+                            close much of the quality difference.
+                        </p>
+                    </div>
+
+                    <!-- Hyperparameter Search -->
+                    <span class="task-label">Hyperparameter Search: WGAN</span>
+                    <h3>Hyperparameter Optimisation: 4 Random Configurations × 10 Epochs</h3>
+
+                    <div class="description">
+                        <p>
+                            A random hyperparameter search over four WGAN training parameters is conducted
+                            on MNIST: learning rate <code>lr ∈ {1e-5, 5e-5, 1e-4, 2e-4}</code>,
+                            critic steps per generator update <code>n_critic ∈ {3, 5, 7, 10}</code>,
+                            weight-clip range <code>clip ∈ {0.005, 0.01, 0.02, 0.05}</code>, and
+                            batch size <code>∈ {32, 64, 128, 256}</code>. 
+                        </p>
+                    </div>
+
+                    <div class="full-image">
+                        <img src="results_part3/hyperparams/hp_loss_curves.png" alt="HP Loss Curves">
+                        <div class="caption">Hyperparameter Search: Wasserstein Distance and Generator Loss per Config</div>
+                    </div>
+
+                    <div class="full-image">
+                        <img src="results_part3/hyperparams/hp_samples_grid.png" alt="HP Samples Grid">
+                        <div class="caption">Hyperparameter Search: Generated Digits After 10 Epochs, 4 Random Configs</div>
+                    </div>
+
+                    <table class="results-table">
+                        <thead>
+                            <tr>
+                                <th>Config</th>
+                                <th>lr</th>
+                                <th>n_critic</th>
+                                <th>clip</th>
+                                <th>batch_size</th>
+                                <th>Final W-dist</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>C1</td>
+                                <td>1e-05</td>
+                                <td>3</td>
+                                <td>0.02</td>
+                                <td>64</td>
+                                <td>0.0797 → diverges (peaks ~5.0)</td>
+                                <td>Unstable; clip too large for lr</td>
+                            </tr>
+                            <tr>
+                                <td>C2</td>
+                                <td>5e-05</td>
+                                <td>5</td>
+                                <td>0.005</td>
+                                <td>32</td>
+                                <td>0.0101</td>
+                                <td>Stable; decent digit quality</td>
+                            </tr>
+                            <tr class="best">
+                                <td>C3 (best)</td>
+                                <td>2e-04</td>
+                                <td>3</td>
+                                <td>0.005</td>
+                                <td>32</td>
+                                <td>0.0034</td>
+                                <td>Sharpest digits; lowest W-dist</td>
+                            </tr>
+                            <tr>
+                                <td>C4</td>
+                                <td>5e-05</td>
+                                <td>5</td>
+                                <td>0.005</td>
+                                <td>64</td>
+                                <td>0.0114</td>
+                                <td>Stable; similar to C2</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="highlight">
+                        <p><strong>Key findings from the hyperparameter search:</strong></p>
+                        <ul>
+                            <li>
+                                <strong>Config C1</strong> (<code>lr=1e-5, clip=0.02</code>) is the
+                                outlier: its Wasserstein distance rises from ~2 to a peak of ~5 over
+                                the first 3 epochs before collapsing. The large clip value (0.02) combined
+                                with the very low learning rate means the critic's weight magnitude is
+                                not constrained tightly enough relative to its learning speed, causing
+                                the critic to diverge and drag the generator into an extremely negative
+                                loss region (G-loss reaches ~−34). The sample grid for C1 shows blurry,
+                                noisy, barely-recognisable digit blobs.
+                            </li>
+                            <li>
+                                <strong>Configs C2, C3, C4</strong> all converge stably to very low
+                                W-distances within a few epochs. Their G-loss curves are nearly flat
+                                near 0 throughout, indicating rapid equilibrium. Among these, C3
+                                (<code>lr=2e-4, n_critic=3, clip=0.005, bs=32</code>) achieves the
+                                lowest final W-distance (0.0034) and produces the sharpest, most
+                                legible generated digits, as the smaller batch size and higher learning
+                                rate accelerate early convergence, while the tight clip (0.005)
+                                keeps the critic's Lipschitz constant well-controlled.
+                            </li>
+                            <li>
+                                The dominant hyperparameter interaction is between <code>lr</code> and
+                                <code>clip</code>: a large clip allows larger critic weight magnitudes,
+                                which requires a correspondingly higher learning rate to avoid the
+                                critic dominating and destabilising training. Tight clip values
+                                (0.005) are safer across a wider range of learning rates.
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; Stanford White IV 2026 | Deep Learning Project 4 | Generative Models</p>
+            <p>Variational Autoencoder &bull; Deep Convolutional GAN &bull; Wasserstein GAN</p>
+        </footer>
+    </div>
+
+    <script>
+        // Header hide/show on scroll
+        let lastScrollTop = 0;
+        const header = document.getElementById('header');
+        const scrollThreshold = 100;
+
+        window.addEventListener('scroll', function() {
+            let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+            if (scrollTop > scrollThreshold) {
+                if (scrollTop > lastScrollTop) {
+                    header.classList.add('hidden');
+                } else {
+                    header.classList.remove('hidden');
+                }
+            } else {
+                header.classList.remove('hidden');
+            }
+
+            lastScrollTop = scrollTop;
+        });
+    </script>
+</body>
+</html>

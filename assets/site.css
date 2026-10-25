@@ -159,6 +159,13 @@ a { color: inherit; }
     animation: drift 30s ease-in-out infinite alternate;
 }
 
+/* Landing-page hero: Spirit Island on wide screens, frozen Lake Louise (portrait) on phones */
+.home-hero { background-color: #1b2a33; background-image: url('../photography/img/full/dsc00650.jpg'); }
+
+@media (max-width: 720px) {
+    .home-hero { background-image: url('../photography/img/full/dsc00509.jpg'); background-position: center 30%; }
+}
+
 @keyframes drift { to { transform: scale(1.1) translateY(-1.5%); } }
 
 .hero::after {

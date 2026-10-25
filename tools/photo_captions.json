@@ -75,7 +75,7 @@
     "caption": "",
     "featured": false,
     "location": "Lake Louise, Banff National Park",
-    "mobile": true
+    "mobile": false
   },
   "DSC01164": {
     "caption": "",
@@ -171,7 +171,7 @@
     "caption": "",
     "featured": false,
     "location": "Tsutenkaku Tower, Osaka",
-    "mobile": false
+    "mobile": true
   },
   "Edit1": {
     "caption": "",

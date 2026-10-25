@@ -115,7 +115,7 @@ window.PHOTOS = [
   "caption": "",
   "featured": false,
   "location": "Lake Louise, Banff National Park",
-  "mobile": true
+  "mobile": false
  },
  {
   "file": "dsc01164.jpg",
@@ -259,7 +259,7 @@ window.PHOTOS = [
   "caption": "",
   "featured": false,
   "location": "Tsutenkaku Tower, Osaka",
-  "mobile": false
+  "mobile": true
  },
  {
   "file": "edit1.jpg",

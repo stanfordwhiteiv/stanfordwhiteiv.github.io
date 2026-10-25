@@ -164,6 +164,13 @@ a { color: inherit; }
 
 @media (max-width: 720px) {
     .home-hero { background-image: url('../photography/img/full/dsc00509.jpg'); background-position: center 30%; }
+    /* Sit the text lower so the kicker clears the snowy peaks */
+    .hero.home { min-height: 100vh; min-height: 100svh; }
+    .hero.home::after {
+        background: linear-gradient(to bottom, rgba(8, 14, 19, 0.45) 0%, rgba(8, 14, 19, 0.1) 25%, rgba(8, 14, 19, 0.4) 45%, rgba(8, 14, 19, 0.5) 70%, var(--hero-fade) 96%);
+    }
+    .hero.home .wrap { padding-bottom: 1.25rem; }
+    .hero.home .hero-kicker { text-shadow: 0 1px 10px rgba(0, 0, 0, 0.55); }
 }
 
 @keyframes drift { to { transform: scale(1.1) translateY(-1.5%); } }

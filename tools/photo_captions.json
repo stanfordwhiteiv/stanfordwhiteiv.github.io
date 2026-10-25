@@ -2,171 +2,205 @@
   "DSC03985": {
     "caption": "",
     "featured": true,
-    "location": "Hidden Lake, Glacier National Park"
+    "location": "Hidden Lake, Glacier National Park",
+    "mobile": false
   },
   "DSC06621": {
     "caption": "",
     "featured": true,
-    "location": "Downtown Singapore"
+    "location": "Downtown Singapore",
+    "mobile": false
   },
   "DSC03348": {
     "caption": "",
     "featured": true,
-    "location": "Theodore Roosevelt National Park, North Dakota"
+    "location": "Theodore Roosevelt National Park, North Dakota",
+    "mobile": false
   },
   "DSC05628-Pano": {
     "caption": "",
     "featured": true,
-    "location": "The Loch, Rocky Mountain National Park"
+    "location": "The Loch, Rocky Mountain National Park",
+    "mobile": false
   },
   "DSC07557-HDR-Pano": {
     "caption": "",
     "featured": true,
-    "location": "Sunrise Point, Bryce Canyon National Park"
+    "location": "Sunrise Point, Bryce Canyon National Park",
+    "mobile": false
   },
   "DSC03248-2": {
     "caption": "",
     "featured": true,
-    "location": "Buffalo National River, Arkansas"
+    "location": "Buffalo National River, Arkansas",
+    "mobile": false
   },
   "DSC06794": {
     "caption": "",
     "featured": true,
-    "location": "Marina Bay Sands, Singapore"
+    "location": "Marina Bay Sands, Singapore",
+    "mobile": false
   },
   "DSC03926-HDR-Pano": {
     "caption": "",
     "featured": true,
-    "location": "Big South Fork River, Tennessee"
+    "location": "Big South Fork River, Tennessee",
+    "mobile": false
   },
   "DSC00650": {
     "caption": "",
     "featured": false,
-    "location": "Spirit Island, Jasper National Park"
+    "location": "Spirit Island, Jasper National Park",
+    "mobile": false
   },
   "DSC03863": {
     "caption": "",
     "featured": false,
-    "location": "Blue Whale, Channel Islands National Park"
+    "location": "Blue Whale, Channel Islands National Park",
+    "mobile": false
   },
   "DSC03535-Edit-2": {
     "caption": "",
     "featured": false,
-    "location": "Joshua Tree National Park"
+    "location": "Joshua Tree National Park",
+    "mobile": true
   },
   "_DSC4443": {
     "caption": "",
     "featured": false,
-    "location": "Yellowstone National Park"
+    "location": "Yellowstone National Park",
+    "mobile": false
   },
   "DSC00509": {
     "caption": "",
     "featured": false,
-    "location": "Lake Louise, Banff National Park"
+    "location": "Lake Louise, Banff National Park",
+    "mobile": true
   },
   "DSC01164": {
     "caption": "",
     "featured": false,
-    "location": "Lake Louise, Banff National Park"
+    "location": "Lake Louise, Banff National Park",
+    "mobile": true
   },
   "DSC02376": {
     "caption": "",
     "featured": false,
-    "location": "Total Solar Eclipse, Buffalo National River"
+    "location": "Total Solar Eclipse, Buffalo National River",
+    "mobile": false
   },
   "DSC00436": {
     "caption": "",
     "featured": false,
-    "location": "Chief Mountain, Glacier National Park"
+    "location": "Chief Mountain, Glacier National Park",
+    "mobile": true
   },
   "DSC08887": {
     "caption": "",
     "featured": false,
-    "location": "Fushimi Inari Taisha, Kyoto"
+    "location": "Fushimi Inari Taisha, Kyoto",
+    "mobile": true
   },
   "DSC03591-1": {
     "caption": "",
     "featured": false,
-    "location": "Dolphins, Channel Islands National Park"
+    "location": "Dolphins, Channel Islands National Park",
+    "mobile": false
   },
   "DSC00300": {
     "caption": "",
     "featured": false,
-    "location": "Charles Bridge, Prague"
+    "location": "Charles Bridge, Prague",
+    "mobile": true
   },
   "DSC06154": {
     "caption": "",
     "featured": false,
-    "location": "Ophir Pass, Colorado"
+    "location": "Ophir Pass, Colorado",
+    "mobile": true
   },
   "DSC07267": {
     "caption": "",
     "featured": false,
-    "location": "Batu Caves, Kuala Lumpur"
+    "location": "Batu Caves, Kuala Lumpur",
+    "mobile": false
   },
   "DSC06879": {
     "caption": "",
     "featured": false,
-    "location": "Capitol Reef National Park"
+    "location": "Capitol Reef National Park",
+    "mobile": false
   },
   "DSC03532": {
     "caption": "",
     "featured": false,
-    "location": "4th of July, Morgantown, WV"
+    "location": "4th of July, Morgantown, WV",
+    "mobile": false
   },
   "DSC08920-HDR-Pano": {
     "caption": "",
     "featured": false,
-    "location": "Mount Rainier National Park"
+    "location": "Mount Rainier National Park",
+    "mobile": true
   },
   "DSC06187": {
     "caption": "",
     "featured": false,
-    "location": "Balanced Rock, Arches National Park"
+    "location": "Balanced Rock, Arches National Park",
+    "mobile": false
   },
   "DSC07921": {
     "caption": "",
     "featured": false,
-    "location": "Canyon Overlook, Zion National Park"
+    "location": "Canyon Overlook, Zion National Park",
+    "mobile": false
   },
   "DSC08197": {
     "caption": "",
     "featured": false,
-    "location": "The Subway, Zion National Park"
+    "location": "The Subway, Zion National Park",
+    "mobile": false
   },
   "DSC03583": {
     "caption": "",
     "featured": false,
-    "location": "Bee on a Coneflower, Morgantown, WV"
+    "location": "Bee on a Coneflower, Morgantown, WV",
+    "mobile": false
   },
   "DSC08975": {
     "caption": "",
     "featured": false,
-    "location": "Tsutenkaku Tower, Osaka"
+    "location": "Tsutenkaku Tower, Osaka",
+    "mobile": false
   },
   "Edit1": {
     "caption": "",
     "featured": false,
-    "location": "Mt. Moran, Grand Teton National Park"
+    "location": "Mt. Moran, Grand Teton National Park",
+    "mobile": false
   },
   "DSC00102": {
     "caption": "",
     "featured": false,
-    "location": "Fortress Hohensalzburg, Salzburg"
+    "location": "Fortress Hohensalzburg, Salzburg",
+    "mobile": false
   },
   "DSC07843": {
     "caption": "",
     "featured": false,
-    "location": "Julia & Travis's Wedding"
+    "location": "Julia & Travis's Wedding",
+    "mobile": false
   },
   "DSC03534": {
     "caption": "",
     "featured": false,
-    "location": "4th of July, Morgantown, WV"
+    "location": "4th of July, Morgantown, WV",
+    "mobile": false
   },
   "_DSC6073": {
     "caption": "",
     "featured": false,
-    "location": "Devil's Garden, Arches National Park"
+    "location": "Devil's Garden, Arches National Park",
+    "mobile": false
   }
 }

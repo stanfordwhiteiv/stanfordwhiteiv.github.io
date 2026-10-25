@@ -36,17 +36,13 @@
     var showcase = document.querySelector('.showcase');
     if (showcase && window.PHOTOS) {
         var sBase = showcase.dataset.base || '';
-        var featured = PHOTOS.filter(function (p) { return p.featured; });
-        var slides = featured.map(function (p) {
-            var s = document.createElement('div');
-            s.style.backgroundImage = "url('" + sBase + 'full/' + p.file + "')";
-            showcase.querySelector('.showcase-slides').appendChild(s);
-            return s;
-        });
+        var slideBox = showcase.querySelector('.showcase-slides');
         var dots = showcase.querySelector('.showcase-dots');
         var place = showcase.querySelector('.showcase-place');
-        var idx = 0, timer;
+        var featured = [], slides = [], idx = 0, timer;
         var still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+        // Phones get the portrait set, which fills a tall screen better.
+        var phone = matchMedia('(max-width: 720px)');
         function label() {
             place.textContent = featured[idx].location || '';
             place.classList.toggle('on', !!featured[idx].location);
@@ -60,18 +56,31 @@
             label();
         }
         function play() { clearInterval(timer); if (!still) timer = setInterval(function () { go(idx + 1); }, 7000); }
-        slides.forEach(function (_, i) {
-            var b = document.createElement('button');
-            b.setAttribute('aria-label', 'Show photo ' + (i + 1));
-            b.onclick = function () { go(i); play(); };
-            dots.appendChild(b);
-        });
-        if (slides.length) {
-            slides[0].classList.add('on');
-            dots.children[0].classList.add('on');
-            label();
-            play();
+        function build() {
+            var key = phone.matches ? 'mobile' : 'featured';
+            featured = PHOTOS.filter(function (p) { return p[key]; });
+            slideBox.innerHTML = '';
+            dots.innerHTML = '';
+            idx = 0;
+            slides = featured.map(function (p, i) {
+                var s = document.createElement('div');
+                s.style.backgroundImage = "url('" + sBase + 'full/' + p.file + "')";
+                slideBox.appendChild(s);
+                var b = document.createElement('button');
+                b.setAttribute('aria-label', 'Show photo ' + (i + 1));
+                b.onclick = function () { go(i); play(); };
+                dots.appendChild(b);
+                return s;
+            });
+            if (slides.length) {
+                slides[0].classList.add('on');
+                dots.children[0].classList.add('on');
+                label();
+                play();
+            }
         }
+        build();
+        if (phone.addEventListener) phone.addEventListener('change', build);
     }
 
     // ---------- Gallery ----------

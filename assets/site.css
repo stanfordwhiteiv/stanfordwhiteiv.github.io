@@ -562,6 +562,7 @@ h2.display em { font-style: italic; color: var(--accent); }
 
 @media (max-width: 720px) {
     .showcase-place { position: static; max-width: none; text-align: left; margin-top: 0.75rem; }
+    .showcase-dots button { width: 40px; padding: 0 4px; }
 }
 
 /* Lightbox */

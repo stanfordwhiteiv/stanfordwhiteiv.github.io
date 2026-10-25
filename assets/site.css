@@ -502,20 +502,29 @@ h2.display em { font-style: italic; color: var(--accent); }
 .showcase h2.display em { color: #a9e0da; }
 .showcase .lead { margin-top: 0.9rem; max-width: 34rem; color: rgba(255, 255, 255, 0.85); }
 
-.showcase-dots { display: flex; gap: 0.5rem; margin-top: 2.5rem; }
+.showcase-dots { display: flex; flex-wrap: wrap; gap: 0.25rem; margin-top: 2.25rem; margin-left: -6px; }
 
+/* Thin bar drawn inside a larger, easier-to-hit button */
 .showcase-dots button {
-    width: 28px;
-    height: 3px;
+    width: 54px;
+    height: 28px;
     border: none;
-    border-radius: 2px;
-    background: rgba(255, 255, 255, 0.3);
+    background: none;
     cursor: pointer;
-    padding: 0;
-    transition: background 0.3s, width 0.3s;
+    padding: 0 6px;
 }
 
-.showcase-dots button.on { background: #fff; width: 44px; }
+.showcase-dots button::before {
+    content: "";
+    display: block;
+    height: 5px;
+    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.35);
+    transition: background 0.3s;
+}
+
+.showcase-dots button:hover::before { background: rgba(255, 255, 255, 0.7); }
+.showcase-dots button.on::before { background: #fff; }
 
 /* Lightbox */
 .lightbox {

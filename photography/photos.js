@@ -8,9 +8,23 @@ window.PHOTOS = [
   "featured": true
  },
  {
+  "file": "dsc06621.jpg",
+  "w": 2400,
+  "h": 1350,
+  "caption": "",
+  "featured": true
+ },
+ {
   "file": "dsc03348.jpg",
   "w": 2400,
   "h": 1600,
+  "caption": "",
+  "featured": true
+ },
+ {
+  "file": "dsc05628-pano.jpg",
+  "w": 2400,
+  "h": 1028,
   "caption": "",
   "featured": true
  },
@@ -183,13 +197,6 @@ window.PHOTOS = [
   "featured": false
  },
  {
-  "file": "dsc06621.jpg",
-  "w": 2400,
-  "h": 1350,
-  "caption": "",
-  "featured": false
- },
- {
   "file": "dsc08975.jpg",
   "w": 1600,
   "h": 2400,
@@ -200,13 +207,6 @@ window.PHOTOS = [
   "file": "edit1.jpg",
   "w": 2400,
   "h": 1810,
-  "caption": "",
-  "featured": false
- },
- {
-  "file": "dsc05628-pano.jpg",
-  "w": 2400,
-  "h": 1028,
   "caption": "",
   "featured": false
  },

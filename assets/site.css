@@ -10,7 +10,7 @@
     --rule: #d3dcdf;
     --accent: #23686c;
     --accent-soft: rgba(35, 104, 108, 0.08);
-    --glow: #b9764a;
+    --glow: #9a5a30;
     --hero-fade: rgba(238, 242, 243, 1);
     --shadow: 0 20px 50px -25px rgba(21, 33, 42, 0.35);
     --serif: 'Cormorant Garamond', Garamond, Georgia, serif;
@@ -421,6 +421,24 @@ h2.display em { font-style: italic; color: var(--accent); }
 .project:hover h4 { color: var(--accent); }
 .project:hover h4::after { color: var(--accent); transform: translateX(3px); }
 .project p { font-size: 0.85rem; color: var(--ink-soft); line-height: 1.55; margin-top: 0.15rem; }
+
+.awards { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.4rem; }
+
+.award {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 0.15rem 0.55rem;
+    border-radius: 999px;
+    color: var(--glow);
+    background: color-mix(in srgb, var(--glow) 12%, transparent);
+}
+
+.award::before { content: "\2605"; font-size: 0.7rem; }
 
 /* Gallery */
 .gallery { columns: 3 280px; column-gap: 0.9rem; }

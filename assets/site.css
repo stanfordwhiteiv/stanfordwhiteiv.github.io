@@ -463,6 +463,60 @@ h2.display em { font-style: italic; color: var(--accent); }
 
 .section-foot { margin-top: 2rem; }
 
+/* Photo showcase: a full-bleed band that echoes the hero */
+.showcase {
+    position: relative;
+    margin-top: 7rem;
+    padding: 0;
+    min-height: 82vh;
+    display: flex;
+    align-items: flex-end;
+    overflow: hidden;
+    color: #fff;
+    background: #1b2a33;
+}
+
+.showcase-slides { position: absolute; inset: 0; }
+
+.showcase-slides div {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    opacity: 0;
+    transform: scale(1.06);
+    transition: opacity 2.2s ease, transform 9s ease-out;
+}
+
+.showcase-slides div.on { opacity: 1; transform: scale(1); }
+
+.showcase::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, var(--hero-fade) 0%, rgba(8, 14, 19, 0.15) 22%, rgba(8, 14, 19, 0.15) 50%, rgba(8, 14, 19, 0.7) 85%, rgba(8, 14, 19, 0.85) 100%);
+}
+
+.showcase .wrap { position: relative; z-index: 1; width: 100%; padding-bottom: 4rem; }
+.showcase h2.display { margin-top: 0.6rem; color: #fff; text-shadow: 0 2px 24px rgba(0, 0, 0, 0.4); }
+.showcase h2.display em { color: #a9e0da; }
+.showcase .lead { margin-top: 0.9rem; max-width: 34rem; color: rgba(255, 255, 255, 0.85); }
+
+.showcase-dots { display: flex; gap: 0.5rem; margin-top: 2.5rem; }
+
+.showcase-dots button {
+    width: 28px;
+    height: 3px;
+    border: none;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+    padding: 0;
+    transition: background 0.3s, width 0.3s;
+}
+
+.showcase-dots button.on { background: #fff; width: 44px; }
+
 /* Lightbox */
 .lightbox {
     position: fixed;

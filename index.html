@@ -3,181 +3,265 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stanford White IV - Class Projects</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            color: #e0e0e0;
-            background: #2b2b2b;
-            min-height: 100vh;
-        }
-
-        .container {
-            max-width: 1100px;
-            margin: 0 auto;
-            background: #3a3a3a;
-            min-height: 100vh;
-            box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
-        }
-
-        header {
-            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-            padding: 2.5rem 1.5rem 2rem;
-            text-align: center;
-        }
-
-        header h1 {
-            font-size: 2rem;
-            color: white;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-        }
-
-        header p {
-            color: #aaa;
-            margin-top: 0.4rem;
-        }
-
-        main {
-            padding: 2rem 3rem 3rem;
-        }
-
-        h2 {
-            font-size: 1.5rem;
-            color: #4a9eff;
-            margin: 2rem 0 1rem;
-            padding-bottom: 0.4rem;
-            border-bottom: 3px solid #4a9eff;
-        }
-
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 1.25rem;
-        }
-
-        .card {
-            display: block;
-            text-decoration: none;
-            background: rgba(110, 193, 255, 0.08);
-            border: 2px solid rgba(74, 158, 255, 0.3);
-            border-radius: 12px;
-            padding: 1.25rem 1.4rem;
-            transition: border-color 0.2s, transform 0.2s;
-        }
-
-        .card:hover {
-            border-color: #4a9eff;
-            transform: translateY(-2px);
-        }
-
-        .card .number {
-            display: inline-block;
-            background: #4a9eff;
-            color: white;
-            font-size: 0.8rem;
-            font-weight: 600;
-            padding: 0.15rem 0.7rem;
-            border-radius: 20px;
-            margin-bottom: 0.6rem;
-        }
-
-        .card h3 {
-            color: #6ec1ff;
-            font-size: 1.15rem;
-            margin-bottom: 0.35rem;
-        }
-
-        .card p {
-            color: #d0d0d0;
-            font-size: 0.92rem;
-        }
-
-        footer {
-            background: #1a1a1a;
-            color: white;
-            text-align: center;
-            padding: 1.5rem;
-            font-size: 0.9rem;
-        }
-
-        @media (max-width: 600px) {
-            main {
-                padding: 1.5rem 1rem 2rem;
-            }
-        }
-    </style>
+    <title>Stanford White IV</title>
+    <meta name="description" content="Stanford White IV: Ph.D. student and NSF Graduate Research Fellow working on machine learning for materials and manufacturing. Research, projects, CV and photography.">
+    <script>try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/site.css">
 </head>
-<body>
-    <div class="container">
-        <header>
-            <h1>Stanford White IV</h1>
-            <p>Class Project Portfolio</p>
-        </header>
+<body class="on-photo">
 
-        <main>
-            <h2>Multimodal Foundation Models</h2>
-            <div class="grid">
-                <a class="card" href="Multimodal_Foundation_Models_Project_1_ViT_and_CLIP/index.html">
-                    <span class="number">Project 1</span>
-                    <h3>Vision Transformers &amp; CLIP</h3>
-                    <p>Image patching in a pretrained ViT, CLIP zero-shot classification, and a controlled study of whether CLIP can tell left from right.</p>
-                </a>
-            </div>
-
-            <h2>Deep Learning</h2>
-            <div class="grid">
-                <a class="card" href="Deep_Learning_Project_2_RNN_and_Seq2Seq/index.html">
-                    <span class="number">Project 2</span>
-                    <h3>Recurrent Neural Networks</h3>
-                    <p>Basic RNNs, GRUs and sequence-to-sequence models.</p>
-                </a>
-                <a class="card" href="Deep_Learning_Project_3_Attention_and_Transformers/index.html">
-                    <span class="number">Project 3</span>
-                    <h3>Attention &amp; Transformers</h3>
-                    <p>Bahdanau attention, multi-head attention and a full Transformer.</p>
-                </a>
-                <a class="card" href="Deep_Learning_Project_4_Generative_Models/index.html">
-                    <span class="number">Project 4</span>
-                    <h3>Generative Models</h3>
-                    <p>Variational autoencoders, DCGAN and Wasserstein GAN.</p>
-                </a>
-            </div>
-
-            <h2>Computer Vision</h2>
-            <div class="grid">
-                <a class="card" href="Computer_Vision_Project_1_Projection_and_Filtering/index.htm">
-                    <span class="number">Project 1</span>
-                    <h3>Projection &amp; Filtering</h3>
-                    <p>Perspective vs. orthographic projection, histogram manipulation and linear filtering.</p>
-                </a>
-                <a class="card" href="Computer_Vision_Project_2_Homography_and_Morphing/project_results.html">
-                    <span class="number">Project 2</span>
-                    <h3>Homography &amp; Morphing</h3>
-                    <p>Image warping, rectification and morphing.</p>
-                </a>
-                <a class="card" href="Computer_Vision_Project_3_Object_Detection_and_HOI/project_results.html">
-                    <span class="number">Project 3</span>
-                    <h3>Object Detection &amp; HOI</h3>
-                    <p>Lightweight object detection and zero-shot human–object interaction.</p>
-                </a>
-                <a class="card" href="Computer_Vision_Project_4_Diffusion_Models/project_results.html">
-                    <span class="number">Project 4</span>
-                    <h3>Diffusion Models</h3>
-                    <p>Diffusion models and image generation.</p>
-                </a>
-            </div>
-        </main>
-
-        <footer>
-            <p>&copy; Stanford White IV 2026</p>
-        </footer>
+<header class="topbar">
+    <div class="wrap">
+        <a class="brand" href="#top">Stanford White IV</a>
+        <ul class="menu">
+            <li class="hide-sm"><a href="#about">About</a></li>
+            <li><a href="#research">Research</a></li>
+            <li class="hide-sm"><a href="#projects">Projects</a></li>
+            <li><a href="photography/">Photography</a></li>
+            <li>
+                <button class="theme-toggle" aria-label="Toggle light and dark theme">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+                </button>
+            </li>
+        </ul>
     </div>
+</header>
+
+<!-- ================= HERO ================= -->
+<div class="hero" id="top">
+    <div class="hero-img" style="background-color:#1b2a33; background-image:url('photography/img/full/dsc00650.jpg')"></div>
+    <div class="wrap">
+        <div class="hero-kicker">Ph.D. Student &middot; NSF Graduate Research Fellow</div>
+        <h1>Stanford<br>White IV</h1>
+        <p class="lead">I build machine learning models for materials and manufacturing, and photograph the quiet places in between.</p>
+        <div class="hero-actions">
+            <a class="btn btn-solid" href="cv.pdf">Extended CV</a>
+            <a class="btn btn-ghost" href="resume.pdf">Resume</a>
+            <a class="btn btn-ghost" href="https://www.linkedin.com/in/stanford-white-iv-1801a919b/">LinkedIn</a>
+            <a class="btn btn-ghost" href="https://github.com/stanfordwhiteiv">GitHub</a>
+            <a class="btn btn-ghost" href="https://scholar.google.com/citations?user=HnohF9gAAAAJ&amp;hl=en">Scholar</a>
+        </div>
+    </div>
+</div>
+
+<main>
+
+    <!-- ================= ABOUT ================= -->
+    <section id="about">
+        <div class="wrap">
+            <div class="label">About</div>
+            <div class="about-grid">
+                <div class="portrait reveal">
+                    <img src="assets/me.jpg" alt="Stanford White IV standing at a frozen alpine lake">
+                </div>
+                <div class="about-body reveal">
+                    <h2 class="display">Teaching models to <em>see</em> the structure of materials.</h2>
+                    <p>I'm a Ph.D. student in Engineering Science at the <strong>University of Mississippi</strong> and an <strong>NSF Graduate Research Fellow</strong>. My work sits where machine learning meets materials and manufacturing: self-supervised foundation models for crystallographic microstructure, next-frame prediction of additive manufacturing from 60,000&nbsp;fps video, and ML-guided process optimization for metal and bio-printing.</p>
+                    <p>Before that I earned a B.S. in Mechanical Engineering (summa cum laude), studied swarm robotics through an NSF REU at West Virginia University, and worked in vehicle calibration at PACCAR. Away from the lab I'm a professional photographer and a brown belt and volunteer instructor in Brazilian Jiu-Jitsu.</p>
+
+                    <dl class="facts">
+                        <div><dt>Program</dt><dd>Ph.D. Engineering Science, exp. 2028</dd></div>
+                        <div><dt>Fellowship</dt><dd>NSF GRFP, since 2023</dd></div>
+                        <div><dt>Based in</dt><dd>Oxford, Mississippi</dd></div>
+                    </dl>
+
+                    <div class="tags">
+                        <span>Vision Transformers</span>
+                        <span>Self-Supervised Learning</span>
+                        <span>Foundation Models</span>
+                        <span>Diffusion Models</span>
+                        <span>Physics-Informed ML</span>
+                        <span>Video Prediction</span>
+                        <span>Multi-Objective Optimization</span>
+                        <span>Materials Informatics</span>
+                        <span>Additive Manufacturing</span>
+                        <span>High-Speed Imaging</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= RESEARCH ================= -->
+    <section id="research">
+        <div class="wrap">
+            <div class="label">Research</div>
+            <h2 class="display reveal" style="margin-bottom:2.5rem">Publications</h2>
+
+            <!-- Links marked class="soon" are placeholders: set href and remove the class. -->
+            <article class="pub reveal">
+                <div class="when">Oct 2026<br><span class="status">In preparation</span></div>
+                <div>
+                    <h3>A Universal Self-Supervised Representation Framework for Polycrystalline Matter</h3>
+                    <p class="authors"><strong>S. White</strong>, Herring, et al.</p>
+                    <div class="links"><a class="soon" href="#">Preprint</a><a class="soon" href="#">Code</a></div>
+                </div>
+            </article>
+
+            <article class="pub reveal">
+                <div class="when">Oct 2026<br><span class="status">Under review</span></div>
+                <div>
+                    <h3>Machine Learning Guided Determination of Processing-Microstructure Relationship in Laser Powder Bed Fusion Produced Duplex Stainless Steels</h3>
+                    <p class="authors"><strong>S. White</strong>, Tobah, et al.</p>
+                    <p class="venue">Additive Manufacturing Letters</p>
+                    <div class="links"><a class="soon" href="#">Paper</a><a class="soon" href="#">Code</a></div>
+                </div>
+            </article>
+
+            <article class="pub reveal">
+                <div class="when">Oct 2026<br><span class="status">In preparation</span></div>
+                <div>
+                    <h3>Multi-Objective Bayesian Optimization for Geometric Quality Control in Laser Wire-Powder Directed Energy Deposition of 316L Stainless Steel</h3>
+                    <p class="authors"><strong>S. White</strong>, Yang, et al.</p>
+                    <div class="links"><a class="soon" href="#">Preprint</a><a class="soon" href="#">Code</a></div>
+                </div>
+            </article>
+
+            <article class="pub reveal">
+                <div class="when">Oct 2026<br><span class="status">In preparation</span></div>
+                <div>
+                    <h3>Machine Learning&ndash;Enabled Pharmaceutical Security Printing for Drug Authentication and Counterfeit Prevention</h3>
+                    <p class="authors"><strong>S. White</strong>, Zhang, et al.</p>
+                    <div class="links"><a class="soon" href="#">Preprint</a><a class="soon" href="#">Code</a></div>
+                </div>
+            </article>
+
+            <article class="pub reveal">
+                <div class="when">Sep 2026</div>
+                <div>
+                    <h3>Investigating Nozzle-Based Additive Manufacturing Dynamics with High-Speed Imaging and Machine Learning</h3>
+                    <p class="authors"><strong>S. White</strong>, Stoddard, et al.</p>
+                    <p class="venue">Progress in Additive Manufacturing</p>
+                    <div class="links"><a class="soon" href="#">Paper</a><a class="soon" href="#">Code</a></div>
+                </div>
+            </article>
+
+            <article class="pub reveal">
+                <div class="when">Dec 2025</div>
+                <div>
+                    <h3>Physics-Informed Machine Learning Prediction of Char Mass Evolution in the Catalytic Pyrolysis of Polyetherimide/Graphite Nanocomposites</h3>
+                    <p class="authors"><strong>S. White</strong>, Salvati, et al.</p>
+                    <p class="venue">Chemical Physics Impact</p>
+                    <div class="links"><a class="soon" href="#">Paper</a><a class="soon" href="#">Code</a></div>
+                </div>
+            </article>
+
+            <article class="pub reveal">
+                <div class="when">2023</div>
+                <div>
+                    <h3>Imitating Swarm Behaviors by Learning Agent-Level Controllers</h3>
+                    <p class="authors"><strong>S. White</strong>, Rahman, Crockett, et al.</p>
+                    <p class="venue">Proceedings of the American Control Conference (ACC), San Diego, pp. 3657&ndash;3662</p>
+                    <div class="links"><a class="soon" href="#">Paper</a><a class="soon" href="#">Code</a></div>
+                </div>
+            </article>
+
+            <h3 class="subhead reveal">Presentations</h3>
+            <ul class="talks reveal">
+                <li><span class="when">Nov 2026</span><span>Self-Supervised Foundation Models for Dense Crystallographic Representation in Materials Informatics<span class="where">MRS Fall Meeting &middot; Boston, MA</span></span></li>
+                <li><span class="when">Nov 2026</span><span>Multiobjective Adaptive Design for Bead Geometry Optimization in Wire-Powder Directed Energy Deposition<span class="where">MRS Fall Meeting &middot; Boston, MA</span></span></li>
+                <li><span class="when">Nov 2026</span><span>Machine Learning Guided Exploration of Process-Structure-Property Relationships in Laser Powder Bed Fusion of Duplex Stainless Steels<span class="where">MRS Fall Meeting &middot; Boston, MA</span></span></li>
+                <li><span class="when">Oct 2026</span><span>A Self-Supervised Foundation Model for General-Purpose Microstructure Representation from EBSD Data<span class="where">IMAT &middot; Quebec City, QC</span></span></li>
+                <li><span class="when">Mar 2025</span><span>Machine Learning Guided Prediction of Printability During Additive Manufacturing<span class="where">TMS Annual Meeting &middot; Las Vegas, NV</span></span></li>
+                <li><span class="when">Mar 2025</span><span>Additive Manufacturing Guided with High-Speed Photography and Machine Learning<span class="where">TMS Annual Meeting &middot; Las Vegas, NV</span></span></li>
+                <li><span class="when">Jun 2023</span><span>Imitating Swarm Behavior by Learning Agent-Level Controllers<span class="where">IEEE American Control Conference &middot; San Diego, CA</span></span></li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- ================= PROJECTS ================= -->
+    <section id="projects">
+        <div class="wrap">
+            <div class="label">Course Projects</div>
+            <h2 class="display reveal" style="margin-bottom:2.5rem">Graduate coursework, written up.</h2>
+
+            <div class="courses">
+                <div class="course reveal">
+                    <h3>Multimodal Foundation Models</h3>
+                    <a class="project" href="Multimodal_Foundation_Models_Project_1_ViT_and_CLIP/index.html">
+                        <h4>Vision Transformers &amp; CLIP</h4>
+                        <p>Image patching in a pretrained ViT, CLIP zero-shot classification, and whether CLIP can tell left from right.</p>
+                    </a>
+                </div>
+
+                <div class="course reveal">
+                    <h3>Deep Learning</h3>
+                    <a class="project" href="Deep_Learning_Project_2_RNN_and_Seq2Seq/index.html">
+                        <h4>Recurrent Neural Networks</h4>
+                        <p>Basic RNNs, GRUs and sequence-to-sequence models.</p>
+                    </a>
+                    <a class="project" href="Deep_Learning_Project_3_Attention_and_Transformers/index.html">
+                        <h4>Attention &amp; Transformers</h4>
+                        <p>Bahdanau attention, multi-head attention and a full Transformer.</p>
+                    </a>
+                    <a class="project" href="Deep_Learning_Project_4_Generative_Models/index.html">
+                        <h4>Generative Models</h4>
+                        <p>Variational autoencoders, DCGAN and Wasserstein GAN.</p>
+                    </a>
+                </div>
+
+                <div class="course reveal">
+                    <h3>Computer Vision</h3>
+                    <a class="project" href="Computer_Vision_Project_1_Projection_and_Filtering/index.htm">
+                        <h4>Projection &amp; Filtering</h4>
+                        <p>Perspective vs. orthographic projection, histograms and linear filtering.</p>
+                    </a>
+                    <a class="project" href="Computer_Vision_Project_2_Homography_and_Morphing/project_results.html">
+                        <h4>Homography &amp; Morphing</h4>
+                        <p>Image warping, rectification and morphing.</p>
+                    </a>
+                    <a class="project" href="Computer_Vision_Project_3_Object_Detection_and_HOI/project_results.html">
+                        <h4>Object Detection &amp; HOI</h4>
+                        <p>Lightweight detection and zero-shot human&ndash;object interaction.</p>
+                    </a>
+                    <a class="project" href="Computer_Vision_Project_4_Diffusion_Models/project_results.html">
+                        <h4>Diffusion Models</h4>
+                        <p>Diffusion models and image generation.</p>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= PHOTOGRAPHY ================= -->
+    <section id="photography">
+        <div class="wrap">
+            <div class="label">Photography</div>
+            <h2 class="display reveal" style="margin-bottom:2.5rem">Light, weather, and <em>stillness</em>.</h2>
+            <div class="gallery no-save" data-base="photography/img/" data-featured></div>
+            <div class="section-foot">
+                <a class="btn btn-ghost" href="photography/">View the full portfolio &rarr;</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= CONTACT ================= -->
+    <section class="contact" id="contact">
+        <div class="wrap reveal">
+            <div class="label">Contact</div>
+            <h2 class="display">Let's build something.</h2>
+            <p>Open to research collaborations, internships and photography work.</p>
+            <div class="hero-actions">
+                <a class="btn btn-solid" href="mailto:stanfordwhiteiv@gmail.com">stanfordwhiteiv@gmail.com</a>
+                <a class="btn btn-ghost" href="https://www.linkedin.com/in/stanford-white-iv-1801a919b/">LinkedIn</a>
+                <a class="btn btn-ghost" href="https://scholar.google.com/citations?user=HnohF9gAAAAJ&amp;hl=en">Google Scholar</a>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<footer>
+    <div class="wrap">
+        <span>&copy; 2026 Stanford White IV. All photographs are copyrighted; please don't reuse without permission.</span>
+        <span>Oxford, MS</span>
+    </div>
+</footer>
+
+<script src="photography/photos.js"></script>
+<script src="assets/site.js"></script>
 </body>
 </html>

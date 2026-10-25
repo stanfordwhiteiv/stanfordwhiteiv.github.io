@@ -1,0 +1,3 @@
+# Full-resolution photo originals are never committed.
+# Watermarked web copies in photography/img/ are built by tools/build_photos.py.
+.photos/

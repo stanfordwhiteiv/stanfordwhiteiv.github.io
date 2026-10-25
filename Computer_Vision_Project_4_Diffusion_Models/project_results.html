@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Computer Vision Project 4 - Diffusion Models</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #e0e0e0;
+            background: #2b2b2b;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: #3a3a3a;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Header and Navigation */
+        header {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            color: white;
+            padding: 1rem 0;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            max-width: 1400px;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        header.hidden {
+            transform: translateY(-100%);
+        }
+
+        header h1 {
+            text-align: center;
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        header h2 {
+            text-align: center;
+            font-size: 1rem;
+            font-weight: normal;
+            margin-top: 0.3rem;
+            opacity: 0.8;
+        }
+
+        nav {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            padding: 0 2rem;
+            margin-top: 0.5rem;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            font-size: 0.9rem;
+            border: 2px solid transparent;
+        }
+
+        nav a:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: white;
+            transform: translateY(-2px);
+        }
+
+        /* Main content padding to account for fixed header */
+        main {
+            padding-top: 140px;
+        }
+
+        /* Section Styling */
+        section {
+            padding: 4rem 2rem;
+            border-bottom: 3px solid #2b2b2b;
+        }
+
+        section:nth-child(even) {
+            background: #444;
+        }
+
+        section h2 {
+            font-size: 2.5rem;
+            color: #4a9eff;
+            margin-bottom: 1rem;
+            text-align: center;
+            position: relative;
+            padding-bottom: 1rem;
+        }
+
+        section h2:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(90deg, #4a9eff, #6ec1ff);
+            border-radius: 2px;
+        }
+
+        section h3 {
+            font-size: 1.8rem;
+            color: #6ec1ff;
+            margin: 2rem 0 1rem;
+        }
+
+        .content-wrapper {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Description Box */
+        .description {
+            background: rgba(74, 158, 255, 0.1);
+            padding: 2rem;
+            border-radius: 15px;
+            margin: 2rem 0;
+            border-left: 5px solid #4a9eff;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .description p {
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: #d0d0d0;
+        }
+
+        .description ul {
+            margin-left: 2rem;
+            margin-top: 1rem;
+        }
+
+        .description li {
+            margin-bottom: 0.5rem;
+            font-size: 1.05rem;
+            color: #d0d0d0;
+        }
+
+        /* Image Grid */
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .image-card {
+            background: #2b2b2b;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .image-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(74, 158, 255, 0.3);
+        }
+
+        .image-card img {
+            width: 100%;
+            max-height: 85vh;
+            height: auto;
+            display: block;
+            object-fit: contain;
+            image-rendering: crisp-edges;
+            image-rendering: -webkit-optimize-contrast;
+        }
+
+        .image-card .caption {
+            padding: 1rem;
+            text-align: center;
+            font-weight: 600;
+            color: #4a9eff;
+            background: #1a1a1a;
+        }
+
+        /* Full-width image for animation */
+        .full-image {
+            margin: 2rem 0;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .full-image img {
+            width: 100%;
+            max-height: 85vh;
+            height: auto;
+            display: block;
+            object-fit: contain;
+            image-rendering: crisp-edges;
+            image-rendering: -webkit-optimize-contrast;
+        }
+
+        .full-image .caption {
+            padding: 1.5rem;
+            text-align: center;
+            font-weight: 600;
+            font-size: 1.2rem;
+            color: white;
+            background: linear-gradient(135deg, #4a9eff, #6ec1ff);
+        }
+
+        /* Comparison Grid for Part 3 */
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        @media (max-width: 768px) {
+            .comparison-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Grand Reveal styling */
+        .grand-reveal {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            color: white;
+            padding: 3rem;
+            border-radius: 15px;
+            text-align: center;
+            margin: 2rem 0;
+            box-shadow: 0 10px 30px rgba(74, 158, 255, 0.3);
+            border: 2px solid #4a9eff;
+        }
+
+        .grand-reveal h3 {
+            color: #4a9eff;
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .grand-reveal p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Footer */
+        footer {
+            background: #1a1a1a;
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            font-size: 0.9rem;
+        }
+
+        /* Smooth scroll */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Code/Math styling */
+        code {
+            background: #2b2b2b;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            color: #ff6b9d;
+        }
+
+        /* Highlight box */
+        .highlight {
+            background: rgba(74, 158, 255, 0.15);
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin: 1.5rem 0;
+            border-left: 5px solid #4a9eff;
+        }
+
+        .highlight strong {
+            color: #6ec1ff;
+        }
+
+        .highlight p {
+            color: #d0d0d0;
+        }
+
+        /* Joke styling */
+        .joke-box {
+            background: rgba(255, 215, 0, 0.1);
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin: 1.5rem 0;
+            border-left: 5px solid #ffd700;
+            font-style: italic;
+        }
+
+        .joke-box p {
+            color: #ffd700;
+            font-size: 1.1rem;
+        }
+
+        /* Method box styling */
+        .method-box {
+            background: rgba(110, 193, 255, 0.08);
+            padding: 2rem;
+            border-radius: 15px;
+            margin: 2rem 0;
+            border: 2px solid rgba(74, 158, 255, 0.3);
+        }
+
+        .method-box h4 {
+            color: #4a9eff;
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+        }
+
+        .method-box p {
+            color: #d0d0d0;
+            margin-bottom: 0.8rem;
+        }
+
+        .method-box ul {
+            margin-left: 1.5rem;
+            color: #d0d0d0;
+        }
+
+        .method-box li {
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header id="header">
+            <h1>Computer Vision Project 4</h1>
+            <h2>Diffusion Models & Image Generation</h2>
+            <nav>
+                <a href="#part0">Part 0: Setup</a>
+                <a href="#part1">Part 1: Forward & Reverse Processes</a>
+                <a href="#part2">Part 2: Diffusion Model Image Generation</a>
+                <a href="#part3">Part 3: Visual Anagrams</a>
+            </nav>
+        </header>
+
+        <main>
+            <!-- Part 0: Setup -->
+            <section id="part0">
+                <div class="content-wrapper">
+                    <h2>Part 0: Setup</h2>
+
+                    <div class="description">
+                        <h3>Overview</h3>
+                        <p>
+                            This section explores text-to-image generation using the DeepFloyd IF model,
+                            a state-of-the-art diffusion model that generates 64×64 pixel images from text prompts.
+                            We test the model on three different prompts and investigate the effect of varying
+                            the number of inference steps on image quality and prompt adherence.
+                        </p>
+                        <p>
+                            <strong>Random Seed:</strong> All experiments use random seed <code>42</code>
+                            for reproducibility across the entire project.
+                        </p>
+                    </div>
+
+                    <h3>Text Prompts and Generation Results</h3>
+
+                    <div class="description">
+                        <p>
+                            The model was tested on three diverse prompts to evaluate its capabilities:
+                        </p>
+                        <ul>
+                            <li><strong>Prompt 1:</strong> "an oil painting of a snowy mountain village"</li>
+                            <li><strong>Prompt 2:</strong> "a man wearing a hat"</li>
+                            <li><strong>Prompt 3:</strong> "a rocket ship"</li>
+                        </ul>
+                        <p>
+                            Each prompt was generated with two different <code>num_inference_steps</code> values
+                            to compare quality and generation characteristics. The top row shows results with
+                            20 steps, while the bottom row shows results with 50 steps.
+                        </p>
+                    </div>
+
+                    <div class="full-image">
+                        <img src="project_results/Part0.png" alt="DeepFloyd IF Generation Results">
+                        <div class="caption">Text-to-Image Generation with DeepFloyd IF: Comparison of num_inference_steps</div>
+                    </div>
+
+                    <div class="description">
+                        <h3>Quality Assessment by Prompt</h3>
+
+                        <div class="method-box">
+                            <h4>Prompt 1: "an oil painting of a snowy mountain village"</h4>
+                            <p>
+                                Both the 20-step and 50-step versions successfully capture the artistic style of
+                                an oil painting with visible brushwork-like textures and painterly quality. The
+                                generated images show clear mountain structures with snow coverage and village
+                                elements in the foreground. The color palettes appropriately use cool blues and
+                                whites for snow, with warmer earth tones for the village structures. Comparing
+                                the two versions, the 20-step result (top) has a slightly more impressionistic,
+                                looser style with bolder color transitions, while the 50-step result (bottom)
+                                exhibits more refined details, smoother gradients, and more architectural
+                                features in the village buildings. Both successfully combine stylistic instructions
+                                ("oil painting") with semantic content ("snowy mountain village"), though the
+                                50-step version shows more coherent spatial relationships between elements.
+                            </p>
+                        </div>
+
+                        <div class="method-box">
+                            <h4>Prompt 2: "a man wearing a hat"</h4>
+                            <p>
+                                This prompt produces interesting variations between the two
+                                inference step counts. The 20-step version (top) generates a portrait-style image
+                                with a distinctly Western or frontier aesthetic, featuring a wide-brimmed hat and
+                                period clothing rendered in warm, sepia-like tones. It shows more of an outline, however,
+                                than a full oil painting. The 50-step version (bottom)
+                                takes a more classical portrait approach with a different hat style (possibly a
+                                top hat or formal hat) and darker, more refined rendering. Both correctly identify
+                                and emphasize the hat as the key feature, but they interpret the prompt differently
+                                in terms of artistic style and historical period. The 50-step version shows
+                                noticeably better facial definition, smoother skin tones, and more precise
+                                rendering of fabric textures and shadows.
+                            </p>
+                        </div>
+
+                        <div class="method-box">
+                            <h4>Prompt 3: "a rocket ship"</h4>
+                            <p>
+                                The rocket ship prompt demonstrates the most visible difference between the two
+                                inference step counts. The 20-step version (top) generates a vertically-oriented
+                                rocket with clear structural elements including a pointed nose cone, cylindrical
+                                white body with yellow/gold striping, and red fins or boosters. The background
+                                is a gradient suggesting atmosphere or sky. The 50-step version (bottom) produces
+                                a more polished and detailed rocket with similar color scheme (red, yellow, white)
+                                but with better-defined edges, more realistic lighting effects showing the rocket
+                                engines firing, and a starfield background suggesting space rather than atmosphere.
+                                The 50-step version also shows improved geometric precision in the rocket's
+                                construction and more coherent representation of the exhaust/propulsion system.
+                                Both successfully capture the essential characteristics of a rocket, but the
+                                50-step version is significantly more refined and visually appealing.
+                            </p>
+                        </div>
+                    </div>
+
+                    <h3>Effect of num_inference_steps</h3>
+
+                    <div class="description">
+                        <p>
+                            I tested two different values for <code>num_inference_steps</code>: 20 and 50.
+                            This parameter controls how many denoising iterations the diffusion model performs,
+                            directly impacting both generation quality and computational cost.
+                        </p>
+                    </div>
+
+                    <div class="highlight">
+                        <p><strong>Observations on Inference Steps:</strong></p>
+                        <ul>
+                            <li>
+                                <strong>20 Steps:</strong> Produces coherent images with good prompt adherence
+                                in significantly less time. The results show that even with fewer denoising steps,
+                                the model captures the essential elements of each prompt effectively. However,
+                                images may have slightly rougher textures, less refined details, and occasionally
+                                less precise geometric features.
+                            </li>
+                            <li>
+                                <strong>50 Steps:</strong> Generates images with noticeably improved fine details,
+                                smoother textures, and better-defined edges. The additional iterations allow for
+                                more refined denoising, resulting in cleaner compositions, more accurate geometric
+                                rendering (especially visible in the rocket ship), and better overall visual polish.
+                                Colors tend to be more saturated and gradients more natural.
+                            </li>
+                            <li>
+                                <strong>Quality vs. Speed Trade-off:</strong> While both step counts produce
+                                recognizable and prompt-adherent images, the quality improvement from 20 to 50
+                                steps is clearly visible, particularly for prompts requiring precise geometric
+                                features or fine details. The difference is more pronounced than anticipated,
+                                suggesting that for final-quality outputs, 50 steps may be worth the additional
+                                computational cost. However, 20 steps remains viable for rapid prototyping or
+                                when generation speed is prioritized over maximum quality.
+                            </li>
+                            <li>
+                                <strong>Prompt Dependency:</strong> The benefit of additional steps varies by
+                                prompt complexity. The rocket ship (geometric, technical) showed the most
+                                improvement with 50 steps, while the oil painting (artistic, impressionistic)
+                                showed more subtle differences. The portrait showed intermediate improvement,
+                                primarily in facial features and fabric textures. This suggests that prompts
+                                requiring precise rendering benefit more from additional inference steps.
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Part 1: Understanding the Forward & Reverse Processes -->
+            <section id="part1">
+                <div class="content-wrapper">
+                    <h2>Part 1: Understanding the Forward & Reverse Processes</h2>
+
+                    <div class="description">
+                        <h3>Overview</h3>
+                        <p>
+                            This section explores the fundamental mechanics of diffusion models.
+                        </p>
+                    </div>
+
+                    <h3>1.1: Forward Process (Adding Noise)</h3>
+
+                    <div class="description">
+                        <p>
+                            The forward process gradually corrupts a clean image by adding Gaussian noise at
+                            different timesteps. This process follows the equation:
+                        </p>
+                        <p style="text-align: center; font-family: 'Courier New', monospace;">
+                            x_t = sqrt(α̅_t) · x_0 + sqrt(1 - α̅_t) · ε
+                        </p>
+                        <p>
+                            where x_0 is the original image, α̅_t is the cumulative product of alphas at timestep t,
+                            and ε is random Gaussian noise. As t increases, the image becomes progressively noisier
+                            until it resembles pure noise.
+                        </p>
+                    </div>
+
+                    <div class="full-image">
+                        <img src="project_results/Part1.1.png" alt="Forward Noising Process">
+                        <div class="caption">Forward Process: Noise Addition at t=250, 500, 750</div>
+                    </div>
+
+                    <div class="highlight">
+                        <p>
+                            The visualization shows how the original image progressively degrades as we move to
+                            higher timesteps. At t=250, the image structure is still recognizable with moderate
+                            noise. By t=500, significant degradation occurs with only rough shapes remaining visible.
+                            At t=750, the image is almost entirely dominated by noise, with very little of the
+                            original structure discernible. This demonstrates the forward diffusion process's ability
+                            to systematically destroy information in a controlled manner.
+                        </p>
+                    </div>
+
+                    <h3>1.2: Traditional Denoising with Gaussian Blur</h3>
+
+                    <div class="description">
+                        <p>
+                            As a baseline, we apply traditional Gaussian blur filtering to denoise the corrupted
+                            images. While Gaussian blur can reduce high-frequency noise, it cannot recover the
+                            lost structural information.
+                        </p>
+                    </div>
+
+                    <div class="full-image">
+                        <img src="project_results/Part1.2.png" alt="Gaussian Blur Denoising">
+                        <div class="caption">Gaussian Blur Denoising Results</div>
+                    </div>
+
+                    <div class="highlight">
+                        <p>
+                            <strong>Why Gaussian Blur Falls Short:</strong> The results clearly show the limitations
+                            of traditional filtering approaches. While Gaussian blur smooths out some noise, it
+                            simultaneously blurs genuine image features, resulting in a loss of sharpness and detail.
+                            More critically, it cannot reconstruct information that was destroyed by the noise. It
+                            merely smooths what remains. At high noise levels (t=750), Gaussian filtering produces
+                            only a blurry, featureless result that bears little resemblance to the original image.
+                            This demonstrates why learning-based approaches are necessary for effective diffusion
+                            model denoising.
+                        </p>
+                    </div>
+
+                    <h3>1.3: One-Step Denoising with Pretrained UNet</h3>
+
+                    <div class="description">
+                        <p>
+                            Instead of simple filtering, we now use a pretrained diffusion model (DeepFloyd) to predict
+                            the noise component and estimate the clean image in a single step. The model is
+                            conditioned on the noise level (timestep t) and learns to reverse the diffusion process.
+                        </p>
+                    </div>
+
+                    <div class="full-image">
+                        <img src="project_results/Part1.3.png" alt="One-Step Denoising">
+                        <div class="caption">One-Step Denoising Using Pretrained UNet</div>
+                    </div>
+
+                    <div class="highlight">
+                        <p>
+                            The one-step denoising results show dramatic improvement over Gaussian blur. The UNet
+                            has learned to predict the noise pattern and can estimate the underlying clean image
+                            structure even from heavily corrupted inputs. At lower noise levels (t=250), the
+                            one-step approach recovers much of the original image content. However, at very high
+                            noise levels (t=750), while the result is more structured than Gaussian blur, it still
+                            shows significant artifacts and doesn't fully recover the original image. This
+                            limitation motivates the iterative denoising approach explored next.
+                        </p>
+                    </div>
+
+                    <h3>1.4: Iterative Denoising</h3>
+
+                    <div class="description">
+                        <p>
+                            Rather than attempting to denoise in a single large step, iterative denoising
+                            progressively removes noise through multiple small steps. Starting from a very noisy
+                            image (t=990), we repeatedly apply the UNet to gradually refine the image, moving
+                            through intermediate noise levels until reaching a clean result.
+                        </p>
+                    </div>
+
+                    <div class="full-image">
+                        <img src="project_results/Part1.4_iterative.png" alt="Iterative Denoising Progress">
+                        <div class="caption">Iterative Denoising: Progressive Refinement from Pure Noise</div>
+                    </div>
+
+                    <div class="full-image">
+                        <img src="project_results/Part1.4_comparison.png" alt="Denoising Method Comparison">
+                        <div class="caption">Comparison: Iterative vs. One-Step vs. Gaussian Blur Denoising</div>
+                    </div>
+
+                    <div class="highlight">
+                        <p>
+                            <strong>Iterative Denoising Performance:</strong> The comparison clearly demonstrates
+                            the superiority of iterative denoising. While starting from extreme noise (t=990),
+                            the iterative approach gradually builds up coherent structure through approximately 33 denoising
+                            steps. Each step makes a small correction, allowing the model to refine
+                            its estimate progressively. 
+                        </p>
+                        <p>
+                            <strong>Limitations at High Noise:</strong> However, it's important to note that the
+                            starting noise level (t=990) was extremely high, essentially pure Gaussian noise with
+                            almost no trace of the original dog image. While iterative denoising produces a
+                            coherent, plausible image, it doesn't perfectly reconstruct the specific original dog
+                            because that information was almost entirely destroyed by the forward process. The
+                            model instead generates what it predicts a reasonable image should look like given
+                            the text conditioning ("a high quality photo"), which may differ from the original.
+                            This is an expected limitation when the noise level is so extreme that the input is
+                            effectively indistinguishable from random noise.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Part 2: Diffusion Model Image Generation -->
+            <section id="part2">
+                <div class="content-wrapper">
+                    <h2>Part 2: Diffusion Model Image Generation</h2>
+
+                    <div class="description">
+                        <h3>Overview</h3>
+                        <p>
+                            Having understood the denoising process in Part 1, we now leverage it for image
+                            generation. By starting from pure random noise and iteratively denoising, diffusion
+                            models can create novel images conditioned on text prompts. 
+                        </p>
+                    </div>
+
+                    <h3>2.1: Sampling Without CFG</h3>
+
+                    <div class="description">
+                        <p>
+                            The most direct application of our iterative denoising is image generation from pure
+                            noise. We start with random Gaussian noise and condition the denoising process on
+                            a text prompt ("a high quality photo") to guide the generation toward coherent images.
+                        </p>
+                    </div>
+
+                    <div class="full-image">
+                        <img src="project_results/Part2.1.png" alt="Sampling Without CFG">
+                        <div class="caption">Generated Images from Pure Noise (Without CFG)</div>
+                    </div>
+
+                    <div class="highlight">
+                        <p>
+                            The results demonstrate that diffusion models can successfully generate diverse,
+                            coherent images from pure randomness. Each generated image is plausible and exhibits
+                            reasonable structure, though the prompt "a high quality photo" is quite generic,
+                            leading to varied outputs. The images show that the model has learned meaningful
+                            visual patterns during training and can synthesize novel content. However, without
+                            stronger guidance, the generations may not strongly adhere to specific desired
+                            characteristics.
+                        </p>
+                    </div>
+
+                    <h3>2.2: Sampling With Classifier-Free Guidance (CFG)</h3>
+
+                    <div class="description">
+                        <p>
+                            Classifier-Free Guidance improves generation quality by combining conditional and
+                            unconditional predictions. Instead of using only the text-conditioned noise prediction,
+                            CFG computes:
+                        </p>
+                        <p style="text-align: center; font-family: 'Courier New', monospace;">
+                            ε = ε_uncond + γ · (ε_cond - ε_uncond)
+                        </p>
+                        <p>
+                            where ε_uncond is the unconditional noise prediction (empty prompt), ε_cond is the
+                            conditional prediction (with text prompt), and γ is the guidance scale. When γ > 1,
+                            this amplifies the difference between conditional and unconditional predictions,
+                            making the model more strongly adhere to the text prompt.
+                        </p>
+                    </div>
+
+                    <div class="full-image">
+                        <img src="project_results/Part2.2.png" alt="Sampling With CFG">
+                        <div class="caption">Generated Images from Pure Noise (With CFG, γ=7.0)</div>
+                    </div>
+
+                    <div class="highlight">
+                        <p>
+                            <strong>Why CFG is Better:</strong> Comparing these results with the non-CFG generations
+                            from section 2.1, we observe improved image quality and coherence. CFG provides stronger
+                            guidance toward the text prompt by explicitly modeling what makes an image match the
+                            prompt versus not matching it. The guidance scale γ=7.0 amplifies this distinction,
+                            resulting in images that more confidently exhibit "high quality photo" characteristics.
+                            The images tend to have better composition, clearer subject matter, and fewer artifacts.
+                            This demonstrates why CFG has become standard practice in modern diffusion models. It
+                            provides a tunable way to trade off between diversity and prompt adherence, typically
+                            yielding more desirable results at moderate guidance scales.
+                        </p>
+                    </div>
+
+                    <h3>2.3: Image-to-Image Translation</h3>
+
+                    <div class="description">
+                        <p>
+                            Beyond generating from pure noise, we can edit existing images by adding intermediate
+                            amounts of noise and then denoising with text guidance. Lower noise levels preserve
+                            more of the original structure while allowing subtle modifications, whereas higher
+                            noise levels permit more dramatic transformations.
+                        </p>
+                    </div>
+
+                    <div class="full-image">
+                        <img src="project_results/Part2.3_test_image.png" alt="Image Editing - Test Image">
+                        <div class="caption">Image-to-Image Translation on Test Image</div>
+                    </div>
+
+                    <div class="full-image">
+                        <img src="project_results/Part2.3_my_image1.png" alt="Image Editing - Joshua Tree">
+                        <div class="caption">Image-to-Image Translation on My Image: Joshua Tree National Park Night Sky</div>
+                    </div>
+
+                    <div class="full-image">
+                        <img src="project_results/Part2.3_my_image2.png" alt="Image Editing - Channel Islands">
+                        <div class="caption">Image-to-Image Translation on My Image: Blue Whale Rainbow at Channel Islands National Park</div>
+                    </div>
+
+                    <div class="highlight">
+                        <p>
+                            <strong>Image Editing Results:</strong> The progression across different noise levels:
+                        </p>
+                        <p>
+                            I also contributed two of my own images for editing: A photograph of the night sky in
+                            Joshua Tree National Park, and a photo of a blue whale that I took on a boat ride in
+                            Channel Islands National Park.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Part 3: Visual Anagrams -->
+            <section id="part3">
+                <div class="content-wrapper">
+                    <h2>Part 3: Visual Anagrams</h2>
+
+                    <div class="description">
+                        <h3>Overview</h3>
+                        <p>
+                            Visual anagrams are a fascinating application of diffusion models where a single image
+                            reveals different interpretations depending on how it's viewed. By carefully composing
+                            noise predictions during the generation process, we can create images that appear as
+                            one object normally but transform into a completely different object when flipped or
+                            rotated. This technique was introduced in the CVPR 2024 paper
+                            <em>"Visual Anagrams: Generating Multi-View Optical Illusions with Diffusion Models"</em>.
+                        </p>
+                    </div>
+
+                    <div class="method-box">
+                        <h4>Implementation Credit</h4>
+                        <p>
+                            The visual anagrams implementation used in this project is based on the method described
+                            in the 2024 CVPR paper. The technique works by running the diffusion model with different
+                            text prompts for different views of the same noise tensor. During each denoising step,
+                            the noise predictions for each view are averaged together, creating a composite gradient
+                            that satisfies multiple objectives simultaneously. This allows the model to generate
+                            images that are coherent under multiple transformations.
+                        </p>
+                    </div>
+
+                    <h3>Visual Anagram Examples</h3>
+
+                    <div class="description">
+                        <p>
+                            The following examples demonstrate various visual anagrams created using diffusion
+                            models. Each image is designed to appear as one object in its normal orientation and
+                            reveal a different object when transformed (typically flipped upside-down or rotated).
+                        </p>
+                    </div>
+
+                    <div class="full-image">
+                        <img src="project_results/Part3_example1.png" alt="Visual Anagram Example 1">
+                        <div class="caption">Visual Anagram Example 1</div>
+                    </div>
+
+                    <div class="full-image">
+                        <img src="project_results/Part3_example2.png" alt="Visual Anagram Example 2">
+                        <div class="caption">Visual Anagram Example 2</div>
+                    </div>
+
+                    <div class="full-image">
+                        <img src="project_results/Part3_example3.png" alt="Visual Anagram Example 3">
+                        <div class="caption">Visual Anagram Example 3</div>
+                    </div>
+
+                    <div class="highlight">
+                        <p>
+                            <strong>Visual Anagram Analysis:</strong> These examples showcase the remarkable
+                            capability of diffusion models to satisfy multiple competing objectives simultaneously.
+                            The generated images must maintain coherent visual structure for two completely different
+                            semantic concepts, which requires the model to find visual features that can be
+                            interpreted in multiple ways depending on orientation.
+                        </p>
+                        <p>
+                            The success of these visual anagrams demonstrates several key insights about diffusion
+                            models: (1) they have learned robust internal representations that can be composed in
+                            non-trivial ways, (2) the iterative denoising process allows for complex constraint
+                            satisfaction across multiple objectives, and (3) natural images contain enough
+                            ambiguity and structural flexibility that multiple semantic interpretations can
+                            coexist in the same pixel arrangement.
+                        </p>
+                        <p>
+                            This technique opens up creative possibilities for generative art and demonstrates
+                            that diffusion models can be guided to produce outputs that satisfy complex,
+                            multi-faceted criteria beyond simple text-to-image generation.
+                        </p>
+                    </div>
+
+                    <div class="method-box">
+                        <h4>Technical Approach</h4>
+                        <p>
+                            The visual anagram generation process works by modifying the standard diffusion
+                            sampling loop. At each denoising timestep:
+                        </p>
+                        <ol>
+                            <li>The current noisy image is transformed according to each desired view (e.g., normal and upside-down)</li>
+                            <li>Each transformed version is passed through the UNet with its corresponding text prompt</li>
+                            <li>The noise predictions are transformed back to the original orientation</li>
+                            <li>All noise predictions are averaged together</li>
+                            <li>The averaged prediction is used to perform the denoising step</li>
+                        </ol>
+                        <p>
+                            This averaging ensures that the denoising step makes progress toward satisfying all
+                            views simultaneously, gradually converging to an image that appears coherent under
+                            all specified transformations.
+                        </p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; Stanford White IV 2025 Computer Vision Project 4 | Diffusion Models</p>
+            <p>DeepFloyd IF • Forward & Reverse Processes • Classifier-Free Guidance • Visual Anagrams</p>
+        </footer>
+    </div>
+
+    <script>
+        // Header hide/show on scroll
+        let lastScrollTop = 0;
+        const header = document.getElementById('header');
+        const scrollThreshold = 100; // Start hiding after scrolling 100px
+
+        window.addEventListener('scroll', function() {
+            let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+            if (scrollTop > scrollThreshold) {
+                if (scrollTop > lastScrollTop) {
+                    // Scrolling down
+                    header.classList.add('hidden');
+                } else {
+                    // Scrolling up
+                    header.classList.remove('hidden');
+                }
+            } else {
+                // At top of page
+                header.classList.remove('hidden');
+            }
+
+            lastScrollTop = scrollTop;
+        });
+    </script>
+</body>
+</html>

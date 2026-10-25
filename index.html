@@ -1,16 +1,183 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>My Portfolio</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stanford White IV - Class Projects</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #e0e0e0;
+            background: #2b2b2b;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: #3a3a3a;
+            min-height: 100vh;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+        }
+
+        header {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            padding: 2.5rem 1.5rem 2rem;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2rem;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        header p {
+            color: #aaa;
+            margin-top: 0.4rem;
+        }
+
+        main {
+            padding: 2rem 3rem 3rem;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            color: #4a9eff;
+            margin: 2rem 0 1rem;
+            padding-bottom: 0.4rem;
+            border-bottom: 3px solid #4a9eff;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .card {
+            display: block;
+            text-decoration: none;
+            background: rgba(110, 193, 255, 0.08);
+            border: 2px solid rgba(74, 158, 255, 0.3);
+            border-radius: 12px;
+            padding: 1.25rem 1.4rem;
+            transition: border-color 0.2s, transform 0.2s;
+        }
+
+        .card:hover {
+            border-color: #4a9eff;
+            transform: translateY(-2px);
+        }
+
+        .card .number {
+            display: inline-block;
+            background: #4a9eff;
+            color: white;
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 0.15rem 0.7rem;
+            border-radius: 20px;
+            margin-bottom: 0.6rem;
+        }
+
+        .card h3 {
+            color: #6ec1ff;
+            font-size: 1.15rem;
+            margin-bottom: 0.35rem;
+        }
+
+        .card p {
+            color: #d0d0d0;
+            font-size: 0.92rem;
+        }
+
+        footer {
+            background: #1a1a1a;
+            color: white;
+            text-align: center;
+            padding: 1.5rem;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 600px) {
+            main {
+                padding: 1.5rem 1rem 2rem;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>Welcome to My CS581 Portfolio!</h1>
-    <a href="./Project_1/index.htm">Project 1</a>
+    <div class="container">
+        <header>
+            <h1>Stanford White IV</h1>
+            <p>Class Project Portfolio</p>
+        </header>
+
+        <main>
+            <h2>Multimodal Foundation Models</h2>
+            <div class="grid">
+                <a class="card" href="Multimodal_Foundation_Models_Project_1_ViT_and_CLIP/index.html">
+                    <span class="number">Project 1</span>
+                    <h3>Vision Transformers &amp; CLIP</h3>
+                    <p>Image patching in a pretrained ViT, CLIP zero-shot classification, and a controlled study of whether CLIP can tell left from right.</p>
+                </a>
+            </div>
+
+            <h2>Deep Learning</h2>
+            <div class="grid">
+                <a class="card" href="Deep_Learning_Project_2_RNN_and_Seq2Seq/index.html">
+                    <span class="number">Project 2</span>
+                    <h3>Recurrent Neural Networks</h3>
+                    <p>Basic RNNs, GRUs and sequence-to-sequence models.</p>
+                </a>
+                <a class="card" href="Deep_Learning_Project_3_Attention_and_Transformers/index.html">
+                    <span class="number">Project 3</span>
+                    <h3>Attention &amp; Transformers</h3>
+                    <p>Bahdanau attention, multi-head attention and a full Transformer.</p>
+                </a>
+                <a class="card" href="Deep_Learning_Project_4_Generative_Models/index.html">
+                    <span class="number">Project 4</span>
+                    <h3>Generative Models</h3>
+                    <p>Variational autoencoders, DCGAN and Wasserstein GAN.</p>
+                </a>
+            </div>
+
+            <h2>Computer Vision</h2>
+            <div class="grid">
+                <a class="card" href="Computer_Vision_Project_1_Projection_and_Filtering/index.htm">
+                    <span class="number">Project 1</span>
+                    <h3>Projection &amp; Filtering</h3>
+                    <p>Perspective vs. orthographic projection, histogram manipulation and linear filtering.</p>
+                </a>
+                <a class="card" href="Computer_Vision_Project_2_Homography_and_Morphing/project_results.html">
+                    <span class="number">Project 2</span>
+                    <h3>Homography &amp; Morphing</h3>
+                    <p>Image warping, rectification and morphing.</p>
+                </a>
+                <a class="card" href="Computer_Vision_Project_3_Object_Detection_and_HOI/project_results.html">
+                    <span class="number">Project 3</span>
+                    <h3>Object Detection &amp; HOI</h3>
+                    <p>Lightweight object detection and zero-shot human–object interaction.</p>
+                </a>
+                <a class="card" href="Computer_Vision_Project_4_Diffusion_Models/project_results.html">
+                    <span class="number">Project 4</span>
+                    <h3>Diffusion Models</h3>
+                    <p>Diffusion models and image generation.</p>
+                </a>
+            </div>
+        </main>
+
+        <footer>
+            <p>&copy; Stanford White IV 2026</p>
+        </footer>
+    </div>
 </body>
 </html>

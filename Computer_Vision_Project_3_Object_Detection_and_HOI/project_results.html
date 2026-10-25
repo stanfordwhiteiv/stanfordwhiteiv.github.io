@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Computer Vision Project 3 - Object Detection & Zero-Shot HOI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #e0e0e0;
+            background: #2b2b2b;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: #3a3a3a;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Header and Navigation */
+        header {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            color: white;
+            padding: 1rem 0;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            max-width: 1400px;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        header.hidden {
+            transform: translateY(-100%);
+        }
+
+        header h1 {
+            text-align: center;
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        header h2 {
+            text-align: center;
+            font-size: 1rem;
+            font-weight: normal;
+            margin-top: 0.3rem;
+            opacity: 0.8;
+        }
+
+        nav {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            padding: 0 2rem;
+            margin-top: 0.5rem;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            font-size: 0.9rem;
+            border: 2px solid transparent;
+        }
+
+        nav a:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: white;
+            transform: translateY(-2px);
+        }
+
+        /* Main content padding to account for fixed header */
+        main {
+            padding-top: 140px;
+        }
+
+        /* Section Styling */
+        section {
+            padding: 4rem 2rem;
+            border-bottom: 3px solid #2b2b2b;
+        }
+
+        section:nth-child(even) {
+            background: #444;
+        }
+
+        section h2 {
+            font-size: 2.5rem;
+            color: #4a9eff;
+            margin-bottom: 1rem;
+            text-align: center;
+            position: relative;
+            padding-bottom: 1rem;
+        }
+
+        section h2:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(90deg, #4a9eff, #6ec1ff);
+            border-radius: 2px;
+        }
+
+        section h3 {
+            font-size: 1.8rem;
+            color: #6ec1ff;
+            margin: 2rem 0 1rem;
+        }
+
+        .content-wrapper {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Description Box */
+        .description {
+            background: rgba(74, 158, 255, 0.1);
+            padding: 2rem;
+            border-radius: 15px;
+            margin: 2rem 0;
+            border-left: 5px solid #4a9eff;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .description p {
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: #d0d0d0;
+        }
+
+        .description ul {
+            margin-left: 2rem;
+            margin-top: 1rem;
+        }
+
+        .description li {
+            margin-bottom: 0.5rem;
+            font-size: 1.05rem;
+            color: #d0d0d0;
+        }
+
+        /* Image Grid */
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .image-card {
+            background: #2b2b2b;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .image-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(74, 158, 255, 0.3);
+        }
+
+        .image-card img {
+            width: 100%;
+            max-height: 85vh;
+            height: auto;
+            display: block;
+            object-fit: contain;
+            image-rendering: crisp-edges;
+            image-rendering: -webkit-optimize-contrast;
+        }
+
+        .image-card .caption {
+            padding: 1rem;
+            text-align: center;
+            font-weight: 600;
+            color: #4a9eff;
+            background: #1a1a1a;
+        }
+
+        /* Full-width image for animation */
+        .full-image {
+            margin: 2rem 0;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .full-image img {
+            width: 100%;
+            max-height: 85vh;
+            height: auto;
+            display: block;
+            object-fit: contain;
+            image-rendering: crisp-edges;
+            image-rendering: -webkit-optimize-contrast;
+        }
+
+        .full-image .caption {
+            padding: 1.5rem;
+            text-align: center;
+            font-weight: 600;
+            font-size: 1.2rem;
+            color: white;
+            background: linear-gradient(135deg, #4a9eff, #6ec1ff);
+        }
+
+        /* Comparison Grid for Part 3 */
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        @media (max-width: 768px) {
+            .comparison-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Grand Reveal styling */
+        .grand-reveal {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            color: white;
+            padding: 3rem;
+            border-radius: 15px;
+            text-align: center;
+            margin: 2rem 0;
+            box-shadow: 0 10px 30px rgba(74, 158, 255, 0.3);
+            border: 2px solid #4a9eff;
+        }
+
+        .grand-reveal h3 {
+            color: #4a9eff;
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .grand-reveal p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Footer */
+        footer {
+            background: #1a1a1a;
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            font-size: 0.9rem;
+        }
+
+        /* Smooth scroll */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Code/Math styling */
+        code {
+            background: #2b2b2b;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            color: #ff6b9d;
+        }
+
+        /* Highlight box */
+        .highlight {
+            background: rgba(74, 158, 255, 0.15);
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin: 1.5rem 0;
+            border-left: 5px solid #4a9eff;
+        }
+
+        .highlight strong {
+            color: #6ec1ff;
+        }
+
+        .highlight p {
+            color: #d0d0d0;
+        }
+
+        /* Joke styling */
+        .joke-box {
+            background: rgba(255, 215, 0, 0.1);
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin: 1.5rem 0;
+            border-left: 5px solid #ffd700;
+            font-style: italic;
+        }
+
+        .joke-box p {
+            color: #ffd700;
+            font-size: 1.1rem;
+        }
+
+        /* Method box styling */
+        .method-box {
+            background: rgba(110, 193, 255, 0.08);
+            padding: 2rem;
+            border-radius: 15px;
+            margin: 2rem 0;
+            border: 2px solid rgba(74, 158, 255, 0.3);
+        }
+
+        .method-box h4 {
+            color: #4a9eff;
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+        }
+
+        .method-box p {
+            color: #d0d0d0;
+            margin-bottom: 0.8rem;
+        }
+
+        .method-box ul {
+            margin-left: 1.5rem;
+            color: #d0d0d0;
+        }
+
+        .method-box li {
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header id="header">
+            <h1>Computer Vision Project 3</h1>
+            <h2>Object Detection & Zero-Shot Human-Object Interaction</h2>
+            <nav>
+                <a href="#part1">Part 1: Lightweight Object Detection</a>
+                <a href="#part2">Part 2: Non-Maximum Suppression (NMS)</a>
+                <a href="#part3">Part 3: Human–Object Interaction (HOI) Analysis using VLMs</a>
+            </nav>
+        </header>
+
+        <main>
+            <!-- Part 1: Banana Detection -->
+            <section id="part1">
+                <div class="content-wrapper">
+                    <h2>Part 1: Lightweight Object Detection</h2>
+
+                    <div class="description">
+                        <h3>Methodology</h3>
+                        <p>
+                            The banana detection system employs a Single Shot MultiBox 
+                            Detector (SSD) architecture, a modern deep learning 
+                            approach for object detection. Inspired by the 
+                            implementation described in 
+                            <a href="https://d2l.ai/chapter_computer-vision/ssd.html" 
+                            target="_blank" style="color: #4a9eff;">D2L's SSD 
+                            tutorial</a>, this method combines anchor-based detection 
+                            with multi-scale feature maps to detect objects at 
+                            various sizes in a single forward pass. The network 
+                            generates anchor boxes of different aspect ratios and 
+                            scales at multiple feature map resolutions, allowing it 
+                            to detect bananas of varying sizes throughout the image. 
+                            Each anchor box predicts both a class probability (banana 
+                            vs. background) and bounding box offsets to refine the 
+                            anchor location. During training, the model learns to 
+                            classify anchors and regress their coordinates using a 
+                            multi-task loss combining classification (cross-entropy) 
+                            and bounding box localization (Huber/smooth L1) objectives. At inference 
+                            time, predictions with confidence scores above a threshold are 
+                            retained, and Non-Maximum Suppression (NMS) removes redundant 
+                            detections based on Intersection-over-Union (IoU) overlap (threshold=0.5). 
+                        </p>
+                    </div>
+
+                    <h3>Training Curves</h3>
+
+                    <div class="description">
+                        <p>
+                            The following plot shows the training and validation 
+                            loss curves during model training. The bounding box 
+                            localization loss (Huber/smooth L1) converges steadily, 
+                            indicating that the model successfully learns to predict 
+                            accurate bounding box coordinates. The classification loss 
+                            (cross-entropy) also shows good convergence, demonstrating 
+                            effective learning of the banana vs. background distinction. 
+                            Both losses plateau after short training (15 epochs). 
+                        </p>
+                    </div>
+
+                    <div class="full-image">
+                        <img src="project_results/training_curves.png" alt="Training Curves">
+                        <div class="caption">Training and Validation Loss Curves</div>
+                    </div>
+
+                    <h3>Banana Detection Examples</h3>
+
+                    <div class="comparison-grid">
+                        <div class="image-card">
+                            <img src="project_results/detection_1.png" alt="Banana Detection 1">
+                            <div class="caption">Detection 1</div>
+                        </div>
+                        <div class="image-card">
+                            <img src="project_results/detection_2.png" alt="Banana Detection 2">
+                            <div class="caption">Detection 2</div>
+                        </div>
+                    </div>
+
+                    <div class="comparison-grid">
+                        <div class="image-card">
+                            <img src="project_results/detection_3.png" alt="Banana Detection 3">
+                            <div class="caption">Detection 3</div>
+                        </div>
+                        <div class="image-card">
+                            <img src="project_results/detection_4.png" alt="Banana Detection 4">
+                            <div class="caption">Detection 4</div>
+                        </div>
+                    </div>
+
+                    <div class="full-image">
+                        <img src="project_results/detection_5.png" alt="Banana Detection 5">
+                        <div class="caption">Detection 5</div>
+                    </div>
+
+                    <h3>Custom Image Detection Results</h3>
+
+                    <div class="description">
+                        <p>
+                            The following images demonstrate the detector's performance on 
+                            custom test images. The first two examples are performed on an image I constructed
+                            by taking one of my own photos and inserting a banana. The first photo was taken by me when
+                            I visited Batu Caves, in Kuala Lumpur, Malaysia. I figured that the monkeys, who usually
+                            sit their stealing food from tourists, would be interested in a banana. 
+                        </p>
+                        <p>
+                            The second photo is a picture of several dolphins that I took on the ferry to Channel Islands National Park,
+                            California. I added the banana because, honestly, I figured the dolphins were pretty banana-shaped.
+                        </p>
+                        <p>
+                            Finally, I tested the detector on a more challenging photo, a stock photo of bananas I found on the internet.
+                            Unfortunately, the detector struggled with this image. 
+                        </p>
+                    </div>
+
+                    <div class="comparison-grid">
+                        <div class="image-card">
+                            <img src="project_results/my_image_detection_1.png" alt="My Image Detection 1">
+                            <div class="caption">Custom Detection 1: Success</div>
+                        </div>
+                        <div class="image-card">
+                            <img src="project_results/my_image_detection_2.png" alt="My Image Detection 2">
+                            <div class="caption">Custom Detection 2: Success</div>
+                        </div>
+                    </div>
+
+                    <h3>Failure Case Analysis</h3>
+
+                    <div class="full-image">
+                        <img src="project_results/my_image_detection_3_failure.png" alt="Failure Case">
+                        <div class="caption">Custom Detection 3: Failure Case - Many Bananas</div>
+                    </div>
+
+                    <div class="highlight">
+                        <p>
+                            <strong>Failure Case Discussion:</strong> The detector struggled significantly with This
+                            image of multiple bananas. I initially tried to get it to detect just any of the bananas in 
+                            the image, but upon failing this, I photoshopped in one of the bananas from the test set of our dataset.
+                            Unfortunately, and to my genuine surprise, this did not help. The detector still failed to identify that banana,
+                            instead homing in on a random banana stem. Unfortunately, this is likely a data/dataset issue.
+                            A truly robust banana detector would need to be trained on a much larger and more diverse dataset, consisting of
+                            bananas that exist in their natural environments, with varying lighting conditions, occlusions, and orientations.
+                            The toy dataset of superimposed bananas just does not represent a generalizable distribution of real-world banana images.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Part 2: Non-Maximum Suppression -->
+            <section id="part2">
+                <div class="content-wrapper">
+                    <h2>Part 2: Non-Maximum Suppression (NMS)</h2>
+
+                    <div class="description">
+                        <h3>The Importance of Non-Maximum Suppression</h3>
+                        <p>
+                            Non-Maximum Suppression (NMS) is a critical post-processing step in object 
+                            detection that addresses the problem of multiple overlapping detections for 
+                            the same object. When using essentially any object-detection approach, from region proposal networks
+                            to selective search to traditional template matching, 
+                            the detector often produces many bounding boxes with high confidence scores 
+                            around each true object, as nearby windows generate similar strong responses. 
+                            Without NMS, these redundant detections clutter the output and make it difficult 
+                            to determine the actual number of objects present.
+                        </p>
+                        <p>
+                            NMS works by iteratively selecting the detection with the highest confidence 
+                            score and suppressing all other detections that overlap with it above a 
+                            specified Intersection-over-Union (IoU) threshold. This process continues 
+                            until all detections have either been selected or suppressed. The IoU threshold 
+                            controls the aggressiveness of suppression: lower values (e.g., 0.3) suppress 
+                            more boxes and work well for sparse objects, while higher values (e.g., 0.7) 
+                            are more conservative and better suited for densely packed scenes where 
+                            objects may legitimately overlap.
+                        </p>
+                        <p>
+                            The effectiveness of NMS is crucial for obtaining clean, actionable 
+                            detection results. It transforms a noisy set of overlapping bounding 
+                            boxes into a concise set of high-confidence predictions, each representing 
+                            a single object instance. This not only improves visualization but also enables 
+                            accurate object counting and downstream processing tasks that rely on discrete 
+                            object instances.
+                        </p>
+                        <p> 
+                            Its primary limitation is its reliance on a hand-crafted IoU threshold. 
+                            This heuristic approach can incorrectly suppress accurate predictions 
+                            that overlap with a higher-scoring detection, leading to missed objects 
+                            in crowded scenes. Furthermore, the NMS process is not differentiable, 
+                            preventing it from being optimized end-to-end within the neural 
+                            network.
+                        </p>
+                    </div>
+
+                    <h3>NMS Results</h3>
+
+                    <div class="description">
+                        <p>
+                            The following images demonstrate the before and after effects of applying 
+                            Non-Maximum Suppression to the detection results. The first image shows 
+                            raw detections with multiple overlapping bounding boxes, while subsequent 
+                            images show the cleaned results after NMS is applied with an IoU threshold of 0.5.
+                        </p>
+                    </div>
+
+                    <div class="comparison-grid">
+                        <div class="image-card">
+                            <img src="project_results/nms_results_1.png" alt="NMS Results 1">
+                            <div class="caption">NMS Example 1</div>
+                        </div>
+                        <div class="image-card">
+                            <img src="project_results/nms_results_2.png" alt="NMS Results 2">
+                            <div class="caption">NMS Example 2</div>
+                        </div>
+                    </div>
+
+                    <div class="full-image">
+                        <img src="project_results/nms_results_3.png" alt="NMS Results 3">
+                        <div class="caption">NMS Example 3</div>
+                    </div>
+
+                    <div class="highlight">
+                        <p>
+                            The NMS results clearly demonstrate the algorithm's effectiveness in
+                            eliminating redundant detections. By suppressing overlapping bounding 
+                            boxes, we obtain a clean set of detections where each banana is represented
+                            by a single, high-confidence bounding box.
+                        </p>
+                    </div>
+
+                    <h3>Implementation Comparison: Custom NMS vs. PyTorch</h3>
+
+                    <div class="description">
+                        <p>
+                            The from-scratch NMS implementation in this project 
+                            closely follows the standard algorithm but uses pure 
+                            NumPy operations, while PyTorch's 
+                            <code>torchvision.ops.nms</code> is GPU-accelerated and 
+                            optimized for tensor operations. The core logic is 
+                            identical: both sort boxes by score, iteratively select the 
+                            highest-scoring box, and suppress overlapping boxes above 
+                            the IoU threshold. The main differences lie in 
+                            implementation details. The custom version uses NumPy's 
+                            <code>argsort()[::-1]</code> for descending sort and 
+                            manually computes IoU with array broadcasting, while 
+                            PyTorch's version operates directly on CUDA tensors for 
+                            parallel computation. Both use the same greedy selection 
+                            strategy, but PyTorch's implementation is significantly 
+                            faster for large numbers of detections due to optimized 
+                            C++/CUDA backends. For this project's scale (typically 
+                            fewer than 100 candidate boxes per image), the performance 
+                            difference is negligible, but the custom implementation 
+                            provides transparency into the algorithm's mechanics.
+                        </p>
+                    </div>
+
+            </section>
+
+            <!-- Part 3: Zero-Shot Human-Object Interaction -->
+            <section id="part3">
+                <div class="content-wrapper">
+                    <h2>Part 3: Human–Object Interaction (HOI) Analysis using VLMs</h2>
+
+                    <div class="description">
+                        <h3>Understanding Zero-Shot HOI Detection</h3>
+                        <p>
+                            Zero-shot Human-Object Interaction (HOI) detection aims to identify relationships 
+                            between humans and objects in images without requiring extensive training data for 
+                            every possible interaction. Unlike traditional object detection which simply 
+                            identifies "person" and "object", HOI detection seeks to understand the 
+                            <strong>&lt;verb noun&gt;</strong> pairs that describe what action is being 
+                            performed with which object.
+                        </p>
+                        <p>
+                            For this task, I utilized <strong>Qwen2-VL-2B</strong>, a compact 2-billion 
+                            parameter vision-language model developed by Alibaba. This model combines 
+                            visual understanding with language generation capabilities, allowing it to 
+                            analyze images and produce structured text outputs describing human-object 
+                            interactions. The model processes the input image through its vision encoder 
+                            and generates natural language descriptions based on the prompt instructions.
+                        </p>
+                    </div>
+
+                    <div class="method-box">
+                        <h4>Prompt Engineering</h4>
+                        <p>The model was given the following structured prompt to ensure consistent output 
+                            formatting:</p>
+                        <div class="highlight">
+                            <p style="font-family: 'Courier New', monospace; white-space: pre-wrap;">Identify the human-object interaction.
+Output ONLY in this exact format: &lt;verb noun&gt;
+Object is what a person is interacting with, and the verb is the action.
+Example: &lt;hold phone&gt;, &lt;ride bicycle&gt;, or &lt;walk street&gt;.
+Your answer: </p>
+                        </div>
+                        <p>
+                            This prompt instructs the model to identify both the action (verb) and 
+                            the object (noun) in a specific format. However, as we'll see in the results, 
+                            the model doesn't always perfectly follow the formatting instructions, 
+                            occasionally omitting the angle brackets or adding extra descriptive words 
+                            beyond the simple verb-noun structure.
+                        </p>
+                    </div>
+
+                    <h3>Success Cases</h3>
+
+                    <div class="description">
+                        <p>
+                            The following examples demonstrate successful zero-shot HOI detection 
+                            where Qwen2-VL-2B correctly identifies the human-object pairs and their 
+                            associated actions. These cases showcase the model's ability to recognize 
+                            clear, unambiguous interactions.
+                        </p>
+                    </div>
+
+                    <div class="comparison-grid">
+                        <div class="image-card">
+                            <img src="project_results/hoi_success_1.jpg" alt="HOI Success 1">
+                            <div class="caption">Success 1</div>
+                        </div>
+                        <div class="image-card">
+                            <img src="project_results/hoi_success_2.jpg" alt="HOI Success 2">
+                            <div class="caption">Success 2</div>
+                        </div>
+                    </div>
+
+                    <div class="highlight">
+                        <p>
+                            <strong>Success Analysis:</strong> In these cases, Qwen2-VL-2B successfully 
+                            identified the correct verb-object pairs. The model performs best when the 
+                            interaction is visually salient, the human and object are both clearly
+                            visible without significant occlusion, and the action being performed is 
+                            a common, everyday activity that likely appeared frequently in the model's 
+                            training data. The success cases demonstrate the model's capability to 
+                            understand spatial relationships and recognize interaction patterns.
+                        </p>
+                    </div>
+
+                    <h3>Ambiguous Cases</h3>
+
+                    <div class="description">
+                        <p>
+                            These examples represent cases where the model's predictions are 
+                            technically plausible but may not capture the complete context 
+                            or may be overly specific when a more general description would 
+                            be more appropriate.
+                        </p>
+                    </div>
+
+                    <div class="comparison-grid">
+                        <div class="image-card">
+                            <img src="project_results/hoi_ambiguous_1.jpg" alt="HOI Ambiguous 1">
+                            <div class="caption">Ambiguous 1: Occlusion Uncertainty</div>
+                        </div>
+                        <div class="image-card">
+                            <img src="project_results/hoi_ambiguous_2.jpg" alt="HOI Ambiguous 2">
+                            <div class="caption">Ambiguous 2: Action Specificity Issue</div>
+                        </div>
+                    </div>
+
+                    <div class="highlight">
+                        <p>
+                            <strong>Ambiguous Case Analysis:</strong> The first ambiguous case involves a 
+                            wine bottle that obscures the people in the image, making it unclear whether 
+                            the identified interaction is actually what's occurring or if the model is 
+                            inferring based on limited visual evidence. In the second ambiguous case, the model identified a specific 
+                            action ("receiving") when a more general term like "holding" 
+                            would have been more accurate and less assumptive about the intent or direction 
+                            of the interaction. These cases highlight how the model sometimes over-interprets 
+                            contextual clues or makes assumptions beyond what can be confidently determined 
+                            from the visual information alone.
+                        </p>
+                    </div>
+
+                    <h3>Failure Cases</h3>
+
+                    <div class="description">
+                        <p>
+                            The following examples illustrate clear failures where Qwen2-VL-2B incorrectly 
+                            identifies either the object, the action, or fails to provide properly formatted 
+                            output. Note how some of the previous results also struggled with the output formatting,
+                            but was robust enough for parsing. These failure cases represent more significant
+                            breakdowns in the model's understanding.
+                        </p>
+                    </div>
+
+                    <div class="comparison-grid">
+                        <div class="image-card">
+                            <img src="project_results/hoi_failure_1.jpg" alt="HOI Failure 1">
+                            <div class="caption">Failure 1: Object Misidentification</div>
+                        </div>
+                        <div class="image-card">
+                            <img src="project_results/hoi_failure_2.jpg" alt="HOI Failure 2">
+                            <div class="caption">Failure 2: Missing Object</div>
+                        </div>
+                    </div>
+
+                    <div class="highlight">
+                        <p>
+                            <strong>Failure Analysis:</strong> The first failure case demonstrates 
+                            an object misidentification error: the model incorrectly labeled the object 
+                            as a "pillow" when it is actually, I think, a lawn flamingo. 
+                            This reveals limitations in the model's object recognition capabilities, 
+                            particularly for unusual or less common objects. The second failure case 
+                            shows an incomplete output where the model only provided the verb without 
+                            identifying the object, failing to follow the required <code>&lt;verb noun&gt;</code> format. 
+                            This represents both a formatting failure and a detection failure, as the model 
+                            couldn't complete the fundamental task of identifying what object the person 
+                            is interacting with, the street/sidewalk.
+                        </p>
+                    </div>
+
+                    <div class="description">
+                        <h3>Format Compliance Issues</h3>
+                        <p>
+                            Beyond the semantic understanding challenges, Qwen2-VL-2B exhibited 
+                            inconsistent adherence to the specified output format. Despite clear 
+                            instructions to output in the <code>&lt;verb noun&gt;</code> format, the
+                            model sometimes omitted the carrots entirely, producing outputs like 
+                            "hold phone" instead of "&lt;hold phone&gt;". In other cases, it added 
+                            descriptive modifiers beyond the simple verb-noun structure, such as 
+                            "hold red phone" or "ride fast bicycle", deviating from the concise 
+                            format requested. This inconsistency in format compliance suggests that 
+                            smaller vision-language models like the 2B parameter Qwen2-VL may struggle 
+                            with precise instruction following, particularly when the formatting 
+                            requirements conflict with the model's natural language generation tendencies.
+                        </p>
+                    </div>
+
+                    <div class="description">
+                        <h3>Reflections on Zero-Shot HOI with Qwen2-VL-2B</h3>
+                        <p>
+                            The results demonstrate both the promise and limitations of using compact 
+                            vision-language models for zero-shot HOI detection. Qwen2-VL-2B shows impressive 
+                            capabilities in recognizing common, clearly visible interactions, but struggles 
+                            with ambiguous scenes, unusual objects, and strict format adherence. The model's 
+                            2-billion parameter size makes it efficient and deployable on resource-constrained 
+                            devices (I ran it locally on my RTX 4060 Laptop GPU), but this compactness 
+                            comes at the cost of reduced accuracy compared to larger models like 
+                            GPT-5 or Gemini. The ambiguous and failure cases reveal that the model 
+                            relies heavily on visual similarity to common training examples. When objects 
+                            deviate from canonical appearances (like the flamingo being misidentified as a 
+                            pillow) or when contextual reasoning is required (like distinguishing "giving" vs. 
+                            "receiving" vs. "holding"), the model's limitations become apparent. 
+                            Future improvements could involve fine-tuning on HOI-specific datasets, 
+                            using larger model variants, or implementing multi-step reasoning approaches 
+                            where the model first identifies objects and actions separately before 
+                            combining them into interaction descriptions.
+                        </p>
+                    </div>
+
+                    <h3>Improved Prompt Engineering</h3>
+
+                    <div class="description">
+                        <p>
+                            To address the failures and ambiguities observed with the initial prompt, 
+                            I developed a more detailed prompt with explicit rules and clear examples. 
+                            The goal was to improve both semantic accuracy and format compliance.
+                        </p>
+                    </div>
+
+                    <div class="method-box">
+                        <h4>Revised Prompt</h4>
+                        <p>The improved prompt provides more explicit constraints and examples:</p>
+                        <div class="highlight">
+                            <p style="font-family: 'Courier New', monospace; white-space: pre-wrap;">Identify the primary human-object interaction. The "noun" is the object the person is directly interacting with. The "verb" is the specific physical action the person performs on it.
+
+<strong>**Rules:**</strong>
+- Must be a single, physical action.
+- The human must be physically touching or using the object.
+- Use the most precise verb (e.g., "press button" not "use phone").
+- Only output the final answer in the exact format: &lt;verb noun&gt;
+
+<strong>**Examples:**</strong>
+- A person looking at their phone to send a text -&gt; &lt;type message&gt;
+- A person sitting on a bench in the park -&gt; &lt;sit bench&gt;
+- A person using a hammer to hit a nail -&gt; &lt;hammer nail&gt;
+
+Now, identify the interaction for this image. Output ONLY: &lt;verb noun&gt;</p>
+                        </div>
+                        <p>
+                            <strong>Improvements Over the Original Prompt:</strong> The revised prompt 
+                            adds several critical constraints. First, it explicitly defines what 
+                            constitutes a valid interaction by requiring "physical action" and 
+                            "physically touching or using the object," which helps disambiguate cases 
+                            like the flower scenario where the model previously struggled between 
+                            "receiving," "giving," and "holding". This assumption, of course, comes at the cost
+                            of some potential interactions such as "staring" or "want". 
+                            Second, it emphasizes precision 
+                            by instructing the model to use the "most precise verb," potentially helping with 
+                            object misidentification by forcing more specific descriptions. Third, it 
+                            provides more detailed examples that demonstrate the reasoning process 
+                            before showing the final output format, giving the model clearer templates to 
+                            follow. Finally, it adds a direct instruction at the end 
+                            ("Output ONLY: &lt;verb noun&gt;") to reinforce format compliance.
+                        </p>
+                    </div>
+
+                    <h3>Results with Improved Prompt</h3>
+
+                    <div class="description">
+                        <p>
+                            The following images show how the revised prompt performed on challenging cases, 
+                            including images that previously resulted in failures.
+                        </p>
+                    </div>
+
+                    <div class="comparison-grid">
+                        <div class="image-card">
+                            <img src="project_results/hoi_fixed_1.jpg" alt="HOI Fixed 1">
+                            <div class="caption">Fixed Case 1: Improved Object Recognition</div>
+                        </div>
+                        <div class="image-card">
+                            <img src="project_results/hoi_fixed_2.jpg" alt="HOI Fixed 2">
+                            <div class="caption">Fixed Case 2: Correctly Identifying Street</div>
+                        </div>
+                    </div>
+
+                    <div class="highlight">
+                        <p>
+                            <strong>Improved Results Analysis:</strong> The revised prompt showed 
+                            measurable improvements on the previously failed cases. For the flamingo 
+                            image, the model's performance improved, this time identifying the flamingo as, at least,
+                            a bird. Of course, bird isn't the most specific descriptor of what the man is holding,
+                            and it doesn't specify whether or not the bird is real or fake, but, it is decidedly better
+                            than calling it a pillow. The second fixed case also benefited, as the model accurately
+                            identified the object as "street" rather than giving no output at all.
+                        </p>
+                    </div>
+
+                    <h3>New Failure: Formatting</h3>
+
+                    <div class="full-image">
+                        <img src="project_results/hoi_broken.jpg" alt="HOI Format Regression">
+                        <div class="caption">Previously Working Case Now Fails</div>
+                    </div>
+
+                    <div class="highlight">
+                        <p>
+                            <strong>Format Compliance Regression:</strong> Interestingly, while the revised prompt 
+                            improved performance on difficult object recognition cases, it introduced 
+                            a new failure mode for an image that the original prompt handled correctly. 
+                            The model failed to adhere to the required &lt;verb noun&gt; format for this 
+                            particular image, despite the improved prompt's stronger emphasis on format 
+                            compliance. I suspect that this regression may be due to the increased complexity
+                            of the prompt, which could have introduced too much of a load on the smaller 2-billion
+                            parameter model. This is the only example I have shown here, but in my experiments, I found
+                            that the smaller prompt often gave incorrect formats that were "close" more often, whereas this
+                            prompt failed more rarely but more spectacularly. You may have noticed that both of my
+                            success cases with the original prompt actually didn't perfectly follow the format, but they
+                            were accurate descriptions of the human-object interaction nonetheless. This trade-off between
+                            semantic accuracy and format compliance is an interesting area for further exploration.
+                        </p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; Stanford White IV 2025 Computer Vision Project 3 | Object Detection & Zero-Shot HOI</p>
+            <p>Single Shot MultiBox Detector (SSD) • Non-Maximum Suppression • Zero-Shot Human-Object Interaction</p>
+        </footer>
+    </div>
+
+    <script>
+        // Header hide/show on scroll
+        let lastScrollTop = 0;
+        const header = document.getElementById('header');
+        const scrollThreshold = 100; // Start hiding after scrolling 100px
+
+        window.addEventListener('scroll', function() {
+            let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+            if (scrollTop > scrollThreshold) {
+                if (scrollTop > lastScrollTop) {
+                    // Scrolling down
+                    header.classList.add('hidden');
+                } else {
+                    // Scrolling up
+                    header.classList.remove('hidden');
+                }
+            } else {
+                // At top of page
+                header.classList.remove('hidden');
+            }
+
+            lastScrollTop = scrollTop;
+        });
+    </script>
+</body>
+</html>

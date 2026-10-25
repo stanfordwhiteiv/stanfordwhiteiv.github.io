@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multimodal Foundation Models Project 1 - ViT &amp; CLIP</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #e0e0e0;
+            background: #2b2b2b;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: #3a3a3a;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Header and Navigation */
+        header {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            color: white;
+            padding: 1rem 0;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            max-width: 1400px;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        header.hidden {
+            transform: translateY(-100%);
+        }
+
+        header h1 {
+            text-align: center;
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        header h2 {
+            text-align: center;
+            font-size: 1rem;
+            font-weight: normal;
+            margin-top: 0.3rem;
+            color: #aaa;
+        }
+
+        nav {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            padding: 0.5rem 0 0.3rem;
+        }
+
+        nav a {
+            color: #4a9eff;
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        nav a:hover {
+            color: #6ec1ff;
+        }
+
+        /* Main content */
+        main {
+            padding-top: 110px;
+        }
+
+        section {
+            padding: 3rem 0;
+            border-bottom: 2px solid #4a4a4a;
+        }
+
+        section:last-child {
+            border-bottom: none;
+        }
+
+        .content-wrapper {
+            padding: 0 3rem;
+        }
+
+        section h2 {
+            font-size: 2rem;
+            color: #4a9eff;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid #4a9eff;
+        }
+
+        section h3 {
+            font-size: 1.4rem;
+            color: #6ec1ff;
+            margin: 1.5rem 0 1rem;
+        }
+
+        .description {
+            margin-bottom: 1.5rem;
+        }
+
+        .description p {
+            color: #d0d0d0;
+            margin-bottom: 0.8rem;
+        }
+
+        .description ul, .description ol {
+            margin-left: 1.5rem;
+            color: #d0d0d0;
+            margin-top: 0.5rem;
+        }
+
+        .description li {
+            margin-bottom: 0.4rem;
+        }
+
+        /* Section alternating background */
+        section:nth-child(even) {
+            background: #333;
+        }
+
+        section:nth-child(odd) {
+            background: #3a3a3a;
+        }
+
+        section:nth-child(even) .content-wrapper {
+            background: #1a1a1a;
+        }
+
+        /* Full-width image */
+        .full-image {
+            margin: 2rem 0;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .full-image img {
+            width: 100%;
+            max-height: 85vh;
+            height: auto;
+            display: block;
+            object-fit: contain;
+            image-rendering: crisp-edges;
+            image-rendering: -webkit-optimize-contrast;
+        }
+
+        .full-image .caption {
+            padding: 1.5rem;
+            text-align: center;
+            font-weight: 600;
+            font-size: 1.2rem;
+            color: white;
+            background: linear-gradient(135deg, #4a9eff, #6ec1ff);
+        }
+
+        /* Comparison Grid */
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        @media (max-width: 768px) {
+            .comparison-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Results table */
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            font-size: 1rem;
+        }
+
+        .results-table th {
+            background: #4a9eff;
+            color: white;
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+
+        .results-table td {
+            padding: 0.65rem 1rem;
+            border-bottom: 1px solid #555;
+            color: #d0d0d0;
+        }
+
+        .results-table tr:nth-child(even) td {
+            background: rgba(74, 158, 255, 0.05);
+        }
+
+        .results-table tr.best td {
+            color: #6ec1ff;
+            font-weight: 600;
+        }
+
+        /* Footer */
+        footer {
+            background: #1a1a1a;
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            font-size: 0.9rem;
+        }
+
+        /* Smooth scroll */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Code/Math styling */
+        code {
+            background: #2b2b2b;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            color: #ff6b9d;
+        }
+
+        /* Highlight box */
+        .highlight {
+            background: rgba(74, 158, 255, 0.15);
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin: 1.5rem 0;
+            border-left: 5px solid #4a9eff;
+        }
+
+        .highlight strong {
+            color: #6ec1ff;
+        }
+
+        .highlight p {
+            color: #d0d0d0;
+        }
+
+        .highlight ul {
+            margin-left: 1.5rem;
+            color: #d0d0d0;
+            margin-top: 0.5rem;
+        }
+
+        .highlight li {
+            margin-bottom: 0.4rem;
+        }
+
+        /* Method box styling */
+        .method-box {
+            background: rgba(110, 193, 255, 0.08);
+            padding: 2rem;
+            border-radius: 15px;
+            margin: 2rem 0;
+            border: 2px solid rgba(74, 158, 255, 0.3);
+        }
+
+        .method-box h4 {
+            color: #4a9eff;
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+        }
+
+        .method-box p {
+            color: #d0d0d0;
+            margin-bottom: 0.8rem;
+        }
+
+        .method-box ul, .method-box ol {
+            margin-left: 1.5rem;
+            color: #d0d0d0;
+        }
+
+        .method-box li {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Task label */
+        .task-label {
+            display: inline-block;
+            background: #4a9eff;
+            color: white;
+            padding: 0.3rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            letter-spacing: 0.5px;
+        }
+
+        .small-table {
+            font-size: 0.85rem;
+        }
+
+        .small-table td, .small-table th {
+            padding: 0.45rem 0.6rem;
+            vertical-align: middle;
+        }
+
+        .table-scroll {
+            overflow-x: auto;
+        }
+
+        .thumb {
+            display: block;
+            border-radius: 4px;
+        }
+
+        .mini {
+            border-collapse: collapse;
+            font-size: 0.8rem;
+        }
+
+        .mini th, .mini td {
+            padding: 0.2rem 0.5rem;
+            border: 1px solid #555;
+            text-align: center;
+            background: transparent !important;
+            color: #d0d0d0;
+        }
+
+        .mini th {
+            color: #aaa;
+            font-weight: normal;
+        }
+
+        .mini td.correct {
+            background: rgba(74, 158, 255, 0.3) !important;
+        }
+
+        .print-only {
+            display: none !important;
+        }
+
+        .highlight p + p {
+            margin-top: 0.7rem;
+        }
+
+        @media print {
+            header {
+                position: static;
+            }
+
+            main {
+                padding-top: 0;
+            }
+
+            .full-image, tr, footer {
+                break-inside: avoid;
+            }
+
+            .screen-only {
+                display: none !important;
+            }
+
+            .table-scroll {
+                overflow: visible;
+            }
+
+            .print-only {
+                display: block !important;
+            }
+        }
+    </style>
+
+<body>
+    <div class="container">
+        <header id="header">
+            <h1>Multimodal Foundation Models Project 1</h1>
+            <h2>Vision Transformers, CLIP Zero-Shot Classification &amp; Where CLIP Struggles</h2>
+            <nav>
+                <a href="#part1">Part 1: ViT</a>
+                <a href="#part2">Part 2: CLIP</a>
+                <a href="#part3">Part 3: Left vs. Right</a>
+            </nav>
+        </header>
+
+        <main>
+            <!-- Part 1 -->
+            <section id="part1">
+                <div class="content-wrapper">
+                    <h2>Part 1: Understanding a Pretrained Vision Transformer</h2>
+
+                    <div class="description">
+                        <h3>Overview</h3>
+                        <p>
+                            The first experiment used torchvision's pretrained <code>vit_b_16</code>
+                            (<code>ViT_B_16_Weights.IMAGENET1K_V1</code>) with its own preprocessing: resizing to 256,
+                            center-cropping to 224, and ImageNet color normalization. Inference ran on an NVIDIA RTX 5090
+                            Laptop GPU (Python 3.12, torch 2.11, torchvision 0.26), and no training was performed.
+                        </p>
+                        <p>
+                            The 20 test images (5 categories × 4) were taken from the COCO 2017 validation set. They were
+                            selected automatically: the largest labeled object had to be the category and cover at least
+                            20% of the image. The source and license of each image were recorded in
+                            <code>data/collection.csv</code>.
+                        </p>
+                    </div>
+
+                    <!-- Task 1 -->
+                    <span class="task-label">Task 1 - Image Patches and Model Inputs</span>
+                    <h3>Task 1: From Image to Input Sequence</h3>
+
+                    <div class="full-image">
+                        <img class="screen-only" src="results_part1/patches.gif" alt="Patch animation">
+                        <img class="print-only" src="results_part1/patches_keyframes.png" alt="Patch animation keyframes">
+                        <div class="caption">The image is cut into 16×16 patches, spread apart, and lined up as the input sequence</div>
+                    </div>
+
+                    <table class="results-table">
+                        <thead>
+                            <tr><th>Quantity</th><th>Value</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Number of patches (224×224 image, 16×16 patches)</td><td>14 × 14 = <strong>196</strong></td></tr>
+                            <tr><td>Sequence length after adding the CLS token</td><td>196 + 1 = <strong>197</strong></td></tr>
+                            <tr><td>Numbers per patch / per token</td><td>16 × 16 × 3 = 768 / 768</td></tr>
+                        </tbody>
+                    </table>
+
+                    <div class="highlight">
+                        <p><strong>Patch projection:</strong> each patch's 768 pixel values were turned into a 768-number
+                        token by a single shared, learned linear layer. Repeating this multiplication by hand reproduced the
+                        model's own tokens to within 10⁻⁵.</p>
+                        <p><strong>Positional embeddings:</strong> a transformer has no built-in sense of order, so on its own
+                        it could not tell a top-left patch from a bottom-right one. The model added a learned "position
+                        vector" to each of the 197 tokens to record where each patch came from.</p>
+                        <p><strong>CLS token:</strong> an extra learned token was placed at the front of the sequence. It
+                        belonged to no patch but attended to all of them in every layer, so by the final layer it served as a
+                        summary of the whole image. Only this token was used for the final prediction.</p>
+                    </div>
+
+                    <div class="full-image">
+                        <img src="results_part1/learned_patch_filters.png" alt="Learned patch projection filters">
+                        <div class="caption">32 of the 768 learned patch-projection filters</div>
+                    </div>
+
+                    <div class="highlight">
+                        <p><strong>Pixel patches vs. the learned projection:</strong> the animation only cut out pixels, and
+                        nothing in it was learned. The model, by contrast, compared each patch with 768 learned filters like
+                        those shown above. Some responded to colors or smooth color changes, while many resembled noise.
+                        Each number in a token measured how strongly the patch matched one filter, so the token was a learned
+                        description of the patch rather than its raw pixels.</p>
+                    </div>
+
+                    <!-- Task 2 -->
+                    <span class="task-label">Task 2 - Predictions on a Small Image Collection</span>
+                    <h3>Task 2: Top-5 Predictions, Accuracy and Confusion Matrix</h3>
+
+                    <div class="description">
+                        <p>Label mapping (category &rarr; ImageNet label, index): zebra &rarr; zebra (340), banana &rarr;
+                        banana (954), pizza &rarr; pizza (963), teddy bear &rarr; teddy (850), laptop &rarr; laptop (620).</p>
+                    </div>
+
+                    <div class="full-image">
+                        <img src="results_part1/predictions_grid.png" alt="Predictions grid">
+                        <div class="caption">Top-1 predictions (green = correct, red = wrong)</div>
+                    </div>
+
+                    <div class="comparison-grid">
+                        <div class="full-image">
+                            <img src="results_part1/confusion_matrix.png" alt="Confusion matrix">
+                            <div class="caption">Confusion Matrix</div>
+                        </div>
+                        <div>
+                            <table class="results-table">
+                                <thead><tr><th>Metric</th><th>Result</th></tr></thead>
+                                <tbody>
+                                    <tr class="best"><td>Top-1 accuracy</td><td>80% (16 / 20)</td></tr>
+                                    <tr><td>Top-5 accuracy</td><td>90% (18 / 20)</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <h3>Top-5 Predictions for Every Image</h3>
+                    <div class="table-scroll">
+<table class="results-table small-table">
+<thead><tr><th>Image</th><th>True</th><th>Top-1</th><th>Top-2</th><th>Top-3</th><th>Top-4</th><th>Top-5</th></tr></thead>
+<tbody>
+<tr><td><img class="thumb" src="data/coco_images/000000001818.jpg" style="width:70px"></td><td>zebra</td><td>zebra (0.89)</td><td>ostrich (0.00)</td><td>hartebeest (0.00)</td><td>impala (0.00)</td><td>African elephant (0.00)</td></tr>
+<tr><td><img class="thumb" src="data/coco_images/000000017115.jpg" style="width:70px"></td><td>zebra</td><td>zebra (0.89)</td><td>ostrich (0.00)</td><td>hartebeest (0.00)</td><td>impala (0.00)</td><td>warthog (0.00)</td></tr>
+<tr><td><img class="thumb" src="data/coco_images/000000025139.jpg" style="width:70px"></td><td>zebra</td><td>zebra (0.88)</td><td>ostrich (0.00)</td><td>great grey owl (0.00)</td><td>hartebeest (0.00)</td><td>gazelle (0.00)</td></tr>
+<tr><td><img class="thumb" src="data/coco_images/000000038825.jpg" style="width:70px"></td><td>zebra</td><td>zebra (0.89)</td><td>ostrich (0.00)</td><td>hartebeest (0.00)</td><td>impala (0.00)</td><td>warthog (0.00)</td></tr>
+<tr><td><img class="thumb" src="data/coco_images/000000003661.jpg" style="width:70px"></td><td>banana</td><td>banana (0.88)</td><td>spaghetti squash (0.01)</td><td>butternut squash (0.00)</td><td>orange (0.00)</td><td>lemon (0.00)</td></tr>
+<tr><td><img class="thumb" src="data/coco_images/000000008844.jpg" style="width:70px"></td><td>banana</td><td>banana (0.81)</td><td>drumstick (0.01)</td><td>wooden spoon (0.01)</td><td>pineapple (0.01)</td><td>maraca (0.00)</td></tr>
+<tr><td><img class="thumb" src="data/coco_images/000000028809.jpg" style="width:70px"></td><td>banana</td><td>banana (0.78)</td><td>zucchini (0.03)</td><td>jackfruit (0.02)</td><td>bakery (0.01)</td><td>pineapple (0.01)</td></tr>
+<tr><td><img class="thumb" src="data/coco_images/000000090891.jpg" style="width:70px"></td><td>banana</td><td><strong>grocery store</strong> (0.35)</td><td>banana (0.22)</td><td>lemon (0.06)</td><td>cucumber (0.03)</td><td>custard apple (0.02)</td></tr>
+<tr><td><img class="thumb" src="data/coco_images/000000008629.jpg" style="width:70px"></td><td>pizza</td><td><strong>plate</strong> (0.53)</td><td>burrito (0.14)</td><td>guacamole (0.05)</td><td>hotdog (0.03)</td><td>meat loaf (0.02)</td></tr>
+<tr><td><img class="thumb" src="data/coco_images/000000024144.jpg" style="width:70px"></td><td>pizza</td><td>pizza (0.77)</td><td>dough (0.00)</td><td>frying pan (0.00)</td><td>disk brake (0.00)</td><td>carbonara (0.00)</td></tr>
+<tr><td><img class="thumb" src="data/coco_images/000000027696.jpg" style="width:70px"></td><td>pizza</td><td>pizza (0.86)</td><td>carbonara (0.00)</td><td>dough (0.00)</td><td>French horn (0.00)</td><td>restaurant (0.00)</td></tr>
+<tr><td><img class="thumb" src="data/coco_images/000000032038.jpg" style="width:70px"></td><td>pizza</td><td>pizza (0.86)</td><td>potpie (0.00)</td><td>dough (0.00)</td><td>frying pan (0.00)</td><td>zucchini (0.00)</td></tr>
+<tr><td><img class="thumb" src="data/coco_images/000000000776.jpg" style="width:70px"></td><td>teddy bear</td><td>teddy (0.89)</td><td>toyshop (0.01)</td><td>bib (0.00)</td><td>bath towel (0.00)</td><td>seat belt (0.00)</td></tr>
+<tr><td><img class="thumb" src="data/coco_images/000000042889.jpg" style="width:70px"></td><td>teddy bear</td><td>teddy (0.55)</td><td>iPod (0.12)</td><td>cellular telephone (0.06)</td><td>notebook (0.02)</td><td>computer keyboard (0.02)</td></tr>
+<tr><td><img class="thumb" src="data/coco_images/000000050844.jpg" style="width:70px"></td><td>teddy bear</td><td>teddy (0.84)</td><td>toyshop (0.04)</td><td>Christmas stocking (0.01)</td><td>silky terrier (0.00)</td><td>bib (0.00)</td></tr>
+<tr><td><img class="thumb" src="data/coco_images/000000070229.jpg" style="width:70px"></td><td>teddy bear</td><td>teddy (0.67)</td><td>toyshop (0.04)</td><td>park bench (0.03)</td><td>mountain tent (0.01)</td><td>umbrella (0.01)</td></tr>
+<tr><td><img class="thumb" src="data/coco_images/000000026465.jpg" style="width:70px"></td><td>laptop</td><td>laptop (0.44)</td><td>notebook (0.29)</td><td>space bar (0.03)</td><td>hand-held computer (0.02)</td><td>screen (0.01)</td></tr>
+<tr><td><img class="thumb" src="data/coco_images/000000046031.jpg" style="width:70px"></td><td>laptop</td><td><strong>joystick</strong> (0.27)</td><td>desktop computer (0.19)</td><td>monitor (0.19)</td><td>mouse (0.10)</td><td>computer keyboard (0.05)</td></tr>
+<tr><td><img class="thumb" src="data/coco_images/000000076731.jpg" style="width:70px"></td><td>laptop</td><td><strong>flute</strong> (0.92)</td><td>notebook (0.01)</td><td>laptop (0.00)</td><td>fountain pen (0.00)</td><td>ocarina (0.00)</td></tr>
+<tr><td><img class="thumb" src="data/coco_images/000000080949.jpg" style="width:70px"></td><td>laptop</td><td>laptop (0.69)</td><td>computer keyboard (0.08)</td><td>notebook (0.05)</td><td>mouse (0.04)</td><td>monitor (0.01)</td></tr>
+</tbody>
+</table>
+</div>
+
+                    <div class="highlight">
+                        <p><strong>Successes:</strong> all four zebras were recognized with high confidence (0.88 to 0.89),
+                        including a black-and-white close-up, since the stripes were highly distinctive. The close-up of
+                        three teddy bears (776) was similarly easy, at 0.89.</p>
+                        <p><strong>Errors:</strong></p>
+                        <ul>
+                            <li><strong>Banana &rarr; "grocery store" (0.35):</strong> the photo showed a market with people
+                            among piles of bananas, and "banana" came second (0.22). The prediction described the scene well
+                            but was counted as wrong.</li>
+                            <li><strong>Laptop &rarr; "flute" (0.92):</strong> the photo showed a closed laptop with an orange
+                            pen lying on it. With no screen or keyboard visible, the pen dominated. This was the most confident
+                            prediction in the entire set, and it was wrong.</li>
+                            <li>The remaining two errors were a collage of pizza slices ("plate") and a cluttered desk
+                            ("joystick", with "desktop computer" and "monitor" close behind).</li>
+                        </ul>
+                        <p>The five categories were never confused with one another; every error went to a different ImageNet
+                        label that matched another part of the image.</p>
+                        <p><strong>Limits of fixed categories:</strong> the model could only answer "which of these 1000
+                        labels fits best?". It could not name anything outside that list, it had to give a single label even
+                        when an image contained several objects (bananas <em>and</em> a market), and it could not answer
+                        questions about counts, actions or positions (for example, "is the laptop open?").</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Part 2 -->
+            <section id="part2">
+                <div class="content-wrapper">
+                    <h2>Part 2: CLIP for Image–Text Matching and Zero-Shot Classification</h2>
+
+                    <div class="description">
+                        <h3>Overview</h3>
+                        <p>
+                            CLIP maps images and text into the same vector space, so that an image and a matching caption
+                            point in similar directions. To classify an image, one sentence was written per category and the
+                            sentence closest to the image was selected. The study used OpenAI's CLIP ViT-B/32 from
+                            <a href="https://huggingface.co/openai/clip-vit-base-patch32" style="color:#4a9eff">huggingface.co/openai/clip-vit-base-patch32</a>
+                            (transformers 5.20, with its own preprocessing: resizing to 224, center-cropping and CLIP color
+                            normalization), run on the same GPU. These weights were confirmed to be identical to OpenAI's
+                            original release.
+                        </p>
+                    </div>
+
+                    <!-- Task 1 -->
+                    <span class="task-label">Task 1 - Implementing the Similarity Calculation</span>
+                    <h3>Task 1: Similarity, Logits and Softmax by Hand</h3>
+
+                    <div class="method-box">
+                        <h4>Steps (numpy only, after CLIP's encoders)</h4>
+                        <ol>
+                            <li>L2 normalization: <code>x / np.sqrt(np.sum(x**2, axis=1, keepdims=True))</code></li>
+                            <li>Cosine similarity matrix: <code>image_n @ text_n.T</code> (20 images × 5 texts)</li>
+                            <li>Logits: <code>np.exp(logit_scale) * cosine</code>, where the learned scale was 100</li>
+                            <li>Softmax over the texts (<code>np.exp</code>, divided by the row sum) and <code>np.argmax</code> for the prediction</li>
+                        </ol>
+                        <p>The hand-computed logits matched CLIP's built-in <code>logits_per_image</code> to within 0.00002,
+                        with identical predictions. Using "a photo of a {category}", all 20 images were classified correctly.</p>
+                    </div>
+
+                    <div class="full-image">
+                        <img src="results_part2/similarity_subset.png" alt="Similarity heatmaps">
+                        <div class="caption">One image per category: cosine similarity, logits and softmax probability</div>
+                    </div>
+
+                    <div class="highlight">
+                        <p><strong>Cosine similarity</strong> measured how well one image matched one text. For CLIP the
+                        values were small: about 0.25 to 0.32 for a match and 0.1 to 0.2 otherwise.</p>
+                        <p><strong>Logits</strong> were the same values multiplied by 100. The ranking did not change, but the
+                        gaps grew (a 0.07 gap became 7).</p>
+                        <p><strong>Softmax probabilities</strong> turned an image's logits into shares that summed to 1.
+                        Because the gaps were large after scaling, the best match received almost all of the probability
+                        (1.00 above), even though its cosine similarity was only about 0.3.</p>
+                    </div>
+
+                    <h3>Why the Probabilities Depended on the Candidate Texts</h3>
+                    <div class="table-scroll">
+<table class="results-table">
+<thead><tr><th>Candidate texts ("a photo of a ...")</th><th>Logits (banana first)</th><th>P(banana)</th></tr></thead>
+<tbody>
+<tr><td>banana, zebra, pizza, teddy bear, laptop</td><td>18.01, 14.27, 13.16, 16.60, 17.12</td><td>0.5917</td></tr>
+<tr><td>banana, pizza</td><td>18.01, 13.16</td><td>0.9922</td></tr>
+<tr><td>banana, grocery store</td><td>18.01, 21.39</td><td>0.0329</td></tr>
+<tr><td>banana, grocery store, market, fruit stand</td><td>18.01, 21.39, 26.66, 24.29</td><td>0.0002</td></tr>
+</tbody>
+</table>
+</div>
+
+                    <div class="highlight">
+                        <p>A probability depended on both the image <em>and</em> the other texts in the list, because softmax
+                        compares logits with one another. For the banana market image, the similarity to "a photo of a banana"
+                        was always 0.180 (logit 18.01), yet P(banana) ranged from 0.99 (against "pizza") to 0.0002 (against
+                        "grocery store", "market" and "fruit stand"), simply because the competing texts fitted the image
+                        better or worse.</p>
+                        <p>Only the <em>differences</em> between logits mattered: had every candidate received the same logit,
+                        each would have been given 1/N regardless of how high that logit was, and adding the same amount to all
+                        logits changed nothing. A high probability therefore meant "better than the other options on the
+                        list", not "a good description of the image".</p>
+                    </div>
+
+                    <!-- Task 2 -->
+                    <span class="task-label">Task 2 - Comparing Prompt Wording</span>
+                    <h3>Task 2: Three Prompt Templates</h3>
+
+                    <div class="full-image">
+                        <img src="results_part2/prompt_confusion.png" alt="Prompt confusion matrices">
+                        <div class="caption">Accuracy and confusion matrix for each template</div>
+                    </div>
+
+                    <h3>Images Where the Wording Changed the Score Most</h3>
+                    <div class="table-scroll">
+<table class="results-table">
+<thead><tr><th>Image</th><th>True</th><th>P(true): "{category}"</th><th>P(true): "a photo of a {category}"</th><th>P(true): "an image showing a {category}"</th></tr></thead>
+<tbody>
+<tr><td><img class="thumb" src="data/coco_images/000000070229.jpg" style="width:90px"></td><td>teddy bear</td><td>0.78</td><td>0.98</td><td>0.97</td></tr>
+<tr><td><img class="thumb" src="data/coco_images/000000090891.jpg" style="width:90px"></td><td>banana</td><td>0.76</td><td>0.59</td><td>0.72</td></tr>
+<tr><td><img class="thumb" src="data/coco_images/000000042889.jpg" style="width:90px"></td><td>teddy bear</td><td>0.93</td><td>0.98</td><td>0.99</td></tr>
+</tbody>
+</table>
+</div>
+
+                    <div class="highlight">
+                        <p>All three templates reached 100%, so the wording never changed a prediction, but it did change the
+                        confidence on harder images. For the plush bear on a bench, confidence rose from 0.78 with the bare
+                        "teddy bear" to 0.98 with "a photo of a teddy bear". For the banana market, "a photo of a banana" was
+                        actually the <em>least</em> confident (0.59). Full sentences were generally slightly more confident,
+                        likely because CLIP was trained on captions rather than single words, but no template was best for
+                        every image.</p>
+                        <p><strong>Prompting vs. fine-tuning:</strong> changing the prompt only changed the text being compared
+                        against. The model's weights and the image vectors stayed exactly the same, and no labeled data was
+                        required. Fine-tuning would have changed the weights using labeled examples, which can fix mistakes
+                        but can also degrade performance on other tasks.</p>
+                    </div>
+
+                    <h3>Comparison with the Part 1 ViT</h3>
+                    <div class="table-scroll">
+<table class="results-table">
+<thead><tr><th>Model</th><th>Chooses from</th><th>Accuracy</th></tr></thead>
+<tbody>
+<tr><td>ViT-B/16</td><td>1000 ImageNet classes</td><td>80%</td></tr>
+<tr><td>ViT-B/16</td><td>the 5 classes</td><td>100%</td></tr>
+<tr><td>CLIP ViT-B/32</td><td>the 5 prompts (&quot;a photo of a ...&quot;)</td><td>100%</td></tr>
+</tbody>
+</table>
+</div>
+
+                    <div class="highlight">
+                        <p>CLIP scored 100% against the ViT's 80%, but the comparison was not a fair one: CLIP chose only among
+                        the 5 prompts, while the ViT chose among 1000 labels such as "grocery store" and "flute". When the ViT
+                        was restricted to the same 5 classes, it also scored 100%. The two models were also trained
+                        differently (the ViT on labeled ImageNet photos, CLIP on image–caption pairs from the web), and 20
+                        easy images were far too few to rank them. The real difference was flexibility: CLIP's options were
+                        whatever text was written for it.</p>
+                    </div>
+
+                    <!-- Task 3 -->
+                    <span class="task-label">Task 3 - Exploring the Representation Space</span>
+                    <h3>Task 3: Image–Image Similarity</h3>
+
+                    <div class="full-image">
+                        <img src="results_part2/image_similarity.png" alt="Image-image similarity">
+                        <div class="caption">Cosine similarity between all 20 CLIP image vectors, grouped by category</div>
+                    </div>
+
+                    <div class="table-scroll">
+<table class="results-table">
+<thead><tr><th>Pair</th><th>Image 1</th><th>Image 2</th><th>Cosine similarity</th></tr></thead>
+<tbody>
+<tr><td>most similar, same category</td><td><img class="thumb" src="data/coco_images/000000025139.jpg" style="width:120px"></td><td><img class="thumb" src="data/coco_images/000000038825.jpg" style="width:120px"></td><td>0.90</td></tr>
+<tr><td>least similar, same category</td><td><img class="thumb" src="data/coco_images/000000028809.jpg" style="width:120px"></td><td><img class="thumb" src="data/coco_images/000000090891.jpg" style="width:120px"></td><td>0.39</td></tr>
+<tr><td>most similar, different categories</td><td><img class="thumb" src="data/coco_images/000000025139.jpg" style="width:120px"></td><td><img class="thumb" src="data/coco_images/000000000776.jpg" style="width:120px"></td><td>0.69</td></tr>
+<tr><td>most similar, different categories</td><td><img class="thumb" src="data/coco_images/000000042889.jpg" style="width:120px"></td><td><img class="thumb" src="data/coco_images/000000080949.jpg" style="width:120px"></td><td>0.68</td></tr>
+</tbody>
+</table>
+</div>
+
+                    <div class="highlight">
+                        <p>Images of the same category were more similar on average (0.70) than images of different
+                        categories (0.50), though this varied considerably:</p>
+                        <ul>
+                            <li><strong>Zebras formed the tightest group (0.85)</strong> despite different backgrounds and even
+                            a black-and-white photo, as the stripe pattern dominated.</li>
+                            <li><strong>Bananas barely formed a group (0.56).</strong> The market photo was unlike every other
+                            image, since people and the market filled most of the frame.</li>
+                            <li><strong>Unexpected matches across categories:</strong> zebra and teddy-bear close-ups (both
+                            furry animal faces filling the frame), and a teddy bear beside a keyboard versus a kitten lying on a
+                            laptop (both combined a soft animal with electronics).</li>
+                        </ul>
+                        <p>CLIP's image vector thus described the <em>whole scene</em>: the main object, other objects, the
+                        type of place and strong textures. It was less driven by plain color, as the black-and-white zebra
+                        still matched the color zebras. This is consistent with CLIP having learned from captions, which
+                        describe everything noticeable in a picture.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Part 3 -->
+            <section id="part3">
+                <div class="content-wrapper">
+                    <h2>Part 3: Can CLIP Tell Left from Right?</h2>
+
+                    <div class="description">
+                        <h3>Overview</h3>
+                        <p>
+                            Parts 1 and 2 required only recognition of the main object. Part 3 posed a question that
+                            recognition alone could not answer: <strong>which side of the photo was each object on?</strong>
+                            The same CLIP model and GPU from Part 2 were used.
+                        </p>
+                    </div>
+
+                    <!-- Task 1 -->
+                    <span class="task-label">Task 1 - Hypothesis and Comparison Sets</span>
+                    <h3>Task 1: Hypothesis and Comparison Sets</h3>
+
+                    <div class="method-box">
+                        <h4>Hypothesis</h4>
+                        <p>CLIP would recognize both objects but not their left/right arrangement, and would therefore pick the
+                        correct description only about half the time (chance).</p>
+                        <h4>Design</h4>
+                        <p>Each comparison set consisted of one photo with two different objects side by side, plus the same
+                        photo <strong>mirrored</strong>. Mirroring swapped left and right while keeping everything else
+                        identical (objects, colors, background). The two descriptions named both objects and differed by
+                        a single word:</p>
+                        <ul>
+                            <li>original &harr; "a photo of {A} to the <strong>left</strong> of {B}"</li>
+                            <li>mirrored &harr; "a photo of {A} to the <strong>right</strong> of {B}"</li>
+                        </ul>
+                        <h4>Photo selection</h4>
+                        <p>From COCO, photos were kept if they contained exactly two large objects of different types, clearly
+                        side by side, with nothing else large in the frame. This yielded 31 photos. Fourteen were then removed
+                        because one object was hard to see or did not match its label (for example, the "person" was only a
+                        hand or a poster), leaving <strong>17 sets (34 images)</strong>.</p>
+                        <h4>Possible confounds</h4>
+                        <p>Mirrored photos could look slightly unnatural (reversed text), CLIP might simply prefer one wording
+                        over the other, and "left of" could be ambiguous when one object was much closer to the camera.</p>
+                    </div>
+
+                    <!-- Task 2 -->
+                    <span class="task-label">Task 2 - Evaluation and Visualization</span>
+                    <h3>Task 2: Results for All 17 Sets</h3>
+
+                    <div class="description">
+                        <p>Each row shows one set and its 2×2 similarity matrix. Shaded cells mark the correct matches, and
+                        the bold value marks the description CLIP chose for that image.</p>
+                    </div>
+
+                    <div class="table-scroll">
+<table class="results-table small-table">
+<thead><tr><th>Set</th><th>Original</th><th>Mirrored</th><th>Description of the original</th><th>2×2 cosine similarity</th></tr></thead>
+<tbody>
+<tr><td>1</td><td><img class="thumb" src="data/coco_images/000000054931.jpg" style="width:105px"></td><td><img class="thumb" src="data/part3/54931_mirrored.jpg" style="width:105px"></td><td>a horse to the left of a person</td><td><table class="mini"><tr><th></th><th>"left of"</th><th>"right of"</th></tr><tr><th>original</th><td class="correct">0.281</td><td class=""><strong>0.287</strong></td></tr><tr><th>mirrored</th><td class="">0.290</td><td class="correct"><strong>0.292</strong></td></tr></table></td></tr>
+<tr><td>2</td><td><img class="thumb" src="data/coco_images/000000139077.jpg" style="width:105px"></td><td><img class="thumb" src="data/part3/139077_mirrored.jpg" style="width:105px"></td><td>a person to the left of a television</td><td><table class="mini"><tr><th></th><th>"left of"</th><th>"right of"</th></tr><tr><th>original</th><td class="correct">0.261</td><td class=""><strong>0.271</strong></td></tr><tr><th>mirrored</th><td class="">0.257</td><td class="correct"><strong>0.269</strong></td></tr></table></td></tr>
+<tr><td>3</td><td><img class="thumb" src="data/coco_images/000000166664.jpg" style="width:105px"></td><td><img class="thumb" src="data/part3/166664_mirrored.jpg" style="width:105px"></td><td>a car to the left of an elephant</td><td><table class="mini"><tr><th></th><th>"left of"</th><th>"right of"</th></tr><tr><th>original</th><td class="correct"><strong>0.345</strong></td><td class="">0.341</td></tr><tr><th>mirrored</th><td class=""><strong>0.347</strong></td><td class="correct">0.344</td></tr></table></td></tr>
+<tr><td>4</td><td><img class="thumb" src="data/coco_images/000000176446.jpg" style="width:105px"></td><td><img class="thumb" src="data/part3/176446_mirrored.jpg" style="width:105px"></td><td>a laptop to the left of a book</td><td><table class="mini"><tr><th></th><th>"left of"</th><th>"right of"</th></tr><tr><th>original</th><td class="correct">0.271</td><td class=""><strong>0.272</strong></td></tr><tr><th>mirrored</th><td class="">0.265</td><td class="correct"><strong>0.268</strong></td></tr></table></td></tr>
+<tr><td>5</td><td><img class="thumb" src="data/coco_images/000000213605.jpg" style="width:105px"></td><td><img class="thumb" src="data/part3/213605_mirrored.jpg" style="width:105px"></td><td>a bus to the left of a car</td><td><table class="mini"><tr><th></th><th>"left of"</th><th>"right of"</th></tr><tr><th>original</th><td class="correct">0.270</td><td class=""><strong>0.278</strong></td></tr><tr><th>mirrored</th><td class="">0.271</td><td class="correct"><strong>0.278</strong></td></tr></table></td></tr>
+<tr><td>6</td><td><img class="thumb" src="data/coco_images/000000248631.jpg" style="width:105px"></td><td><img class="thumb" src="data/part3/248631_mirrored.jpg" style="width:105px"></td><td>a laptop to the left of a computer mouse</td><td><table class="mini"><tr><th></th><th>"left of"</th><th>"right of"</th></tr><tr><th>original</th><td class="correct">0.328</td><td class=""><strong>0.332</strong></td></tr><tr><th>mirrored</th><td class="">0.347</td><td class="correct"><strong>0.351</strong></td></tr></table></td></tr>
+<tr><td>7</td><td><img class="thumb" src="data/coco_images/000000261161.jpg" style="width:105px"></td><td><img class="thumb" src="data/part3/261161_mirrored.jpg" style="width:105px"></td><td>a bench to the left of a dog</td><td><table class="mini"><tr><th></th><th>"left of"</th><th>"right of"</th></tr><tr><th>original</th><td class="correct">0.290</td><td class=""><strong>0.293</strong></td></tr><tr><th>mirrored</th><td class="">0.311</td><td class="correct"><strong>0.314</strong></td></tr></table></td></tr>
+<tr><td>8</td><td><img class="thumb" src="data/coco_images/000000335658.jpg" style="width:105px"></td><td><img class="thumb" src="data/part3/335658_mirrored.jpg" style="width:105px"></td><td>a computer keyboard to the left of a computer mouse</td><td><table class="mini"><tr><th></th><th>"left of"</th><th>"right of"</th></tr><tr><th>original</th><td class="correct"><strong>0.392</strong></td><td class="">0.387</td></tr><tr><th>mirrored</th><td class=""><strong>0.383</strong></td><td class="correct">0.378</td></tr></table></td></tr>
+<tr><td>9</td><td><img class="thumb" src="data/coco_images/000000353051.jpg" style="width:105px"></td><td><img class="thumb" src="data/part3/353051_mirrored.jpg" style="width:105px"></td><td>a person to the left of a horse</td><td><table class="mini"><tr><th></th><th>"left of"</th><th>"right of"</th></tr><tr><th>original</th><td class="correct"><strong>0.294</strong></td><td class="">0.289</td></tr><tr><th>mirrored</th><td class=""><strong>0.299</strong></td><td class="correct">0.294</td></tr></table></td></tr>
+<tr><td>10</td><td><img class="thumb" src="data/coco_images/000000394199.jpg" style="width:105px"></td><td><img class="thumb" src="data/part3/394199_mirrored.jpg" style="width:105px"></td><td>a motorcycle to the left of a person</td><td><table class="mini"><tr><th></th><th>"left of"</th><th>"right of"</th></tr><tr><th>original</th><td class="correct"><strong>0.285</strong></td><td class="">0.278</td></tr><tr><th>mirrored</th><td class=""><strong>0.301</strong></td><td class="correct">0.293</td></tr></table></td></tr>
+<tr><td>11</td><td><img class="thumb" src="data/coco_images/000000410880.jpg" style="width:105px"></td><td><img class="thumb" src="data/part3/410880_mirrored.jpg" style="width:105px"></td><td>a bench to the left of a teddy bear</td><td><table class="mini"><tr><th></th><th>"left of"</th><th>"right of"</th></tr><tr><th>original</th><td class="correct">0.310</td><td class=""><strong>0.312</strong></td></tr><tr><th>mirrored</th><td class="">0.305</td><td class="correct"><strong>0.306</strong></td></tr></table></td></tr>
+<tr><td>12</td><td><img class="thumb" src="data/coco_images/000000429011.jpg" style="width:105px"></td><td><img class="thumb" src="data/part3/429011_mirrored.jpg" style="width:105px"></td><td>a truck to the left of a car</td><td><table class="mini"><tr><th></th><th>"left of"</th><th>"right of"</th></tr><tr><th>original</th><td class="correct">0.244</td><td class=""><strong>0.253</strong></td></tr><tr><th>mirrored</th><td class="">0.263</td><td class="correct"><strong>0.273</strong></td></tr></table></td></tr>
+<tr><td>13</td><td><img class="thumb" src="data/coco_images/000000431140.jpg" style="width:105px"></td><td><img class="thumb" src="data/part3/431140_mirrored.jpg" style="width:105px"></td><td>a toilet to the left of a sink</td><td><table class="mini"><tr><th></th><th>"left of"</th><th>"right of"</th></tr><tr><th>original</th><td class="correct">0.307</td><td class=""><strong>0.310</strong></td></tr><tr><th>mirrored</th><td class="">0.321</td><td class="correct"><strong>0.327</strong></td></tr></table></td></tr>
+<tr><td>14</td><td><img class="thumb" src="data/coco_images/000000437514.jpg" style="width:105px"></td><td><img class="thumb" src="data/part3/437514_mirrored.jpg" style="width:105px"></td><td>a bench to the left of a potted plant</td><td><table class="mini"><tr><th></th><th>"left of"</th><th>"right of"</th></tr><tr><th>original</th><td class="correct">0.337</td><td class=""><strong>0.345</strong></td></tr><tr><th>mirrored</th><td class="">0.334</td><td class="correct"><strong>0.342</strong></td></tr></table></td></tr>
+<tr><td>15</td><td><img class="thumb" src="data/coco_images/000000449909.jpg" style="width:105px"></td><td><img class="thumb" src="data/part3/449909_mirrored.jpg" style="width:105px"></td><td>a person to the left of a giraffe</td><td><table class="mini"><tr><th></th><th>"left of"</th><th>"right of"</th></tr><tr><th>original</th><td class="correct">0.318</td><td class=""><strong>0.323</strong></td></tr><tr><th>mirrored</th><td class="">0.307</td><td class="correct"><strong>0.313</strong></td></tr></table></td></tr>
+<tr><td>16</td><td><img class="thumb" src="data/coco_images/000000454067.jpg" style="width:105px"></td><td><img class="thumb" src="data/part3/454067_mirrored.jpg" style="width:105px"></td><td>a television to the left of a person</td><td><table class="mini"><tr><th></th><th>"left of"</th><th>"right of"</th></tr><tr><th>original</th><td class="correct">0.286</td><td class=""><strong>0.293</strong></td></tr><tr><th>mirrored</th><td class="">0.286</td><td class="correct"><strong>0.290</strong></td></tr></table></td></tr>
+<tr><td>17</td><td><img class="thumb" src="data/coco_images/000000575081.jpg" style="width:105px"></td><td><img class="thumb" src="data/part3/575081_mirrored.jpg" style="width:105px"></td><td>a person to the left of a television</td><td><table class="mini"><tr><th></th><th>"left of"</th><th>"right of"</th></tr><tr><th>original</th><td class="correct">0.284</td><td class=""><strong>0.292</strong></td></tr><tr><th>mirrored</th><td class="">0.277</td><td class="correct"><strong>0.283</strong></td></tr></table></td></tr>
+</tbody>
+</table>
+</div>
+
+                    <table class="results-table">
+                        <thead><tr><th>Result (all 17 sets)</th><th>CLIP</th><th>Random guessing</th></tr></thead>
+                        <tbody>
+                            <tr class="best"><td>Images matched to the correct description</td><td>17 / 34 (50%)</td><td>50%</td></tr>
+                            <tr><td>Sets with both images correct</td><td>0 / 17</td><td>about 4 / 17</td></tr>
+                            <tr><td>Sets where both images picked the same description</td><td>17 / 17</td><td>about 8 / 17</td></tr>
+                            <tr><td>Control: picking the right pair of objects ("a photo of {A} and {B}" vs. another set's objects)</td><td>17 / 17</td><td>50%</td></tr>
+                        </tbody>
+                    </table>
+
+                    <div class="full-image">
+                        <img src="results_part3/text_similarity.png" alt="Text similarity">
+                        <div class="caption">Similarity between descriptions from four sets</div>
+                    </div>
+
+                    <div class="highlight">
+                        <p><strong>CLIP performed at chance.</strong> In <em>every</em> set, the original and mirrored images
+                        chose the same description (usually "right of"), so exactly one of the two was correct each time.
+                        CLIP was not using the layout at all. It did, however, know <em>what</em> was in the photos,
+                        identifying the correct object pair in all 17 cases.</p>
+                        <p><strong>Descriptions with the same objects remained almost identical.</strong> "A person to the left
+                        of a television" and "a person to the right of a television" had a similarity of 0.98 (0.99 on average
+                        across all sets), whereas descriptions with different objects sat around 0.76. Even swapping the order
+                        of the objects made little difference. The text vector was largely determined by which objects were
+                        named. The image side behaved similarly: a photo and its mirror image had a similarity of 0.98.</p>
+                    </div>
+
+                    <!-- Task 3 -->
+                    <span class="task-label">Task 3 - Testing One Explanation</span>
+                    <h3>Task 3: Did Clearer Wording Help?</h3>
+
+                    <div class="description">
+                        <p>
+                            <strong>Explanation tested:</strong> "left of / right of" might have been too subtle as a single
+                            word within a sentence. <strong>Change:</strong> each object was tied to a side of the photo, with
+                            everything else held constant: "a photo with {A} on the left side and {B} on the right side"
+                            (swapped for the mirrored image).
+                        </p>
+                    </div>
+
+                    <div class="table-scroll">
+<table class="results-table">
+<thead><tr><th>Wording</th><th>Images correct</th><th>Both images correct</th><th>Both images picked the same description</th><th>Similarity of the two descriptions</th></tr></thead>
+<tbody>
+<tr><td>&quot;{A} to the left / right of {B}&quot;</td><td>17/34 = 50.0%</td><td>0/17</td><td>17/17</td><td>0.99</td></tr>
+<tr><td>&quot;{A} on the left side and {B} on the right side&quot;</td><td>18/34 = 52.9%</td><td>1/17</td><td>16/17</td><td>0.99</td></tr>
+</tbody>
+</table>
+</div>
+
+                    <div class="highlight">
+                        <p><strong>The change had little effect.</strong> Accuracy rose from 50% to 53% (one additional image),
+                        and one set had both images correct, which was well within what chance would produce. Both
+                        images still chose the same description in 16 of 17 sets, and the two descriptions remained 0.99
+                        similar to the model.</p>
+                        <p><strong>Alternative explanations and limits:</strong> only the text was changed, so the problem
+                        could also have been on the image side, since a photo and its mirror received almost the same vector.
+                        Web captions rarely mention "left" or "right", so CLIP may never have needed to learn the
+                        distinction. Other relations (on top of, inside) might behave differently, and 17 sets with a single
+                        CLIP model made for a small study. Even so, the result was highly consistent: CLIP ViT-B/32 knew
+                        <em>what</em> was in a photo, but not <em>where</em>.</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; Stanford White IV 2026 | Multimodal Foundation Models Project 1</p>
+            <p>Vision Transformer &bull; CLIP Zero-Shot Classification &bull; Left vs. Right in CLIP</p>
+        </footer>
+    </div>
+
+
+    <script>
+        // Header hide/show on scroll
+        let lastScrollTop = 0;
+        const header = document.getElementById('header');
+        const scrollThreshold = 100;
+
+        window.addEventListener('scroll', function() {
+            let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+            if (scrollTop > scrollThreshold) {
+                if (scrollTop > lastScrollTop) {
+                    header.classList.add('hidden');
+                } else {
+                    header.classList.remove('hidden');
+                }
+            } else {
+                header.classList.remove('hidden');
+            }
+
+            lastScrollTop = scrollTop;
+        });
+    </script>
+</body>
+</html>

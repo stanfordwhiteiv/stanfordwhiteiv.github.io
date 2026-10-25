@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deep Learning Project 3 - Attention Mechanisms &amp; Transformers</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #e0e0e0;
+            background: #2b2b2b;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: #3a3a3a;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Header and Navigation */
+        header {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            color: white;
+            padding: 1rem 0;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            max-width: 1400px;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        header.hidden {
+            transform: translateY(-100%);
+        }
+
+        header h1 {
+            text-align: center;
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        header h2 {
+            text-align: center;
+            font-size: 1rem;
+            font-weight: normal;
+            margin-top: 0.3rem;
+            color: #aaa;
+        }
+
+        nav {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            padding: 0.5rem 0 0.3rem;
+        }
+
+        nav a {
+            color: #4a9eff;
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        nav a:hover {
+            color: #6ec1ff;
+        }
+
+        /* Main content */
+        main {
+            padding-top: 110px;
+        }
+
+        section {
+            padding: 3rem 0;
+            border-bottom: 2px solid #4a4a4a;
+        }
+
+        section:last-child {
+            border-bottom: none;
+        }
+
+        .content-wrapper {
+            padding: 0 3rem;
+        }
+
+        section h2 {
+            font-size: 2rem;
+            color: #4a9eff;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid #4a9eff;
+        }
+
+        section h3 {
+            font-size: 1.4rem;
+            color: #6ec1ff;
+            margin: 1.5rem 0 1rem;
+        }
+
+        .description {
+            margin-bottom: 1.5rem;
+        }
+
+        .description p {
+            color: #d0d0d0;
+            margin-bottom: 0.8rem;
+        }
+
+        .description ul, .description ol {
+            margin-left: 1.5rem;
+            color: #d0d0d0;
+            margin-top: 0.5rem;
+        }
+
+        .description li {
+            margin-bottom: 0.4rem;
+        }
+
+        /* Section alternating background */
+        section:nth-child(even) {
+            background: #333;
+        }
+
+        section:nth-child(odd) {
+            background: #3a3a3a;
+        }
+
+        section:nth-child(even) .content-wrapper {
+            background: #1a1a1a;
+        }
+
+        /* Full-width image */
+        .full-image {
+            margin: 2rem 0;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .full-image img {
+            width: 100%;
+            max-height: 85vh;
+            height: auto;
+            display: block;
+            object-fit: contain;
+            image-rendering: crisp-edges;
+            image-rendering: -webkit-optimize-contrast;
+        }
+
+        .full-image .caption {
+            padding: 1.5rem;
+            text-align: center;
+            font-weight: 600;
+            font-size: 1.2rem;
+            color: white;
+            background: linear-gradient(135deg, #4a9eff, #6ec1ff);
+        }
+
+        /* Comparison Grid */
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        @media (max-width: 768px) {
+            .comparison-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Results table */
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            font-size: 1rem;
+        }
+
+        .results-table th {
+            background: #4a9eff;
+            color: white;
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+
+        .results-table td {
+            padding: 0.65rem 1rem;
+            border-bottom: 1px solid #555;
+            color: #d0d0d0;
+        }
+
+        .results-table tr:nth-child(even) td {
+            background: rgba(74, 158, 255, 0.05);
+        }
+
+        .results-table tr.best td {
+            color: #6ec1ff;
+            font-weight: 600;
+        }
+
+        /* Footer */
+        footer {
+            background: #1a1a1a;
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            font-size: 0.9rem;
+        }
+
+        /* Smooth scroll */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Code/Math styling */
+        code {
+            background: #2b2b2b;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            color: #ff6b9d;
+        }
+
+        /* Highlight box */
+        .highlight {
+            background: rgba(74, 158, 255, 0.15);
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin: 1.5rem 0;
+            border-left: 5px solid #4a9eff;
+        }
+
+        .highlight strong {
+            color: #6ec1ff;
+        }
+
+        .highlight p {
+            color: #d0d0d0;
+        }
+
+        .highlight ul {
+            margin-left: 1.5rem;
+            color: #d0d0d0;
+            margin-top: 0.5rem;
+        }
+
+        .highlight li {
+            margin-bottom: 0.4rem;
+        }
+
+        /* Method box styling */
+        .method-box {
+            background: rgba(110, 193, 255, 0.08);
+            padding: 2rem;
+            border-radius: 15px;
+            margin: 2rem 0;
+            border: 2px solid rgba(74, 158, 255, 0.3);
+        }
+
+        .method-box h4 {
+            color: #4a9eff;
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+        }
+
+        .method-box p {
+            color: #d0d0d0;
+            margin-bottom: 0.8rem;
+        }
+
+        .method-box ul, .method-box ol {
+            margin-left: 1.5rem;
+            color: #d0d0d0;
+        }
+
+        .method-box li {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Task label */
+        .task-label {
+            display: inline-block;
+            background: #4a9eff;
+            color: white;
+            padding: 0.3rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            letter-spacing: 0.5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header id="header">
+            <h1>Deep Learning Project 3</h1>
+            <h2>Attention Mechanisms &amp; Transformers: Bahdanau, Multi-Head, &amp; Full Transformer</h2>
+            <nav>
+                <a href="#part1">Part 1: Bahdanau Attention</a>
+                <a href="#part2">Part 2: Multi-Head Attention</a>
+                <a href="#part3">Part 3: Transformer</a>
+            </nav>
+        </header>
+
+        <main>
+            <!-- Part 1: Basic Attention Mechanism -->
+            <section id="part1">
+                <div class="content-wrapper">
+                    <h2>Part 1: Basic Attention Mechanism (Bahdanau)</h2>
+
+                    <div class="description">
+                        <h3>Overview</h3>
+                        <p>
+                            Bahdanau (additive) attention is implemented on top of the GRU encoder-decoder
+                            Seq2Seq model from Project 2 and trained on the English-French dataset. Rather than
+                            passing a single fixed context vector from encoder to decoder, the attention
+                            mechanism computes a soft "alignment" at each decoding step: a learned alignment
+                            score is computed between the current decoder hidden state and each encoder hidden
+                            state, then normalised via softmax to produce a weighted sum (context vector)
+                            that the decoder uses at that step. In short, the decoder can reference any point in the input sequence dynamically.
+                        </p>
+                        <p>
+                            <strong>Dataset:</strong> First 15,000 English-French pairs from fra.txt,
+                            split 90/10 into 13,500 training and 1,500 validation pairs.
+                            <code>SRC_MAX_LEN = TGT_MAX_LEN = 20</code> tokens.
+                        </p>
+                        <p>
+                            <strong>Evaluation:</strong> Sentence-level BLEU using the D2L formula,
+                            evaluated on the same fixed 20-sentence test set from Project 2.
+                        </p>
+                    </div>
+
+                    <!-- Task 1 -->
+                    <span class="task-label">Task 1 - Hyperparameter Tuning</span>
+                    <h3>Task 1: Hyperparameter Tuning and BLEU Evaluation</h3>
+
+                    <div class="description">
+                        <p>
+                            Four attention Seq2Seq configurations were trained and evaluated through a random hyperparameter search. The search
+                            space covered embedding dimension, hidden dimension, number of GRU layers,
+                            dropout rate, learning rate, and batch size.
+                        </p>
+                    </div>
+
+                    <div class="full-image">
+                        <img src="results_part1/task1_perplexity.png" alt="Part 1 Task 1 Perplexity Curves">
+                        <div class="caption">Task 1 Attention Seq2Seq: Training &amp; Validation Perplexity for Top 4 Configurations</div>
+                    </div>
+
+                    <div class="full-image">
+                        <img src="results_part1/task1_bleu.png" alt="Part 1 Task 1 BLEU Scores">
+                        <div class="caption">Task 1 BLEU Scores by Configuration</div>
+                    </div>
+
+                    <table class="results-table">
+                        <thead>
+                            <tr>
+                                <th>Config</th>
+                                <th>Parameters</th>
+                                <th>BLEU Score</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>A</td>
+                                <td>e=256, h=256, l=1, d=0.20, lr=1e-3, bs=64</td>
+                                <td>0.5949</td>
+                            </tr>
+                            <tr class="best">
+                                <td>B (best)</td>
+                                <td>e=256, h=512, l=1, d=0.30, lr=1e-3, bs=32</td>
+                                <td>0.6427</td>
+                            </tr>
+                            <tr>
+                                <td>C</td>
+                                <td>e=256, h=256, l=2, d=0.20, lr=5e-4, bs=64</td>
+                                <td>0.5474</td>
+                            </tr>
+                            <tr>
+                                <td>D</td>
+                                <td>e=128, h=128, l=1, d=0.10, lr=1e-3, bs=128</td>
+                                <td>0.4467</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="highlight">
+                        <p><strong>Key Findings:</strong></p>
+                        <ul>
+                            <li>
+                                <strong>Config B</strong> (e=256, h=512, d=0.30, lr=1e-3, bs=32) achieves
+                                the highest BLEU of <strong>0.6427</strong>. The larger hidden dimension (512)
+                                provides the decoder with greater capacity to model French syntax, while a
+                                moderately high dropout (0.30) guards against overfitting. The smaller batch
+                                size (32) yields noisier but ultimately more informative gradient estimates
+                                per parameter update.
+                            </li>
+                            <li>
+                                <strong>Config A</strong> uses the same embedding and learning rate as B but
+                                half the hidden size (256) and a larger batch (64). Its lower BLEU (0.5949)
+                                suggests that hidden dimension is the most impactful hyperparameter here:
+                                halving it costs roughly 0.05 BLEU points despite otherwise identical settings.
+                            </li>
+                            <li>
+                                <strong>Config C</strong> adds a second GRU layer but reduces the learning
+                                rate to 5e-4 and uses larger batches. The resulting BLEU (0.5474) is lower
+                                than Config A, indicating that the extra depth did not compensate for the
+                                slower convergence introduced by the halved learning rate within 30 epochs.
+                            </li>
+                            <li>
+                                <strong>Config D</strong> (the smallest model, h=128, bs=128) scores the
+                                lowest BLEU (0.4467). Insufficient hidden capacity combined with large
+                                batches limits both representational power and the gradient signal quality
+                                on this translation task.
+                            </li>
+                            <li>
+                                All four perplexity curves converge smoothly without spikes, confirming
+                                that the attention mechanism stabilises training across a range of
+                                hyperparameter settings. Training perplexity falls below 5 for the best
+                                configurations by epoch 30, while validation perplexity levels off around
+                                8-11.
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Task 2 -->
+                    <span class="task-label">Task 2 - Attention Visualization</span>
+                    <h3>Task 2: Attention Weight Visualization</h3>
+
+                    <div class="description">
+                        <p>
+                            Attention heatmaps are produced for six sentence pairs using the best configuration
+                            (Config B). Each heatmap shows, for every generated French token (y-axis), the
+                            attention weight assigned to each English source token (x-axis) at that decoding step.
+                            A near-diagonal pattern indicates monotonic, word-by-word alignment.
+                        </p>
+                    </div>
+
+                    <div class="full-image">
+                        <img src="results_part1/task2_attention_heatmaps.png" alt="Part 1 Task 2 Attention Heatmaps Overview">
+                        <div class="caption">Task 2 Bahdanau Attention Weights: All Six Sentence Pairs (Best Config B)</div>
+                    </div>
+
+                    <div class="comparison-grid">
+                        <div class="full-image">
+                            <img src="results_part1/task2_attn_1.png" alt="Attention: she likes coffee">
+                            <div class="caption">"she likes coffee ." → "elle aime le café ." (Perfect)</div>
+                        </div>
+                        <div class="full-image">
+                            <img src="results_part1/task2_attn_2.png" alt="Attention: where is the library">
+                            <div class="caption">"where is the library ?" → "où est ?" (Truncated)</div>
+                        </div>
+                    </div>
+
+                    <div class="full-image">
+                        <img src="results_part1/task2_attn_4.png" alt="Attention: this is my brother">
+                        <div class="caption">"this is my brother ." → "c'est mon frère ." (Perfect)</div>
+                    </div>
+
+                    <div class="highlight">
+                        <p><strong>"she likes coffee ." → "elle aime le café ."</strong></p>
+                        <p>
+                            This sentence produces a near-perfect diagonal alignment. The model correctly
+                            attends to "she" (0.29) and "likes" (0.39) when generating <em>elle</em>; focuses
+                            most strongly on "likes" (0.61) for <em>aime</em>; and attends primarily to
+                            "coffee" (0.39) and the period (0.51) for <em>le</em>. For <em>café</em>
+                            the model is sharply concentrated on the period token (0.94), and similarly for
+                            the final period (0.89). The slight concentration on the English period for
+                            the French content word "café" is an artifact of the model conflating the
+                            end-of-content signal with the last meaningful word.
+                        </p>
+                        <p><strong>"where is the library ?" → "où est ?" (truncated output)</strong></p>
+                        <p>
+                            The model generates only "où est ?" instead of the full reference "où est la
+                            bibliothèque ?". The heatmap reveals why: <em>où</em> attends strongly to "where"
+                            (0.76), and <em>est</em> splits attention across "where" (0.38), "library" (0.20),
+                            and the question mark (0.20), indicating uncertainty about how to proceed. The
+                            model then jumps directly to the "?" token (attending 0.69 to the source "?"),
+                            skipping the "la bibliothèque" span. This collapse likely reflects that
+                            "bibliothèque" is a low-frequency word whose source region ("the library") fails
+                            to accumulate sufficiently peaked attention weights before the decoder prematurely
+                            generates the terminating question mark.
+                        </p>
+                        <p><strong>"this is my brother ." → "c'est mon frère ." (perfect)</strong></p>
+                        <p>
+                            An interesting cross-lingual alignment: both <em>c'est</em> and <em>mon</em>
+                            attend most strongly to "my" (0.45 and 0.49 respectively), rather than to
+                            "this" or "is". This reflects the French contraction: the phrase "c'est mon
+                            frère" maps the English possessive structure "this is my" holistically, and
+                            the attention mechanism has learned that "my" is the most informative source
+                            token for placing both the copula contraction and the possessive determiner.
+                            <em>frère</em> and the final period concentrate sharply on the source period
+                            (0.89 and 0.98), accurately signalling end-of-sentence.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Part 2: Multi-Head Attention -->
+            <section id="part2">
+                <div class="content-wrapper">
+                    <h2>Part 2: Multi-Head Attention</h2>
+
+                    <div class="description">
+                        <h3>Overview</h3>
+                        <p>
+                            Multi-head attention (MHA) replaces the single Bahdanau attention mechanism with
+                            <em>h</em> parallel attention heads, each operating in a lower-dimensional
+                            subspace of size <code>d_model / h</code>. The outputs of all heads are
+                            concatenated and linearly projected. This allows the model to jointly attend
+                            to information from different representation subspaces at different positions,
+                            potentially capturing richer alignment structure than a single attention head.
+                        </p>
+                        <p>
+                            Four head-count configurations were evaluated, all using a total attention
+                            dimension of 256 and the same base Seq2Seq encoder-decoder architecture.
+                            Head counts of 1, 2, 4, and 8 were tested, with corresponding per-head
+                            dimensions of 256, 128, 64, and 32.
+                        </p>
+                    </div>
+
+                    <!-- Task 1 -->
+                    <span class="task-label">Task 1 - Multi-Head Attention Performance</span>
+                    <h3>Task 1: Training Results and Comparison with Part 1</h3>
+
+                    <div class="full-image">
+                        <img src="results_part2/task1_perplexity.png" alt="Part 2 Task 1 Perplexity Curves">
+                        <div class="caption">Task 1 MHA Seq2Seq: Training &amp; Validation Perplexity by Head Count</div>
+                    </div>
+
+                    <div class="full-image">
+                        <img src="results_part2/task1_bleu.png" alt="Part 2 Task 1 BLEU Scores">
+                        <div class="caption">Task 1 BLEU Score vs. Number of Attention Heads</div>
+                    </div>
+
+                    <div class="full-image">
+                        <img src="results_part2/task1_scatter.png" alt="Part 2 Task 1 Scatter">
+                        <div class="caption">Task 1 BLEU vs. Final Validation Perplexity by Head Count</div>
+                    </div>
+
+                    <table class="results-table">
+                        <thead>
+                            <tr>
+                                <th>Configuration</th>
+                                <th>Head Dim</th>
+                                <th>BLEU Score</th>
+                                <th>Final Val PPL (approx.)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>MHA h=1</td>
+                                <td>256</td>
+                                <td>0.6263</td>
+                                <td>~9.4</td>
+                            </tr>
+                            <tr class="best">
+                                <td>MHA h=2 (best BLEU)</td>
+                                <td>128</td>
+                                <td>0.6319</td>
+                                <td>~9.0</td>
+                            </tr>
+                            <tr>
+                                <td>MHA h=4 (best PPL)</td>
+                                <td>64</td>
+                                <td>0.6178</td>
+                                <td>~8.7</td>
+                            </tr>
+                            <tr>
+                                <td>MHA h=8</td>
+                                <td>32</td>
+                                <td>0.6155</td>
+                                <td>~9.1</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="highlight">
+                        <p><strong>Does multi-head attention improve translation quality?</strong></p>
+                        <p>
+                            Compared to the best Bahdanau single-head result from Part 1 (BLEU = 0.6427),
+                            the best MHA configuration (h=2, BLEU = 0.6319) falls slightly short. All four
+                            MHA variants score between 0.6155 and 0.6319, forming a tight cluster that
+                            is somewhat below the Part 1 peak. This outcome is consistent with the
+                            training curves: as seen in the perplexity plots, all four head-count
+                            configurations produce nearly identical learning trajectories throughout
+                            30 epochs, suggesting that on this small dataset (15,000 pairs) the additional
+                            expressiveness of multiple heads provides no measurable advantage over a
+                            well-tuned single-head model.
+                        </p>
+                        <p><strong>Effect of head count on performance:</strong></p>
+                        <p>
+                            The BLEU scores form a mild inverted-U shape: h=1 (0.6263) and h=2 (0.6319)
+                            outperform h=4 (0.6178) and h=8 (0.6155) by a small margin. As head count
+                            increases, each head's per-head dimension shrinks (from 256 down to 32), which
+                            may limit the representational capacity available to each individual attention
+                            pattern. The scatter plot further shows that h=4 achieves the lowest final
+                            validation perplexity (~8.7) yet yields only the third-best BLEUa reminder
+                            that perplexity and BLEU can decorrelate at inference time. The narrow
+                            performance band across all configurations (range &lt; 0.02 BLEU) indicates
+                            that head count is not a strongly predictive hyperparameter for this task
+                            and dataset scale.
+                        </p>
+                    </div>
+
+                    <!-- Task 2 -->
+                    <span class="task-label">Task 2 - Analysis of Attention Heads</span>
+                    <h3>Task 2: Per-Head Attention Visualization</h3>
+
+                    <div class="description">
+                        <p>
+                            Attention weights are visualised separately for each head in the best-performing
+                            h=2 configuration. Sentence pairs include both correct translations and error
+                            cases, allowing us to observe whether different heads specialize in different
+                            alignment strategies.
+                        </p>
+                    </div>
+
+                    <div class="full-image">
+                        <img src="results_part2/task2_heads_s1.png" alt="Part 2 Task 2 Heads: she likes coffee">
+                        <div class="caption">Task 2 Per-Head Attention: "she likes coffee ." → "elle aime le café ."</div>
+                    </div>
+
+                    <div class="full-image">
+                        <img src="results_part2/task2_heads_s2.png" alt="Part 2 Task 2 Heads: where is the library">
+                        <div class="caption">Task 2 Per-Head Attention: "where is the library ?" → "où est la ?"</div>
+                    </div>
+
+                    <div class="full-image">
+                        <img src="results_part2/task2_heads_s3.png" alt="Part 2 Task 2 Heads: do you like music">
+                        <div class="caption">Task 2 Per-Head Attention: "do you like music ?" → "aimez-vous la la porte ?"</div>
+                    </div>
+
+                    <div class="full-image">
+                        <img src="results_part2/task2_heads_s4.png" alt="Part 2 Task 2 Heads: this is my brother">
+                        <div class="caption">Task 2 Per-Head Attention: "this is my brother ." → "c'est mon frère ."</div>
+                    </div>
+
+                    <div class="full-image">
+                        <img src="results_part2/task2_entropy.png" alt="Part 2 Task 2 Entropy">
+                        <div class="caption">Task 2 Mean Attention Entropy per Head (higher = more diffuse)</div>
+                    </div>
+
+                    <div class="full-image">
+                        <img src="results_part2/task2_cross_corr.png" alt="Part 2 Task 2 Cross-Head Correlation">
+                        <div class="caption">Task 2 Cross-Head Correlation: "where is the library ?"</div>
+                    </div>
+
+                    <div class="highlight">
+                        <p><strong>Do different heads attend to different parts of the input?</strong></p>
+                        <p>
+                            Both exhibit clearly different attention patterns across all
+                            sentences examined. Head 1 (blue) consistently produces sharper, more
+                            focused alignments. For "she likes coffee .", Head 1 assigns weights of
+                            0.99, 0.98, and 0.98 to the correct source token for <em>elle</em>,
+                            <em>aime</em>, and <em>café</em> respectively. This results in a nearly perfect diagonal.
+                            Head 2 (orange) is systematically more diffuse: for the same sentence,
+                            <em>aime</em> splits 0.51/0.49 between "likes" and "coffee", and
+                            <em>café</em> distributes weight more broadly.
+                        </p>
+                        <p>
+                            For "where is the library ?", the division of labour is even more striking.
+                            Head 1 collapses entirely onto the "where" token for both <em>où</em> and
+                            <em>est</em> (weights of 1.00 and 1.00), effectively ignoring the rest of
+                            the source. Head 2 captures the full alignment: <em>où</em>→"where" (1.00),
+                            <em>est</em>→"the" (0.76), <em>la</em>→"library" (1.00), <em>?</em>→"library"
+                            (1.00). The cross-head correlation matrix confirms this orthogonality:
+                            H1-H2 correlation is only 0.20, indicating that the two heads have learned
+                            nearly independent alignment strategies on this sentence.
+                        </p>
+                        <p><strong>Diversity and redundancy across heads:</strong></p>
+                        <p>
+                            The entropy analysis shows that Head 2 consistently has higher mean attention
+                            entropy than Head 1 across all four tested sentences. The largest gap occurs
+                            for "do you like music ?" (H1=0.17, H2=0.60), where Head 1 is extremely
+                            peaked (attending mostly to "like" and then collapsed on &lt;eos&gt;) while
+                            Head 2 distributes attention more broadly across content words. For the
+                            incorrect translation "do you like music ?" → "aimez-vous la la porte ?",
+                            both heads attend heavily to "like" for the first few output tokens and then
+                            degenerate. Head 1 collapses onto &lt;eos&gt; (1.00) for later tokens, and
+                            Head 2 becomes diffuse. This suggests the error arises from a representation
+                            collapse after generating "la", not from incorrect alignment per se.
+                        </p>
+                        <p>
+                            Overall, with h=2 there is meaningful functional diversity: Head 1 specialises
+                            in sharp, content-word alignment while Head 2 provides a softer, contextual
+                            complement. This division allows the combined model to access both focused and
+                            distributed source representations at each decoding step, which is the core
+                            benefit of multi-head attention in theory, though at this scale the
+                            BLEU improvement over single-head Bahdanau is marginal.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Part 3: Transformer -->
+            <section id="part3">
+                <div class="content-wrapper">
+                    <h2>Part 3: Transformer Architecture</h2>
+
+                    <div class="description">
+                        <h3>Overview</h3>
+                        <p>
+                            A full encoder-decoder Transformer model is implemented and trained on the
+                            English-French dataset from Project 2. The Transformer replaces recurrent
+                            layers entirely with multi-head self-attention and cross-attention, augmented
+                            by position-wise feed-forward networks and sinusoidal positional encodings.
+                            Both the encoder and decoder consist of stacked Transformer blocks following
+                            the architecture described in Vaswani et al. (2017).
+                        </p>
+                    </div>
+
+                    <!-- Task 1 -->
+                    <span class="task-label">Task 1 - Transformer Model</span>
+                    <h3>Task 1: Training Results and Architecture Comparison</h3>
+
+                    <div class="full-image">
+                        <img src="results_part3/task1_perplexity.png" alt="Part 3 Task 1 Perplexity">
+                        <div class="caption">Task 1 Transformer: Training &amp; Validation Perplexity</div>
+                    </div>
+
+                    <div class="full-image">
+                        <img src="results_part3/task1_bleu_comparison.png" alt="Part 3 Task 1 BLEU Comparison">
+                        <div class="caption">Task 1 BLEU Score Comparison Across Architectures</div>
+                    </div>
+
+                    <div class="full-image">
+                        <img src="results_part3/task1_cross_attn.png" alt="Part 3 Task 1 Cross-Attention">
+                        <div class="caption">Task 1 Transformer Cross-Attention Weights (Averaged Over Heads)</div>
+                    </div>
+
+                    <table class="results-table">
+                        <thead>
+                            <tr>
+                                <th>Architecture</th>
+                                <th>Best BLEU</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="best">
+                                <td>Seq2Seq + Bahdanau Attention (Part 1)</td>
+                                <td>0.6427</td>
+                                <td>Best overall; Config B (h=512)</td>
+                            </tr>
+                            <tr>
+                                <td>Seq2Seq + Multi-Head Attention (Part 2)</td>
+                                <td>0.6319</td>
+                                <td>Best at h=2 heads</td>
+                            </tr>
+                            <tr>
+                                <td>Transformer (Part 3)</td>
+                                <td>0.6179</td>
+                                <td>Full encoder-decoder Transformer</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="highlight">
+                        <p><strong>Training behaviour:</strong></p>
+                        <p>
+                            The Transformer's training perplexity drops steeply from approximately 125 at
+                            epoch 1 to near 2 by epoch 30.
+                            Validation perplexity falls from roughly 36 to approximately 3.5 over the same
+                            span, indicating a notably lower final validation perplexity than the recurrent models
+                            in Parts 1 and 2, which levelled off around 8-11. Despite this advantage in
+                            perplexity, the Transformer achieves a BLEU of 0.6179, the lowest of the three
+                            architectures evaluated.
+                        </p>
+                        <p><strong>Which model performs best and why?</strong></p>
+                        <p>
+                            The Bahdanau attention model (Part 1, Config B) achieves the highest BLEU
+                            (0.6427), followed by MHA Seq2Seq (0.6319) and then the Transformer (0.6179).
+                            The Transformer's relatively lower BLEU despite lower validation perplexity
+                            is a known phenomenon at small data scales. The Transformer is a
+                            parameter-heavy, data-hungry architecture: its self-attention layers and
+                            multiple stacked blocks require substantially more data to converge to
+                            well-generalised representations than GRU-based models. On only 13,500
+                            training pairs, the recurrent modelswhich incorporate strong sequential
+                            inductive biasesgeneralise more effectively to the fixed test sentences.
+                            The Transformer outperforms recurrent baselines at scale precisely because it can process all positions in parallel and
+                            model long-range dependencies without gradient degradation, but these
+                            advantages are could be largely irrelevant for short, simple sentences.
+                        </p>
+                        <p><strong>Cross-attention visualisation:</strong></p>
+                        <p>
+                            The averaged cross-attention heatmaps show broadly near-diagonal alignment
+                            patterns for correctly translated sentences. For "she likes coffee ." → "elle
+                            aime le café .", the model attends strongly to the correct source region for
+                            each output token. For longer or more complex sentences such as "do you like
+                            music ?" and "this is my brother .", the attention is somewhat more diffuse,
+                            consistent with the multi-head averaging smoothing out individual head
+                            specialisations.
+                        </p>
+                    </div>
+
+                    <!-- Task 2 -->
+                    <span class="task-label">Task 2 - Ablation Study</span>
+                    <h3>Task 2: AblationPositional Encoding and Self-Attention</h3>
+
+                    <div class="description">
+                        <p>
+                            Two ablated Transformer variants are trained and compared against the full model.
+                            The <strong>No Positional Encoding</strong> variant removes sinusoidal positional
+                            embeddings from both encoder and decoder inputs. The <strong>No Self-Attention</strong>
+                            variant disables the self-attention sublayers in both encoder and decoder blocks,
+                            leaving only the cross-attention and feed-forward sublayers.
+                        </p>
+                    </div>
+
+                    <div class="full-image">
+                        <img src="results_part3/task2_perplexity.png" alt="Part 3 Task 2 Ablation Perplexity">
+                        <div class="caption">Task 2 Ablation Study: Training &amp; Validation Perplexity</div>
+                    </div>
+
+                    <div class="full-image">
+                        <img src="results_part3/task2_bleu.png" alt="Part 3 Task 2 Ablation BLEU">
+                        <div class="caption">Task 2 Ablation Study: BLEU Scores</div>
+                    </div>
+
+                    <table class="results-table">
+                        <thead>
+                            <tr>
+                                <th>Variant</th>
+                                <th>BLEU Score</th>
+                                <th>Delta vs. Full</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Full Transformer</td>
+                                <td>0.6179</td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>No Positional Encoding</td>
+                                <td>0.5949</td>
+                                <td>−0.0230</td>
+                            </tr>
+                            <tr class="best">
+                                <td>No Self-Attention</td>
+                                <td>0.6596</td>
+                                <td>+0.0417</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="highlight">
+                        <p><strong>Effect of removing positional encoding:</strong></p>
+                        <p>
+                            Removing positional encodings causes a BLEU drop of 0.023 (from 0.6179 to
+                            0.5949), confirming that positional information is a meaningful contributor
+                            to translation quality. Without position embeddings, the encoder produces
+                            order-invariant representationsit sees the source sentence as a bag of
+                            tokens. For English-French translation of short sentences (≤20 tokens), word
+                            order is often the primary signal that disambiguates subject from object and
+                            governs verb agreement; losing this information degrades alignment and increases
+                            the rate of grammatically incorrect translations. Notably, the perplexity
+                            curves for the no-PE variant are nearly indistinguishable from the full model
+                            during training (as visible in the nearly overlapping curves), suggesting that
+                            the model compensates partially by overfitting translation patterns at the
+                            token levelbut this compensation does not transfer to held-out test BLEU.
+                        </p>
+                        <p><strong>Effect of removing self-attention:</strong></p>
+                        <p>
+                            Counterintuitively, disabling self-attention in both encoder and decoder
+                            yields the <em>highest</em> BLEU score of the three variants (0.6596), an
+                            improvement of +0.042 over the full Transformer. This surprising result
+                            has a plausible explanation at this data scale: self-attention layers are
+                            the most parameter-heavy component of each Transformer block, and on only
+                            13,500 training pairs they may contribute to overfitting rather than
+                            generalisation. Without self-attention, the model is reduced to a simpler
+                            cross-attention plus feed-forward architecturestructurally closer to
+                            the attention Seq2Seq models in Parts 1 and 2, which outperform the full
+                            Transformer on the same task. The training and validation perplexity curves
+                            for the no-self-attention variant are again nearly identical to the others,
+                            reinforcing that the difference manifests at inference time (BLEU) rather
+                            than in training dynamics. Architectural
+                            components that are critical at large scale (self-attention for in-context
+                            reasoning across long sequences) can be neutral or even harmful on small
+                            datasets where their additional parameters are not justified by the available
+                            training signal.
+                        </p>
+                        <p><strong>Summary of ablation findings:</strong></p>
+                        <ul>
+                            <li>
+                                Positional encoding is necessary for correct word-order modelling;
+                                its removal causes a measurable BLEU decrease of 0.023.
+                            </li>
+                            <li>
+                                Self-attention, while theoretically powerful, hurts performance on
+                                this small datasets. Its removal improves BLEU by 0.042, bringing
+                                the model in line with the recurrent baselines.
+                            </li>
+                            <li>
+                                Neither ablation produces observable training instability: all three
+                                perplexity curves converge smoothly and closely track each other
+                                throughout 30 epochs, with no divergence or loss spikes.
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; Stanford White IV 2026  Deep Learning Project 3 | Attention Mechanisms &amp; Transformers</p>
+            <p>Bahdanau Attention &bull; Multi-Head Attention &bull; Full Transformer Architecture</p>
+        </footer>
+    </div>
+
+    <script>
+        // Header hide/show on scroll
+        let lastScrollTop = 0;
+        const header = document.getElementById('header');
+        const scrollThreshold = 100;
+
+        window.addEventListener('scroll', function() {
+            let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+            if (scrollTop > scrollThreshold) {
+                if (scrollTop > lastScrollTop) {
+                    header.classList.add('hidden');
+                } else {
+                    header.classList.remove('hidden');
+                }
+            } else {
+                header.classList.remove('hidden');
+            }
+
+            lastScrollTop = scrollTop;
+        });
+    </script>
+</body>
+</html>

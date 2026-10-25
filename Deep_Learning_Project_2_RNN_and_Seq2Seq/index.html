@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deep Learning Project 2 - Recurrent Neural Networks</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #e0e0e0;
+            background: #2b2b2b;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: #3a3a3a;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Header and Navigation */
+        header {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            color: white;
+            padding: 1rem 0;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            max-width: 1400px;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        header.hidden {
+            transform: translateY(-100%);
+        }
+
+        header h1 {
+            text-align: center;
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        header h2 {
+            text-align: center;
+            font-size: 1rem;
+            font-weight: normal;
+            margin-top: 0.3rem;
+            opacity: 0.8;
+        }
+
+        nav {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            padding: 0 2rem;
+            margin-top: 0.5rem;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            font-size: 0.9rem;
+            border: 2px solid transparent;
+        }
+
+        nav a:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: white;
+            transform: translateY(-2px);
+        }
+
+        /* Main content padding to account for fixed header */
+        main {
+            padding-top: 140px;
+        }
+
+        /* Section Styling */
+        section {
+            padding: 4rem 2rem;
+            border-bottom: 3px solid #2b2b2b;
+        }
+
+        section:nth-child(even) {
+            background: #444;
+        }
+
+        section h2 {
+            font-size: 2.5rem;
+            color: #4a9eff;
+            margin-bottom: 1rem;
+            text-align: center;
+            position: relative;
+            padding-bottom: 1rem;
+        }
+
+        section h2:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(90deg, #4a9eff, #6ec1ff);
+            border-radius: 2px;
+        }
+
+        section h3 {
+            font-size: 1.8rem;
+            color: #6ec1ff;
+            margin: 2rem 0 1rem;
+        }
+
+        .content-wrapper {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Description Box */
+        .description {
+            background: rgba(74, 158, 255, 0.1);
+            padding: 2rem;
+            border-radius: 15px;
+            margin: 2rem 0;
+            border-left: 5px solid #4a9eff;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .description p {
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: #d0d0d0;
+        }
+
+        .description ul {
+            margin-left: 2rem;
+            margin-top: 1rem;
+        }
+
+        .description li {
+            margin-bottom: 0.5rem;
+            font-size: 1.05rem;
+            color: #d0d0d0;
+        }
+
+        /* Image Grid */
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .image-card {
+            background: #2b2b2b;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .image-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(74, 158, 255, 0.3);
+        }
+
+        .image-card img {
+            width: 100%;
+            max-height: 85vh;
+            height: auto;
+            display: block;
+            object-fit: contain;
+            image-rendering: crisp-edges;
+            image-rendering: -webkit-optimize-contrast;
+        }
+
+        .image-card .caption {
+            padding: 1rem;
+            text-align: center;
+            font-weight: 600;
+            color: #4a9eff;
+            background: #1a1a1a;
+        }
+
+        /* Full-width image */
+        .full-image {
+            margin: 2rem 0;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .full-image img {
+            width: 100%;
+            max-height: 85vh;
+            height: auto;
+            display: block;
+            object-fit: contain;
+            image-rendering: crisp-edges;
+            image-rendering: -webkit-optimize-contrast;
+        }
+
+        .full-image .caption {
+            padding: 1.5rem;
+            text-align: center;
+            font-weight: 600;
+            font-size: 1.2rem;
+            color: white;
+            background: linear-gradient(135deg, #4a9eff, #6ec1ff);
+        }
+
+        /* Comparison Grid */
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        @media (max-width: 768px) {
+            .comparison-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Results table */
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            font-size: 1rem;
+        }
+
+        .results-table th {
+            background: #4a9eff;
+            color: white;
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+
+        .results-table td {
+            padding: 0.65rem 1rem;
+            border-bottom: 1px solid #555;
+            color: #d0d0d0;
+        }
+
+        .results-table tr:nth-child(even) td {
+            background: rgba(74, 158, 255, 0.05);
+        }
+
+        .results-table tr.best td {
+            color: #6ec1ff;
+            font-weight: 600;
+        }
+
+        /* Footer */
+        footer {
+            background: #1a1a1a;
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            font-size: 0.9rem;
+        }
+
+        /* Smooth scroll */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Code/Math styling */
+        code {
+            background: #2b2b2b;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            color: #ff6b9d;
+        }
+
+        /* Highlight box */
+        .highlight {
+            background: rgba(74, 158, 255, 0.15);
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin: 1.5rem 0;
+            border-left: 5px solid #4a9eff;
+        }
+
+        .highlight strong {
+            color: #6ec1ff;
+        }
+
+        .highlight p {
+            color: #d0d0d0;
+        }
+
+        .highlight ul {
+            margin-left: 1.5rem;
+            color: #d0d0d0;
+            margin-top: 0.5rem;
+        }
+
+        .highlight li {
+            margin-bottom: 0.4rem;
+        }
+
+        /* Method box styling */
+        .method-box {
+            background: rgba(110, 193, 255, 0.08);
+            padding: 2rem;
+            border-radius: 15px;
+            margin: 2rem 0;
+            border: 2px solid rgba(74, 158, 255, 0.3);
+        }
+
+        .method-box h4 {
+            color: #4a9eff;
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+        }
+
+        .method-box p {
+            color: #d0d0d0;
+            margin-bottom: 0.8rem;
+        }
+
+        .method-box ul, .method-box ol {
+            margin-left: 1.5rem;
+            color: #d0d0d0;
+        }
+
+        .method-box li {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Task label */
+        .task-label {
+            display: inline-block;
+            background: #4a9eff;
+            color: white;
+            padding: 0.3rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            letter-spacing: 0.5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header id="header">
+            <h1>Deep Learning Project 2</h1>
+            <h2>Recurrent Neural Networks: RNN, GRU & Seq2Seq</h2>
+            <nav>
+                <a href="#part1">Part 1: Basic RNNs</a>
+                <a href="#part2">Part 2: GRU</a>
+                <a href="#part3">Part 3: Seq2Seq</a>
+            </nav>
+        </header>
+
+        <main>
+            <!-- Part 1: Basic RNNs -->
+            <section id="part1">
+                <div class="content-wrapper">
+                    <h2>Part 1: Basic RNNs</h2>
+
+                    <div class="description">
+                        <h3>Overview</h3>
+                        <p>
+                            A basic Recurrent Neural Network (RNN) is implemented from scratch and trained on
+                            <em>The Time Machine</em> by H.G. Wells using character-level tokenization.
+                            The model uses a single hidden layer with tanh activations and is trained with
+                            truncated backpropagation through time (BPTT). Gradient clipping is applied by
+                            default to stabilize training.
+                        </p>
+                        <p>
+                            <strong>Dataset:</strong> 188,564 characters, 27 unique tokens (26 lowercase letters + space),
+                            split 90/10 into train / validation sets.
+                        </p>
+                        <p>
+                            <strong>Tokenization:</strong> Character-level, consistent with D2L Section 9.2.
+                            Each character maps to an integer index; sequences are formed via a sliding window
+                            of <code>num_steps</code> characters.
+                        </p>
+                    </div>
+
+                    <!-- Task 1 -->
+                    <span class="task-label">Task 1 - Hyperparameter Tuning</span>
+                    <h3>Task 1: Optimising RNN Performance</h3>
+
+                    <div class="description">
+                        <p>
+                            Four configurations were sampled via random search over the hyperparameter space and
+                            trained to minimise validation perplexity. The search space covered:
+                        </p>
+                        <ul>
+                            <li><strong>Hidden units:</strong> {128, 192, 256, 384, 512}</li>
+                            <li><strong>Num steps (BPTT window):</strong> {20, 35, 50, 64}</li>
+                            <li><strong>Learning rate:</strong> {0.01, 0.1, 0.2, 0.5, 1.0}</li>
+                            <li><strong>Batch size:</strong> {16, 32, 64}</li>
+                            <li><strong>Epochs:</strong> {20, 30, 40, 50}</li>
+                        </ul>
+                    </div>
+
+                    <div class="full-image">
+                        <img src="results/rnn_task1_random_search.png" alt="RNN Task 1 Random Search Overview">
+                        <div class="caption">Task 1 - Random Search: All Configurations Ranked by Best Validation Perplexity</div>
+                    </div>
+
+                    <div class="full-image">
+                        <img src="results/rnn_task1_hyperparameter_tuning.png" alt="RNN Task 1 Perplexity Curves">
+                        <div class="caption">Task 1 - Training &amp; Validation Perplexity Curves for Top 4 Configurations</div>
+                    </div>
+
+                    <div class="full-image">
+                        <img src="results/rnn_task1_summary.png" alt="RNN Task 1 Summary">
+                        <div class="caption">Task 1 - Summary: Best Validation Perplexity Comparison</div>
+                    </div>
+
+                    <table class="results-table">
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Config</th>
+                                <th>Best Val PPX</th>
+                                <th>Final Train PPX</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="best">
+                                <td>#1</td>
+                                <td>h=128, steps=20, lr=0.2, bs=16, ep=30</td>
+                                <td>8.70</td>
+                                <td>5.33</td>
+                            </tr>
+                            <tr>
+                                <td>#2</td>
+                                <td>h=512, steps=20, lr=1.0, bs=16, ep=50</td>
+                                <td>9.17</td>
+                                <td>5.71</td>
+                            </tr>
+                            <tr>
+                                <td>#3</td>
+                                <td>h=192, steps=20, lr=1.0, bs=16, ep=50</td>
+                                <td>9.30</td>
+                                <td>5.97</td>
+                            </tr>
+                            <tr>
+                                <td>#4</td>
+                                <td>h=128, steps=20, lr=0.01, bs=16, ep=30</td>
+                                <td>13.25</td>
+                                <td>11.13</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="highlight">
+                        <p><strong>Key Findings:</strong></p>
+                        <ul>
+                            <li>
+                                <strong>Config #1</strong> (h=128, lr=0.2) achieves the best validation perplexity
+                                of <strong>8.70</strong> with a small hidden size and moderate learning rate.
+                                The lower hidden dimensionality reduces overfitting relative to the larger models.
+                            </li>
+                            <li>
+                                <strong>Config #2</strong> (h=512, lr=1.0) reaches a slightly higher val PPX of 9.17
+                                despite its greater capacity. The high learning rate enables fast initial convergence
+                                but introduces more variance across epochs.
+                            </li>
+                            <li>
+                                <strong>Config #4</strong> (lr=0.01) is the worst performer: the very low learning
+                                rate causes slow convergence, and the model fails to reach a competitive perplexity
+                                within 30 epochs. This underlines how sensitive RNN training is to the learning rate.
+                            </li>
+                            <li>
+                                Across all configs, train perplexity falls well below validation perplexity,
+                                indicating mild overfitting - expected for a small character-level RNN trained on
+                                a single book.
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Task 2 -->
+                    <span class="task-label">Task 2 - Gradient Clipping &amp; Activation Functions</span>
+                    <h3>Task 2: Gradient Clipping and Activation Functions</h3>
+
+                    <div class="description">
+                        <p>
+                            This task investigates two orthogonal design choices: (1) whether to apply gradient clipping,
+                            and (2) which activation function to use. Four combinations are trained and compared:
+                        </p>
+                        <ul>
+                            <li><strong>[A]</strong> tanh + gradient clipping (default)</li>
+                            <li><strong>[B]</strong> tanh - no gradient clipping</li>
+                            <li><strong>[C]</strong> ReLU - no gradient clipping</li>
+                            <li><strong>[D]</strong> ReLU + gradient clipping</li>
+                        </ul>
+                        <p>All four variants use the best hyperparameters from Task 1 (h=128, lr=0.2, bs=16, ep=30).</p>
+                    </div>
+
+                    <div class="full-image">
+                        <img src="results/rnn_task2_clipping_activation.png" alt="RNN Task 2 Per-variant Perplexity">
+                        <div class="caption">Task 2 - Per-Variant Training &amp; Validation Perplexity: All Four Combinations</div>
+                    </div>
+
+                    <div class="full-image">
+                        <img src="results/rnn_task2_overlay.png" alt="RNN Task 2 Overlay Comparison">
+                        <div class="caption">Task 2 - Overlay Comparison Across All Variants</div>
+                    </div>
+
+                    <div class="highlight">
+                        <p><strong>tanh without gradient clipping [B]:</strong></p>
+                        <p>
+                            On this dataset and configuration, removing gradient clipping from the tanh model
+                            does not produce a strongly noticeable difference in perplexity. This is expected:
+                            tanh is a saturating activation whose derivative is bounded in [0, 1], so the
+                            effective gradient magnitudes stay controlled even without an explicit clipping
+                            threshold. In practice, gradient clipping is still the recommended default for
+                            tanh RNNs - it provides a cheap safety net - but the results here suggest that
+                            for short BPTT windows and small hidden sizes, tanh alone is sufficient to keep
+                            training stable.
+                        </p>
+                        <p><strong>ReLU without gradient clipping [C]:</strong></p>
+                        <p>
+                            Interestingly, divergence was not observed on this particular dataset and configuration,
+                            even without clipping. However, this should not be interpreted as evidence that
+                            clipping is unnecessary for ReLU. ReLU's gradient is exactly 1 for all positive
+                            inputs and 0 otherwise - it does not saturate, so gradient magnitudes can grow
+                            unboundedly with sequence length or hidden size. The fact that training remained
+                            stable here is likely attributable to the short BPTT window (20 steps), the small
+                            hidden dimension, and the well-conditioned character-level data. In larger models
+                            or with longer sequences, the same configuration would be expected to diverge.
+                            Gradient clipping remains <em>strongly recommended</em> for ReLU RNNs to guard
+                            against this risk.
+                        </p>
+                        <p><strong>ReLU + gradient clipping [D]:</strong></p>
+                        <p>
+                            Adding clipping to ReLU does not cause a dramatic change relative to [C] in this
+                            experiment, which is consistent with the observation that gradients were not
+                            exploding in the first place. Performance across all four variants is broadly
+                            similar on this small dataset. The key takeaway is not that gradient clipping
+                            is unnecessary, but rather that the effects are dataset- and architecture-dependent:
+                            the conditions here (short sequences, small hidden size, character-level vocab)
+                            are relatively forgiving. Gradient clipping is still the safer and more general
+                            choice, particularly for ReLU, where the risk of explosion is inherent to the
+                            architecture.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Part 2: GRU -->
+            <section id="part2">
+                <div class="content-wrapper">
+                    <h2>Part 2: GRU</h2>
+
+                    <div class="description">
+                        <h3>Overview</h3>
+                        <p>
+                            Gated Recurrent Units (GRU) are implemented from scratch and trained on the same
+                            <em>Time Machine</em> dataset. GRUs address the vanishing gradient problem of vanilla
+                            RNNs by introducing two learned gates:
+                        </p>
+                        <ul>
+                            <li>
+                                <strong>Reset gate</strong> <code>r_t</code>: controls how much of the previous
+                                hidden state to forget when computing the candidate state.
+                            </li>
+                            <li>
+                                <strong>Update gate</strong> <code>z_t</code>: interpolates between the previous
+                                hidden state and the candidate, deciding how much to update the memory.
+                            </li>
+                        </ul>
+                        <p>
+                            Together, these gates allow the GRU to selectively retain long-range dependencies
+                            and reset irrelevant context, resulting in substantially better performance than
+                            a vanilla RNN on the same task.
+                        </p>
+                    </div>
+
+                    <!-- Task 1 -->
+                    <span class="task-label">Task 1 - Hyperparameter Tuning</span>
+                    <h3>Task 1: GRU Hyperparameter Tuning</h3>
+
+                    <div class="description">
+                        <p>
+                            Four GRU configurations were evaluated via the same random search procedure as
+                            Part 1. The same hyperparameter space was used to allow fair comparison between
+                            the RNN and GRU architectures.
+                        </p>
+                    </div>
+
+                    <div class="full-image">
+                        <img src="results/gru_task1_random_search.png" alt="GRU Task 1 Random Search Overview">
+                        <div class="caption">Task 1 - GRU Random Search: All Configurations Ranked by Best Validation Perplexity</div>
+                    </div>
+
+                    <div class="full-image">
+                        <img src="results/gru_task1_hyperparams.png" alt="GRU Task 1 Perplexity Curves">
+                        <div class="caption">Task 1 - GRU Training &amp; Validation Perplexity Curves for Top 4 Configurations</div>
+                    </div>
+
+                    <div class="highlight">
+                        <p><strong>GRU vs. RNN:</strong></p>
+                        <ul>
+                            <li>
+                                The GRU consistently achieves <strong>lower perplexity than the vanilla RNN</strong>
+                                across matched configurations. The best GRU configuration (h=128, lr=0.2, bs=16, ep=30)
+                                reaches a best validation perplexity of <strong>8.61</strong>, compared to 8.70 for
+                                the equivalent RNN - a modest but consistent improvement.
+                            </li>
+                            <li>
+                                GRU convergence is noticeably smoother: the gating mechanism prevents the gradient
+                                spikes seen in the vanilla RNN, meaning the GRU benefits less from gradient clipping
+                                but still uses it for robustness.
+                            </li>
+                            <li>
+                                At higher hidden dimensions (h=512), the GRU's capacity advantage is more apparent -
+                                the gates allow the larger model to effectively use its extra parameters rather than
+                                simply overfitting.
+                            </li>
+                            <li>
+                                Training is slightly slower per epoch (due to the additional gate computations),
+                                but the improved sample efficiency means competitive perplexity is reached in
+                                fewer epochs.
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Task 2 -->
+                    <span class="task-label">Task 2 - Gate Ablation Study</span>
+                    <h3>Task 2: Ablation Study on GRU Gates</h3>
+
+                    <div class="description">
+                        <p>
+                            To understand each gate's contribution, two ablated variants are trained alongside
+                            the full GRU:
+                        </p>
+                        <ul>
+                            <li>
+                                <strong>Reset-gate only:</strong> The update gate is fixed to <code>z_t = 0</code>,
+                                so the model always fully replaces the hidden state with the candidate.
+                                This forces the model to use only the reset gate for gating.
+                            </li>
+                            <li>
+                                <strong>Update-gate only:</strong> The reset gate is fixed to <code>r_t = 1</code>,
+                                meaning the full previous hidden state is always passed into the candidate computation.
+                                Only the update gate controls memory retention.
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="full-image">
+                        <img src="results/gru_task2_ablation.png" alt="GRU Task 2 Ablation Perplexity Curves">
+                        <div class="caption">Task 2 - Gate Ablation: Perplexity Curves for Full GRU vs. Each Single-Gate Variant</div>
+                    </div>
+
+                    <div class="full-image">
+                        <img src="results/gru_task2_ablation_summary.png" alt="GRU Task 2 Ablation Summary">
+                        <div class="caption">Task 2 - Ablation Summary: Best Validation Perplexity by Variant</div>
+                    </div>
+
+                    <div class="highlight">
+                        <p><strong>Overall observation:</strong></p>
+                        <p>
+                            Notably, the full GRU does not achieve the best validation perplexity in this
+                            experiment - one of the ablated single-gate variants performs comparably or better.
+                            This is a meaningful result: it illustrates that architectural complexity does not
+                            always translate into better generalisation, particularly on small datasets and
+                            short-context tasks. The full GRU has more learnable parameters (both gate weight
+                            matrices) than either ablated variant, and on a corpus as small as <em>The Time
+                            Machine</em> with a 35-step BPTT window, this extra capacity can lead to mild
+                            overfitting or slower convergence rather than improved performance.
+                        </p>
+                        <p><strong>Reset-gate only:</strong></p>
+                        <p>
+                            Fixing the update gate to <code>Z=0</code> means the hidden state is fully replaced
+                            by the candidate at every step - there is no learned interpolation between old and
+                            new memory. Despite this constraint, the model performs competitively here. On a
+                            short, stylistically homogeneous corpus with a limited BPTT window, the update
+                            gate's interpolation mechanism provides diminishing returns: dependencies longer
+                            than the BPTT horizon cannot be captured regardless, so the ability to selectively
+                            preserve state across many steps is less important than in longer-context settings.
+                            The reset gate alone is sufficient to modulate how much of the previous state enters
+                            the candidate, giving the model meaningful recurrence without the full gating overhead.
+                        </p>
+                        <p><strong>Update-gate only:</strong></p>
+                        <p>
+                            Fixing the reset gate to <code>R=1</code> means the full previous hidden state
+                            always feeds into the candidate computation. The update gate still controls how
+                            much of the candidate actually replaces the hidden state, providing some temporal
+                            stability. On this small, single-domain corpus, the hidden state rarely accumulates
+                            the kind of stale, misleading context that the reset gate is designed to suppress -
+                            character-level patterns are repetitive enough that the full past state is rarely
+                            harmful. A more diverse dataset or longer sequences would be expected to reveal
+                            a larger gap between this variant and the full GRU.
+                        </p>
+                        <p><strong>Full GRU:</strong></p>
+                        <p>
+                            Despite being the theoretically most expressive variant, the full GRU does not
+                            outperform the single-gate ablations on this task. The additional gate introduces
+                            more parameters to optimise, and on a small corpus the resulting solution may
+                            overfit slightly more or require more training to reach the same generalisation.
+                            This result should not be interpreted as evidence that one of the gates is
+                            unnecessary in general: on larger datasets, longer BPTT windows, or tasks with
+                            rich long-range structure (e.g. sentence-level language modelling or machine
+                            translation), both gates are expected to contribute meaningfully and the full GRU
+                            to clearly outperform either ablation.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Part 3: Seq2Seq -->
+            <section id="part3">
+                <div class="content-wrapper">
+                    <h2>Part 3: Seq2Seq Machine Translation</h2>
+
+                    <div class="description">
+                        <h3>Overview</h3>
+                        <p>
+                            A Sequence-to-Sequence (Seq2Seq) model is implemented for
+                            English-to-French machine translation using the fra-eng dataset. The architecture
+                            consists of a GRU encoder that compresses the source sentence into a context vector,
+                            and a GRU decoder that autoregressively generates the target sentence conditioned
+                            on that context.
+                        </p>
+                        <p>
+                            <strong>Dataset:</strong> First 15,000 English–French pairs from fra.txt
+                            (tab-separated, preprocessed to lowercase with punctuation space-separated).
+                            Split 90/10 into 13,500 training and 1,500 validation pairs.
+                            <code>SRC_MAX_LEN = TGT_MAX_LEN = 20</code> tokens.
+                        </p>
+                        <p>
+                            <strong>Vocabulary:</strong> Built with <code>min_freq=2</code>; special tokens
+                            <code>&lt;pad&gt;=0</code>, <code>&lt;bos&gt;=1</code>, <code>&lt;eos&gt;=2</code>,
+                            <code>&lt;unk&gt;=3</code>.
+                            Source vocab: 2,040 tokens; target vocab: 3,148 tokens.
+                        </p>
+                        <p>
+                            <strong>Evaluation metric:</strong> Sentence-level BLEU using the D2L formula
+                            (Sec. 10.7) with exponentially decreasing weights
+                            (1-gram: 1/2, 2-gram: 1/4, 3-gram: 1/8, 4-gram: 1/16) and Chen &amp; Cherry
+                            smoothing for zero-count higher-order n-grams.
+                        </p>
+                    </div>
+
+                    <!-- Task 1 -->
+                    <span class="task-label">Task 1 - Hyperparameter Tuning</span>
+                    <h3>Task 1: Hyperparameter Tuning and BLEU Evaluation</h3>
+
+                    <div class="description">
+                        <p>
+                            Four Seq2Seq configurations were sampled via random search and evaluated on the fixed
+                            test set (20 English–French sentence pairs). The search space covered embedding
+                            dimension, hidden dimension, number of GRU layers, dropout rate, learning rate,
+                            batch size, and number of epochs.
+                        </p>
+                    </div>
+
+                    <div class="full-image">
+                        <img src="results/seq2seq_task1_random_search.png" alt="Seq2Seq Task 1 Random Search">
+                        <div class="caption">Task 1 - Random Search: BLEU and Validation Perplexity for All 4 Configurations</div>
+                    </div>
+
+                    <div class="full-image">
+                        <img src="results/seq2seq_task1_perplexity.png" alt="Seq2Seq Task 1 Perplexity Curves">
+                        <div class="caption">Task 1 - Training &amp; Validation Perplexity Curves for Top 4 Configurations</div>
+                    </div>
+
+                    <div class="full-image">
+                        <img src="results/seq2seq_task1_bleu.png" alt="Seq2Seq Task 1 BLEU Scores">
+                        <div class="caption">Task 1 - BLEU Scores by Configuration</div>
+                    </div>
+
+                    <div class="full-image">
+                        <img src="results/seq2seq_task1_translations.png" alt="Seq2Seq Task 1 Translation Examples">
+                        <div class="caption">Task 1 - Translation Examples: Best Configuration</div>
+                    </div>
+
+                    <table class="results-table">
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Config</th>
+                                <th>BLEU</th>
+                                <th>Final Val PPL</th>
+                                <th>Final Train PPL</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="best">
+                                <td>#1</td>
+                                <td>e=256, h=512, l=1, d=0.3, lr=1e-3, bs=32, ep=30</td>
+                                <td>0.6059</td>
+                                <td>10.6</td>
+                                <td>1.34</td>
+                            </tr>
+                            <tr>
+                                <td>#2</td>
+                                <td>e=64, h=512, l=1, d=0.1, lr=1e-4, bs=32, ep=40</td>
+                                <td>0.3961</td>
+                                <td>11.1</td>
+                                <td>3.89</td>
+                            </tr>
+                            <tr>
+                                <td>#3</td>
+                                <td>e=64, h=128, l=2, d=0.2, lr=3e-4, bs=32, ep=40</td>
+                                <td>0.3904</td>
+                                <td>12.8</td>
+                                <td>5.61</td>
+                            </tr>
+                            <tr>
+                                <td>#4</td>
+                                <td>e=256, h=128, l=1, d=0.2, lr=5e-4, bs=32, ep=20</td>
+                                <td>0.3603</td>
+                                <td>12.0</td>
+                                <td>4.33</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="highlight">
+                        <p><strong>Key Findings:</strong></p>
+                        <ul>
+                            <li>
+                                <strong>Config #1</strong> (e=256, h=512, d=0.3, lr=1e-3) achieves the highest
+                                BLEU of <strong>0.6059</strong>. The large hidden dimension (512) gives the
+                                decoder sufficient capacity to model French syntax, and the relatively high
+                                learning rate combined with 30 epochs ensures the model converges to a good
+                                solution. Dropout 0.3 prevents the large model from memorising training pairs.
+                            </li>
+                            <li>
+                                <strong>Config #2</strong> uses the same hidden size (h=512) but a much lower
+                                learning rate (1e-4) and smaller embedding (64). Despite training for 40 epochs,
+                                the low learning rate means convergence is slower, leading to lower BLEU (0.3961).
+                                The train perplexity of 3.89 (vs. 1.34 for #1) confirms under-convergence.
+                            </li>
+                            <li>
+                                <strong>Config #3</strong> uses 2 GRU layers, which is the only multi-layer
+                                configuration. The additional capacity is partially offset by the small embedding
+                                and hidden dim (64/128), resulting in moderate BLEU (0.3904).
+                            </li>
+                            <li>
+                                Short, frequent sentences (e.g., <em>"go ."</em>, <em>"i lost ."</em>) score
+                                perfect BLEU=1.0, while longer, rarer phrases score lower - a known characteristic
+                                of sentence-level BLEU with small training sets.
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Task 2 -->
+                    <span class="task-label">Task 2 - Masked vs. Unmasked Loss</span>
+                    <h3>Task 2: Role of Masking in Loss Calculation</h3>
+
+                    <div class="description">
+                        <p>
+                            Target sequences are padded to <code>TGT_MAX_LEN=20</code> tokens with a
+                            <code>&lt;pad&gt;</code> index. The masked cross-entropy loss excludes padding
+                            positions from the gradient computation; the unmasked variant includes all positions.
+                            Both models use the best configuration from Task 1 (e=256, h=512, l=1, d=0.3,
+                            lr=1e-3, bs=32, ep=30).
+                        </p>
+                    </div>
+
+                    <div class="full-image">
+                        <img src="results/seq2seq_task2_perplexity.png" alt="Seq2Seq Task 2 Perplexity Comparison">
+                        <div class="caption">Task 2 - Training &amp; Validation Perplexity: Masked vs. Unmasked Loss</div>
+                    </div>
+
+                    <div class="full-image">
+                        <img src="results/seq2seq_task2_raw_loss.png" alt="Seq2Seq Task 2 Raw Loss Curves">
+                        <div class="caption">Task 2 - Raw Loss Curves: Masked vs. Unmasked Loss</div>
+                    </div>
+
+                    <div class="full-image">
+                        <img src="results/seq2seq_task2_translation_comparison.png" alt="Seq2Seq Task 2 Translation Comparison">
+                        <div class="caption">Task 2 - Side-by-Side Translation Comparison: Masked vs. Unmasked</div>
+                    </div>
+
+                    <table class="results-table">
+                        <thead>
+                            <tr>
+                                <th>Model</th>
+                                <th>BLEU</th>
+                                <th>Delta</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="best">
+                                <td>Masked cross-entropy (correct)</td>
+                                <td>0.6671</td>
+                                <td>-</td>
+                            </tr>
+                            <tr>
+                                <td>Unmasked cross-entropy (padding included)</td>
+                                <td>0.6365</td>
+                                <td>−0.0306</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="highlight">
+                        <p><strong>How does the final BLEU score differ?</strong></p>
+                        <p>
+                            The masked model achieves BLEU = <strong>0.6671</strong> versus <strong>0.6365</strong>
+                            for the unmasked model - a difference of +0.0306 in favour of masking. While the absolute
+                            gap may appear modest, it is consistent: masking reliably improves translation quality
+                            across all sentence lengths tested.
+                        </p>
+                        <p><strong>Slower convergence or higher perplexity?</strong></p>
+                        <p>
+                            The unmasked model's reported training loss appears numerically <em>lower</em> than
+                            the masked model's, but this is deceptive. Padding positions are trivially easy to
+                            predict - once the model learns to output <code>&lt;pad&gt;</code> after <code>&lt;eos&gt;</code>,
+                            those positions contribute near-zero loss. The average loss is therefore diluted by
+                            easy predictions. When perplexity is computed only over meaningful tokens (as it is
+                            for the masked model), the unmasked model is worse - it spends gradient budget
+                            reinforcing pad-token prediction rather than learning French translation patterns.
+                        </p>
+                        <p><strong>Why does the model struggle without masks?</strong></p>
+                        <p>
+                            Without masking, each training step distributes gradient signal across both real
+                            tokens and padding tokens. For a short sentence like <em>"va !"</em> (3 tokens +
+                            &lt;eos&gt;), 16 out of 20 positions are padding. The model receives 80% of its
+                            gradient from positions that carry no meaningful translation signal. This dilution
+                            slows the effective learning rate on real tokens and encourages the model to allocate
+                            representation capacity to pad-prediction - a task that is structurally trivial but
+                            numerically dominant in the loss. Masking ensures <em>every</em> gradient step
+                            focuses exclusively on the translation objective, producing a better-calibrated
+                            model and higher BLEU.
+                        </p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; Stanford White IV 2026 &mdash; Deep Learning Project 2 | Recurrent Neural Networks</p>
+            <p>Basic RNN &bull; Gated Recurrent Units (GRU) &bull; Seq2Seq Machine Translation</p>
+        </footer>
+    </div>
+
+    <script>
+        // Header hide/show on scroll
+        let lastScrollTop = 0;
+        const header = document.getElementById('header');
+        const scrollThreshold = 100;
+
+        window.addEventListener('scroll', function() {
+            let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+            if (scrollTop > scrollThreshold) {
+                if (scrollTop > lastScrollTop) {
+                    header.classList.add('hidden');
+                } else {
+                    header.classList.remove('hidden');
+                }
+            } else {
+                header.classList.remove('hidden');
+            }
+
+            lastScrollTop = scrollTop;
+        });
+    </script>
+</body>
+</html>

@@ -526,6 +526,26 @@ h2.display em { font-style: italic; color: var(--accent); }
 .showcase-dots button:hover::before { background: rgba(255, 255, 255, 0.7); }
 .showcase-dots button.on::before { background: #fff; }
 
+.showcase-place {
+    position: absolute;
+    right: 2rem;
+    bottom: 4.35rem;
+    max-width: 40%;
+    text-align: right;
+    font-size: 0.8rem;
+    letter-spacing: 0.06em;
+    color: rgba(255, 255, 255, 0.8);
+    opacity: 0;
+    transition: opacity 0.8s;
+}
+
+.showcase-place::before { content: "\25CF"; font-size: 0.5rem; vertical-align: middle; margin-right: 0.6rem; color: #a9e0da; }
+.showcase-place.on { opacity: 1; }
+
+@media (max-width: 720px) {
+    .showcase-place { position: static; max-width: none; text-align: left; margin-top: 0.75rem; }
+}
+
 /* Lightbox */
 .lightbox {
     position: fixed;
@@ -553,8 +573,9 @@ h2.display em { font-style: italic; color: var(--accent); }
     left: 0;
     right: 0;
     text-align: center;
-    color: rgba(255, 255, 255, 0.7);
-    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.75);
+    font-size: 0.9rem;
+    letter-spacing: 0.04em;
 }
 
 .lightbox button {

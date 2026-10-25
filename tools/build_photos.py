@@ -35,7 +35,7 @@ FONT_CANDIDATES = [
 SIZES = {"full": 2400, "thumb": 900}
 QUALITY = {"full": 84, "thumb": 80}
 
-# Optional per-photo captions / ordering. Photos not listed here are appended
+# Optional per-photo captions, locations and ordering. Photos not listed here are appended
 # in file-name order. Set "featured": True to show a photo on the landing page.
 CAPTIONS_FILE = ROOT / "tools" / "photo_captions.json"
 
@@ -97,6 +97,7 @@ def main():
             "w": full_w,
             "h": full_h,
             "caption": meta.get("caption", ""),
+            "location": meta.get("location", ""),
             "featured": bool(meta.get("featured", False)),
         })
         print(f"{path.name} -> {name} ({full_w}x{full_h})")

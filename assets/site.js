@@ -36,21 +36,28 @@
     var showcase = document.querySelector('.showcase');
     if (showcase && window.PHOTOS) {
         var sBase = showcase.dataset.base || '';
-        var slides = PHOTOS.filter(function (p) { return p.featured; }).map(function (p) {
+        var featured = PHOTOS.filter(function (p) { return p.featured; });
+        var slides = featured.map(function (p) {
             var s = document.createElement('div');
             s.style.backgroundImage = "url('" + sBase + 'full/' + p.file + "')";
             showcase.querySelector('.showcase-slides').appendChild(s);
             return s;
         });
         var dots = showcase.querySelector('.showcase-dots');
+        var place = showcase.querySelector('.showcase-place');
         var idx = 0, timer;
         var still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+        function label() {
+            place.textContent = featured[idx].location || '';
+            place.classList.toggle('on', !!featured[idx].location);
+        }
         function go(i) {
             slides[idx].classList.remove('on');
             dots.children[idx].classList.remove('on');
             idx = (i + slides.length) % slides.length;
             slides[idx].classList.add('on');
             dots.children[idx].classList.add('on');
+            label();
         }
         function play() { clearInterval(timer); if (!still) timer = setInterval(function () { go(idx + 1); }, 7000); }
         slides.forEach(function (_, i) {
@@ -62,6 +69,7 @@
         if (slides.length) {
             slides[0].classList.add('on');
             dots.children[0].classList.add('on');
+            label();
             play();
         }
     }
@@ -75,6 +83,8 @@
         ? PHOTOS.filter(function (p) { return p.featured; })
         : PHOTOS;
 
+    function describe(p) { return [p.caption, p.location].filter(Boolean).join(' · '); }
+
     photos.forEach(function (p, i) {
         var fig = document.createElement('figure');
         var img = document.createElement('img');
@@ -83,12 +93,12 @@
         img.height = p.h;
         img.loading = 'lazy';
         img.decoding = 'async';
-        img.alt = p.caption || 'Photograph by Stanford White IV';
+        img.alt = describe(p) || 'Photograph by Stanford White IV';
         img.onload = function () { img.classList.add('loaded'); };
         fig.appendChild(img);
-        if (p.caption) {
+        if (describe(p)) {
             var cap = document.createElement('figcaption');
-            cap.textContent = p.caption;
+            cap.textContent = describe(p);
             fig.appendChild(cap);
         }
         fig.addEventListener('click', function () { open(i); });
@@ -118,8 +128,8 @@
         current = (i + photos.length) % photos.length;
         var p = photos[current];
         lbImg.src = base + 'full/' + p.file;
-        lbImg.alt = p.caption || 'Photograph by Stanford White IV';
-        lbCap.textContent = p.caption || '';
+        lbImg.alt = describe(p) || 'Photograph by Stanford White IV';
+        lbCap.textContent = describe(p);
     }
 
     function open(i) { show(i); lb.classList.add('open'); document.body.style.overflow = 'hidden'; }

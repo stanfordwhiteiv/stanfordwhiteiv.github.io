@@ -5,237 +5,271 @@ window.PHOTOS = [
   "w": 2400,
   "h": 1350,
   "caption": "",
-  "featured": true
+  "featured": true,
+  "location": "Hidden Lake, Glacier National Park"
  },
  {
   "file": "dsc06621.jpg",
   "w": 2400,
   "h": 1350,
   "caption": "",
-  "featured": true
+  "featured": true,
+  "location": "Downtown Singapore"
  },
  {
   "file": "dsc03348.jpg",
   "w": 2400,
   "h": 1600,
   "caption": "",
-  "featured": true
+  "featured": true,
+  "location": "Theodore Roosevelt National Park, North Dakota"
  },
  {
   "file": "dsc05628-pano.jpg",
   "w": 2400,
   "h": 1028,
   "caption": "",
-  "featured": true
+  "featured": true,
+  "location": "The Loch, Rocky Mountain National Park"
  },
  {
   "file": "dsc07557-hdr-pano.jpg",
   "w": 2400,
   "h": 1146,
   "caption": "",
-  "featured": true
+  "featured": true,
+  "location": "Sunrise Point, Bryce Canyon National Park"
  },
  {
   "file": "dsc03248-2.jpg",
   "w": 2400,
   "h": 1600,
   "caption": "",
-  "featured": true
+  "featured": true,
+  "location": "Buffalo National River, Arkansas"
  },
  {
   "file": "dsc06794.jpg",
   "w": 2400,
   "h": 1350,
   "caption": "",
-  "featured": true
+  "featured": true,
+  "location": "Marina Bay Sands, Singapore"
  },
  {
   "file": "dsc03926-hdr-pano.jpg",
   "w": 2400,
   "h": 808,
   "caption": "",
-  "featured": true
+  "featured": true,
+  "location": "Big South Fork River, Tennessee"
  },
  {
   "file": "dsc00650.jpg",
   "w": 2400,
   "h": 1350,
   "caption": "",
-  "featured": false
+  "featured": false,
+  "location": "Spirit Island, Jasper National Park"
  },
  {
   "file": "dsc03863.jpg",
   "w": 2400,
   "h": 2400,
   "caption": "",
-  "featured": false
+  "featured": false,
+  "location": "Blue Whale, Channel Islands National Park"
  },
  {
   "file": "dsc03535-edit-2.jpg",
   "w": 1601,
   "h": 2400,
   "caption": "",
-  "featured": false
+  "featured": false,
+  "location": "Joshua Tree National Park"
  },
  {
   "file": "dsc4443.jpg",
   "w": 2400,
   "h": 2400,
   "caption": "",
-  "featured": false
+  "featured": false,
+  "location": "Yellowstone National Park"
  },
  {
   "file": "dsc00509.jpg",
   "w": 1800,
   "h": 2400,
   "caption": "",
-  "featured": false
+  "featured": false,
+  "location": "Lake Louise, Banff National Park"
  },
  {
   "file": "dsc01164.jpg",
   "w": 1600,
   "h": 2400,
   "caption": "",
-  "featured": false
+  "featured": false,
+  "location": "Lake Louise, Banff National Park"
  },
  {
   "file": "dsc02376.jpg",
   "w": 2019,
   "h": 1346,
   "caption": "",
-  "featured": false
+  "featured": false,
+  "location": "Total Solar Eclipse, Buffalo National River"
  },
  {
   "file": "dsc00436.jpg",
   "w": 1600,
   "h": 2400,
   "caption": "",
-  "featured": false
+  "featured": false,
+  "location": "Chief Mountain, Glacier National Park"
  },
  {
   "file": "dsc08887.jpg",
   "w": 1800,
   "h": 2400,
   "caption": "",
-  "featured": false
+  "featured": false,
+  "location": "Fushimi Inari Taisha, Kyoto"
  },
  {
   "file": "dsc03591-1.jpg",
   "w": 2400,
   "h": 1500,
   "caption": "",
-  "featured": false
+  "featured": false,
+  "location": "Dolphins, Channel Islands National Park"
  },
  {
   "file": "dsc00300.jpg",
   "w": 1714,
   "h": 2400,
   "caption": "",
-  "featured": false
+  "featured": false,
+  "location": "Charles Bridge, Prague"
  },
  {
   "file": "dsc06154.jpg",
   "w": 1600,
   "h": 2400,
   "caption": "",
-  "featured": false
+  "featured": false,
+  "location": "Ophir Pass, Colorado"
  },
  {
   "file": "dsc07267.jpg",
   "w": 1600,
   "h": 2400,
   "caption": "",
-  "featured": false
+  "featured": false,
+  "location": "Batu Caves, Kuala Lumpur"
  },
  {
   "file": "dsc06879.jpg",
   "w": 2400,
   "h": 1350,
   "caption": "",
-  "featured": false
+  "featured": false,
+  "location": "Capitol Reef National Park"
  },
  {
   "file": "dsc03532.jpg",
   "w": 2400,
   "h": 1600,
   "caption": "",
-  "featured": false
+  "featured": false,
+  "location": "4th of July, Morgantown, WV"
  },
  {
   "file": "dsc08920-hdr-pano.jpg",
   "w": 1500,
   "h": 2400,
   "caption": "",
-  "featured": false
+  "featured": false,
+  "location": "Mount Rainier National Park"
  },
  {
   "file": "dsc06187.jpg",
   "w": 2400,
   "h": 1600,
   "caption": "",
-  "featured": false
+  "featured": false,
+  "location": "Balanced Rock, Arches National Park"
  },
  {
   "file": "dsc07921.jpg",
   "w": 2400,
   "h": 1600,
   "caption": "",
-  "featured": false
+  "featured": false,
+  "location": "Canyon Overlook, Zion National Park"
  },
  {
   "file": "dsc08197.jpg",
   "w": 2400,
   "h": 1600,
   "caption": "",
-  "featured": false
+  "featured": false,
+  "location": "The Subway, Zion National Park"
  },
  {
   "file": "dsc03583.jpg",
   "w": 2400,
   "h": 1600,
   "caption": "",
-  "featured": false
+  "featured": false,
+  "location": "Bee on a Coneflower, Morgantown, WV"
  },
  {
   "file": "dsc08975.jpg",
   "w": 1600,
   "h": 2400,
   "caption": "",
-  "featured": false
+  "featured": false,
+  "location": "Tsutenkaku Tower, Osaka"
  },
  {
   "file": "edit1.jpg",
   "w": 2400,
   "h": 1810,
   "caption": "",
-  "featured": false
+  "featured": false,
+  "location": "Mt. Moran, Grand Teton National Park"
  },
  {
   "file": "dsc00102.jpg",
   "w": 2400,
   "h": 1350,
   "caption": "",
-  "featured": false
+  "featured": false,
+  "location": "Fortress Hohensalzburg, Salzburg"
  },
  {
   "file": "dsc07843.jpg",
   "w": 1600,
   "h": 2400,
   "caption": "",
-  "featured": false
+  "featured": false,
+  "location": "Julia & Travis's Wedding"
  },
  {
   "file": "dsc03534.jpg",
   "w": 2400,
   "h": 1600,
   "caption": "",
-  "featured": false
+  "featured": false,
+  "location": "4th of July, Morgantown, WV"
  },
  {
   "file": "dsc6073.jpg",
   "w": 2400,
   "h": 1350,
   "caption": "",
-  "featured": false
+  "featured": false,
+  "location": "Devil's Garden, Arches National Park"
  }
 ];

@@ -922,6 +922,6 @@
         document.querySelector('[data-fineprint]').textContent =
             'Built from my Google Timeline export (' + fmtMonth(isoDate(T.span[0])) + ' to ' + fmtMonth(isoDate(T.span[1])) +
             ') and hand-kept lists of earlier travel. Only places where the timeline logged a stop are mapped, not every GPS ping, and ' +
-            'every location is generalized to about a kilometre. Boundaries from Natural Earth and the National Park Service; place names from GeoNames.';
+            'every location is generalized to about a kilometer. Boundaries from Natural Earth and the National Park Service; place names from GeoNames.';
     })();
 })();

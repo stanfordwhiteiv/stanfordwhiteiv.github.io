@@ -332,7 +332,7 @@
                             passing a single fixed context vector from encoder to decoder, the attention
                             mechanism computes a soft "alignment" at each decoding step: a learned alignment
                             score is computed between the current decoder hidden state and each encoder hidden
-                            state, then normalised via softmax to produce a weighted sum (context vector)
+                            state, then normalized via softmax to produce a weighted sum (context vector)
                             that the decoder uses at that step. In short, the decoder can reference any point in the input sequence dynamically.
                         </p>
                         <p>
@@ -625,7 +625,7 @@
 
                     <div class="description">
                         <p>
-                            Attention weights are visualised separately for each head in the best-performing
+                            Attention weights are visualized separately for each head in the best-performing
                             h=2 configuration. Sentence pairs include both correct translations and error
                             cases, allowing us to observe whether different heads specialize in different
                             alignment strategies.
@@ -773,7 +773,7 @@
                     </table>
 
                     <div class="highlight">
-                        <p><strong>Training behaviour:</strong></p>
+                        <p><strong>Training behavior:</strong></p>
                         <p>
                             The Transformer's training perplexity drops steeply from approximately 125 at
                             epoch 1 to near 2 by epoch 30.
@@ -791,14 +791,14 @@
                             is a known phenomenon at small data scales. The Transformer is a
                             parameter-heavy, data-hungry architecture: its self-attention layers and
                             multiple stacked blocks require substantially more data to converge to
-                            well-generalised representations than GRU-based models. On only 13,500
+                            well-generalized representations than GRU-based models. On only 13,500
                             training pairs, the recurrent modelswhich incorporate strong sequential
-                            inductive biasesgeneralise more effectively to the fixed test sentences.
+                            inductive biases generalize more effectively to the fixed test sentences.
                             The Transformer outperforms recurrent baselines at scale precisely because it can process all positions in parallel and
                             model long-range dependencies without gradient degradation, but these
                             advantages are could be largely irrelevant for short, simple sentences.
                         </p>
-                        <p><strong>Cross-attention visualisation:</strong></p>
+                        <p><strong>Cross-attention visualization:</strong></p>
                         <p>
                             The averaged cross-attention heatmaps show broadly near-diagonal alignment
                             patterns for correctly translated sentences. For "she likes coffee ." → "elle
@@ -885,7 +885,7 @@
                             has a plausible explanation at this data scale: self-attention layers are
                             the most parameter-heavy component of each Transformer block, and on only
                             13,500 training pairs they may contribute to overfitting rather than
-                            generalisation. Without self-attention, the model is reduced to a simpler
+                            generalization. Without self-attention, the model is reduced to a simpler
                             cross-attention plus feed-forward architecturestructurally closer to
                             the attention Seq2Seq models in Parts 1 and 2, which outperform the full
                             Transformer on the same task. The training and validation perplexity curves
@@ -900,7 +900,7 @@
                         <p><strong>Summary of ablation findings:</strong></p>
                         <ul>
                             <li>
-                                Positional encoding is necessary for correct word-order modelling;
+                                Positional encoding is necessary for correct word-order modeling;
                                 its removal causes a measurable BLEU decrease of 0.023.
                             </li>
                             <li>

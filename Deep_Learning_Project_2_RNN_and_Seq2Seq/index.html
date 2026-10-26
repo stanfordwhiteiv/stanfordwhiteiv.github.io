@@ -404,12 +404,12 @@
 
                     <!-- Task 1 -->
                     <span class="task-label">Task 1 - Hyperparameter Tuning</span>
-                    <h3>Task 1: Optimising RNN Performance</h3>
+                    <h3>Task 1: Optimizing RNN Performance</h3>
 
                     <div class="description">
                         <p>
                             Four configurations were sampled via random search over the hyperparameter space and
-                            trained to minimise validation perplexity. The search space covered:
+                            trained to minimize validation perplexity. The search space covered:
                         </p>
                         <ul>
                             <li><strong>Hidden units:</strong> {128, 192, 256, 384, 512}</li>
@@ -684,7 +684,7 @@
                             Notably, the full GRU does not achieve the best validation perplexity in this
                             experiment - one of the ablated single-gate variants performs comparably or better.
                             This is a meaningful result: it illustrates that architectural complexity does not
-                            always translate into better generalisation, particularly on small datasets and
+                            always translate into better generalization, particularly on small datasets and
                             short-context tasks. The full GRU has more learnable parameters (both gate weight
                             matrices) than either ablated variant, and on a corpus as small as <em>The Time
                             Machine</em> with a 35-step BPTT window, this extra capacity can lead to mild
@@ -717,11 +717,11 @@
                         <p>
                             Despite being the theoretically most expressive variant, the full GRU does not
                             outperform the single-gate ablations on this task. The additional gate introduces
-                            more parameters to optimise, and on a small corpus the resulting solution may
-                            overfit slightly more or require more training to reach the same generalisation.
+                            more parameters to optimize, and on a small corpus the resulting solution may
+                            overfit slightly more or require more training to reach the same generalization.
                             This result should not be interpreted as evidence that one of the gates is
                             unnecessary in general: on larger datasets, longer BPTT windows, or tasks with
-                            rich long-range structure (e.g. sentence-level language modelling or machine
+                            rich long-range structure (e.g. sentence-level language modeling or machine
                             translation), both gates are expected to contribute meaningfully and the full GRU
                             to clearly outperform either ablation.
                         </p>

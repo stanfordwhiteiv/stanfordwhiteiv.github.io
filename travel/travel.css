@@ -63,7 +63,7 @@
 }
 
 /* ---------- Page header: photo hero like the landing page ---------- */
-.travel-hero { background-color: #1b2a33; background-image: url('../photography/img/full/edit1.jpg'); background-position: center 45%; }
+.travel-hero { background-color: #1b2a33; background-image: url('../photography/img/full/dsc06621.jpg'); background-position: center 40%; }
 .hero h1 em { font-style: italic; color: #a9e0da; }
 /* Bright photo: keep it dark behind the text and fade to the page only below it */
 .hero.travel::after {

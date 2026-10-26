@@ -10,11 +10,20 @@ window.PHOTOS = [
   "mobile": false
  },
  {
+  "file": "edit1.jpg",
+  "w": 2400,
+  "h": 1810,
+  "caption": "",
+  "featured": true,
+  "location": "Mt. Moran, Grand Teton National Park",
+  "mobile": false
+ },
+ {
   "file": "dsc06621.jpg",
   "w": 2400,
   "h": 1350,
   "caption": "",
-  "featured": true,
+  "featured": false,
   "location": "Downtown Singapore",
   "mobile": false
  },
@@ -260,15 +269,6 @@ window.PHOTOS = [
   "featured": false,
   "location": "Tsutenkaku Tower, Osaka",
   "mobile": true
- },
- {
-  "file": "edit1.jpg",
-  "w": 2400,
-  "h": 1810,
-  "caption": "",
-  "featured": false,
-  "location": "Mt. Moran, Grand Teton National Park",
-  "mobile": false
  },
  {
   "file": "dsc00102.jpg",

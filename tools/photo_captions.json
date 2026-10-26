@@ -5,9 +5,15 @@
     "location": "Hidden Lake, Glacier National Park",
     "mobile": false
   },
-  "DSC06621": {
+  "Edit1": {
     "caption": "",
     "featured": true,
+    "location": "Mt. Moran, Grand Teton National Park",
+    "mobile": false
+  },
+  "DSC06621": {
+    "caption": "",
+    "featured": false,
     "location": "Downtown Singapore",
     "mobile": false
   },
@@ -172,12 +178,6 @@
     "featured": false,
     "location": "Tsutenkaku Tower, Osaka",
     "mobile": true
-  },
-  "Edit1": {
-    "caption": "",
-    "featured": false,
-    "location": "Mt. Moran, Grand Teton National Park",
-    "mobile": false
   },
   "DSC00102": {
     "caption": "",

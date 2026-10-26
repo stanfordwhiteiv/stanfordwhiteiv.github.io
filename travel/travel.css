@@ -62,19 +62,14 @@
     --seq-5: #c9f2ed;
 }
 
-/* ---------- Page header ---------- */
-.page-head { padding: 9rem 0 0; }
-.page-head .hero-kicker { color: var(--accent); }
-.page-head h1 {
-    font-family: var(--serif);
-    font-weight: 400;
-    font-size: clamp(3rem, 8vw, 5.5rem);
-    line-height: 0.98;
-    letter-spacing: -0.01em;
-    margin: 0.6rem 0 1.1rem;
+/* ---------- Page header: photo hero like the landing page ---------- */
+.travel-hero { background-color: #1b2a33; background-image: url('../photography/img/full/edit1.jpg'); background-position: center 45%; }
+.hero h1 em { font-style: italic; color: #a9e0da; }
+/* Bright photo: keep it dark behind the text and fade to the page only below it */
+.hero.travel::after {
+    background: linear-gradient(to bottom, rgba(8, 14, 19, 0.4) 0%, rgba(8, 14, 19, 0.1) 28%, rgba(8, 14, 19, 0.45) 58%, rgba(8, 14, 19, 0.65) 86%, var(--hero-fade) 100%);
 }
-.page-head h1 em { font-style: italic; color: var(--accent); }
-.page-head .lead { max-width: 40rem; font-size: 1.1rem; color: var(--ink-soft); }
+.page-stats { padding-top: 0.5rem; }
 
 .stats {
     margin-top: 3rem;
@@ -252,7 +247,7 @@ table.data tbody tr { transition: background 0.15s; }
     .compass { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 720px) {
-    .page-head { padding-top: 7rem; }
+    .travel-hero { background-image: url('../photography/img/full/dsc08920-hdr-pano.jpg'); background-position: center 35%; }
     .stats { grid-template-columns: repeat(2, 1fr); }
     .stats div:nth-child(n) { border-left: none; padding-left: 0; }
     .stats div:nth-child(even) { border-left: 1px solid var(--rule); padding-left: 1rem; }

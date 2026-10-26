@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Travel &middot; Stanford White IV</title>
+    <meta name="description" content="Ten years of places, mapped from Google Timeline: every stop, every state, country and national park, and time away from home.">
+    <script>try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/site.css?v=4">
+    <link rel="stylesheet" href="travel.css?v=1">
+</head>
+<body>
+
+<header class="topbar">
+    <div class="wrap">
+        <a class="brand" href="../">Stanford White IV</a>
+        <ul class="menu">
+            <li class="hide-sm"><a href="../#about">About</a></li>
+            <li class="hide-sm"><a href="../#research">Research</a></li>
+            <li class="hide-xs"><a href="../photography/">Photography</a></li>
+            <li><a href="./" aria-current="page">Travel</a></li>
+            <li>
+                <button class="theme-toggle" aria-label="Toggle light and dark theme">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+                </button>
+            </li>
+        </ul>
+    </div>
+</header>
+
+<div class="page-head">
+    <div class="wrap">
+        <div class="hero-kicker">Travel &middot; <span data-span></span></div>
+        <h1>Ten years,<br><em>mapped</em>.</h1>
+        <p class="lead">Every place my phone caught me stopping since the summer of 2016, plus the countries, states and national parks I'd visited before it started counting. Most of the photographs came from somewhere on these maps.</p>
+        <dl class="stats" id="stats"></dl>
+    </div>
+</div>
+
+<main>
+
+    <!-- ================= EVERY PLACE ================= -->
+    <section id="everywhere">
+        <div class="wrap">
+            <div class="label">Every place</div>
+            <div class="viz-head reveal">
+                <h2 class="display">A dot for everywhere I've <em>stood</em>.</h2>
+                <p class="intro">Each teal dot is a place my timeline caught me stopping, from a trailhead to a hotel to home.</p>
+            </div>
+            <div class="controls">
+                <div class="seg" role="group" aria-label="View">
+                    <button aria-pressed="true" data-view="map">Map</button>
+                    <button aria-pressed="false" data-view="globe">Globe</button>
+                </div>
+                <div class="chips" data-presets></div>
+                <label class="slider">
+                    <button class="play" type="button" aria-label="Play through the years"><svg viewBox="0 0 12 12" fill="currentColor"><path d="M2 1l9 5-9 5z"/></svg></button>
+                    <span>Through</span>
+                    <input type="range" step="1" aria-label="Show places first seen through this year">
+                    <output></output>
+                </label>
+            </div>
+            <div class="viz" id="dots-viz"></div>
+            <div class="legend">
+                <span><i style="background:var(--viz-1)"></i>On my timeline</span>
+                <span class="note" data-dots-count></span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= SCRATCH-OFF ================= -->
+    <section id="scratch">
+        <div class="wrap">
+            <div class="label">Scratch-off</div>
+            <div class="viz-head reveal">
+                <h2 class="display">Countries, states &amp; <em>provinces</em>.</h2>
+                <p class="intro">Filled in wherever I've set foot. The United States and Canada are split into states and provinces, so there's still plenty left to scratch.</p>
+            </div>
+            <div class="controls">
+                <div class="seg" role="group" aria-label="View">
+                    <button aria-pressed="true" data-view="map">Map</button>
+                    <button aria-pressed="false" data-view="globe">Globe</button>
+                </div>
+                <div class="chips" data-presets></div>
+            </div>
+            <div class="viz" id="scratch-viz"></div>
+            <div class="legend">
+                <span><i class="sq" style="background:var(--map-visited)"></i>Visited</span>
+                <span><i class="sq" style="background:var(--map-land);outline:1px solid var(--map-line)"></i>Not yet</span>
+            </div>
+            <div class="tally" id="tally"></div>
+        </div>
+    </section>
+
+    <!-- ================= NATIONAL PARKS ================= -->
+    <section id="parks">
+        <div class="wrap">
+            <div class="label">National parks</div>
+            <div class="viz-head reveal">
+                <h2 class="display"><span data-parks-count></span> of America's <em>best idea</em>.</h2>
+                <p class="intro">All <span data-parks-total></span> U.S. national parks, Chiricahua included as the newest. The filled-in ones I've been to; dates are my first logged stop inside the boundary.</p>
+            </div>
+            <div class="viz" id="parks-viz"></div>
+            <div class="legend">
+                <span><i style="background:var(--map-visited)"></i>Visited</span>
+                <span><i style="background:var(--map-land);outline:1px solid var(--map-line)"></i>Not yet</span>
+                <span class="note">American Samoa and the Virgin Islands are in the poster below.</span>
+            </div>
+            <div class="controls">
+                <div class="chips" id="park-filter">
+                    <button class="chip" aria-pressed="true" data-f="all">All</button>
+                    <button class="chip" aria-pressed="false" data-f="on">Visited</button>
+                    <button class="chip" aria-pressed="false" data-f="off">Not yet</button>
+                </div>
+            </div>
+            <div class="parks-grid" id="parks-grid"></div>
+        </div>
+    </section>
+
+    <!-- ================= HEATMAP ================= -->
+    <section id="heatmap">
+        <div class="wrap">
+            <div class="label">Heatmap</div>
+            <div class="viz-head reveal">
+                <h2 class="display">Where the days <em>pile up</em>.</h2>
+                <p class="intro">Brightness counts the distinct days I stopped somewhere. Home is seen on more than a thousand days and a mountain pass maybe once, so the scale is logarithmic: a single visit still glows. Zoom in and the scale re-fits to whatever is on screen.</p>
+            </div>
+            <div class="controls"><div class="chips" data-presets></div></div>
+            <div class="viz" id="heat-viz"></div>
+            <div class="legend">
+                <span>Once <i class="ramp" data-heat-ramp></i> Most days in view</span>
+                <span class="note">Log scale &middot; all locations are generalized to about 1&nbsp;km</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= AWAY ================= -->
+    <section id="away">
+        <div class="wrap">
+            <div class="label">Away from home</div>
+            <div class="viz-head reveal">
+                <h2 class="display">Every day, by how far I <em>wandered</em>.</h2>
+                <p class="intro">One row per year, one sliver per day, shaded by the farthest I got from wherever home was at the time. Gaps are days the phone didn't record. Summers stand out.</p>
+            </div>
+            <div class="viz" id="cal-viz" style="background:var(--surface)"></div>
+            <div class="legend" id="cal-legend"></div>
+
+            <h3 class="subhead">Home base</h3>
+            <div class="viz" id="home-viz" style="background:var(--surface)"></div>
+            <div class="legend" id="home-legend"></div>
+
+            <h3 class="subhead">Longest stretches away</h3>
+            <div class="tbl-wrap">
+                <table class="data" id="trip-table">
+                    <thead><tr><th>Dates</th><th class="num">Days</th><th>Mostly in</th><th class="num">Farthest</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= COLLECTION ================= -->
+    <section id="collection">
+        <div class="wrap">
+            <div class="label">The collection</div>
+            <div class="viz-head reveal">
+                <h2 class="display">How the list <em>grew</em>.</h2>
+                <p class="intro">Running totals, stepping up at my first logged stop somewhere new. Each line starts with the places that have no logged stop: mostly from before July 2016, plus a few I only passed through.</p>
+            </div>
+            <div class="viz" id="col-viz" style="background:var(--surface)"></div>
+            <div class="legend" id="col-legend"></div>
+            <details class="table">
+                <summary>View as table</summary>
+                <div class="tbl-wrap"><table class="data" id="col-table"></table></div>
+            </details>
+        </div>
+    </section>
+
+    <!-- ================= COMPASS ================= -->
+    <section id="compass">
+        <div class="wrap">
+            <div class="label">The edges</div>
+            <h2 class="display reveal">Farthest north, south, east &amp; <em>west</em>.</h2>
+            <dl class="compass" id="compass-cards"></dl>
+            <p class="fineprint" data-fineprint></p>
+        </div>
+    </section>
+
+</main>
+
+<footer>
+    <div class="wrap">
+        <span>&copy; 2026 Stanford White IV. Map data: Natural Earth, NPS, GeoNames.</span>
+        <span data-updated></span>
+    </div>
+</footer>
+
+<div class="tooltip" id="tip" role="status" aria-live="polite"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script src="data/geo.js"></script>
+<script src="data/travel.js?v=1"></script>
+<script src="../assets/site.js?v=4"></script>
+<script src="travel.js?v=1"></script>
+</body>
+</html>

@@ -659,6 +659,9 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
 }
 
 /* ---------- Responsive ---------- */
+.brand { white-space: nowrap; }
+@media (max-width: 540px) { .menu .hide-xs { display: none; } }
+
 @media (max-width: 900px) {
     .courses { grid-template-columns: 1fr; }
     .about-grid { grid-template-columns: 1fr; gap: 2.5rem; }

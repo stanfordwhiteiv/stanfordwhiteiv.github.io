@@ -10,9 +10,6 @@
     --map-line: #c9d3d6;
     --map-visited: #008f86;
     --map-visited-line: #e9f4f3;
-    --heat-0: #8fcfc8;
-    --heat-1: #13857d;
-    --heat-2: #06403c;
     --seq-1: #cfe8e5;
     --seq-2: #8fcfc8;
     --seq-3: #3fa59c;
@@ -31,9 +28,6 @@
         --map-line: #2a3943;
         --map-visited: #169a94;
         --map-visited-line: #0e161c;
-        --heat-0: #1f6964;
-        --heat-1: #4fbab1;
-        --heat-2: #e4fbf8;
         --seq-1: #1a3a3c;
         --seq-2: #1f6964;
         --seq-3: #2f938b;
@@ -52,9 +46,6 @@
     --map-line: #2a3943;
     --map-visited: #169a94;
     --map-visited-line: #0e161c;
-    --heat-0: #1f6964;
-    --heat-1: #4fbab1;
-    --heat-2: #e4fbf8;
     --seq-1: #1a3a3c;
     --seq-2: #1f6964;
     --seq-3: #2f938b;
@@ -155,7 +146,6 @@
 .legend span { display: inline-flex; align-items: center; gap: 0.45rem; }
 .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; }
 .legend i.sq { border-radius: 2px; }
-.legend .ramp { width: 140px; height: 8px; border-radius: 4px; }
 .legend .note { color: var(--ink-faint); }
 
 .tooltip {

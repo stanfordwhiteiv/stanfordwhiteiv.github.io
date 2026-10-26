@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../assets/site.css?v=4">
-    <link rel="stylesheet" href="travel.css?v=4">
+    <link rel="stylesheet" href="travel.css?v=5">
 </head>
 <body class="on-photo">
 
@@ -58,8 +58,8 @@
             </div>
             <div class="controls">
                 <div class="seg" role="group" aria-label="View">
-                    <button aria-pressed="true" data-view="map">Map</button>
-                    <button aria-pressed="false" data-view="globe">Globe</button>
+                    <button aria-pressed="true" data-view="globe">Globe</button>
+                    <button aria-pressed="false" data-view="map">Map</button>
                 </div>
                 <div class="chips" data-presets></div>
                 <label class="slider">
@@ -87,8 +87,8 @@
             </div>
             <div class="controls">
                 <div class="seg" role="group" aria-label="View">
-                    <button aria-pressed="true" data-view="map">Map</button>
-                    <button aria-pressed="false" data-view="globe">Globe</button>
+                    <button aria-pressed="true" data-view="globe">Globe</button>
+                    <button aria-pressed="false" data-view="map">Map</button>
                 </div>
                 <div class="chips" data-presets></div>
             </div>
@@ -123,23 +123,6 @@
                 </div>
             </div>
             <div class="parks-grid" id="parks-grid"></div>
-        </div>
-    </section>
-
-    <!-- ================= HEATMAP ================= -->
-    <section id="heatmap">
-        <div class="wrap">
-            <div class="label">Heatmap</div>
-            <div class="viz-head reveal">
-                <h2 class="display">Where the days <em>pile up</em>.</h2>
-                <p class="intro">Brightness counts the distinct days I stopped somewhere. Home is seen on more than a thousand days and a mountain pass maybe once, so the scale is logarithmic: a single visit still glows. Zoom in and the scale re-fits to whatever is on screen.</p>
-            </div>
-            <div class="controls"><div class="chips" data-presets></div></div>
-            <div class="viz" id="heat-viz"></div>
-            <div class="legend">
-                <span>Once <i class="ramp" data-heat-ramp></i> Most days in view</span>
-                <span class="note">Log scale &middot; all locations are generalized to about 1&nbsp;km</span>
-            </div>
         </div>
     </section>
 
@@ -208,8 +191,8 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
 <script src="data/geo.js"></script>
-<script src="data/travel.js?v=2"></script>
+<script src="data/travel.js?v=3"></script>
 <script src="../assets/site.js?v=4"></script>
-<script src="travel.js?v=2"></script>
+<script src="travel.js?v=3"></script>
 </body>
 </html>

@@ -13,7 +13,7 @@
     // ---------- Theme colors (re-read when the theme flips) ----------
     var C = {};
     var NAMES = ['viz-1', 'viz-2', 'viz-3', 'viz-4', 'map-ocean', 'map-land', 'map-line', 'map-visited', 'map-visited-line',
-        'heat-0', 'heat-1', 'heat-2', 'seq-1', 'seq-2', 'seq-3', 'seq-4', 'seq-5', 'surface', 'bg', 'ink', 'ink-soft', 'ink-faint', 'rule'];
+        'seq-1', 'seq-2', 'seq-3', 'seq-4', 'seq-5', 'surface', 'bg', 'ink', 'ink-soft', 'ink-faint', 'rule'];
     var redraws = [];
     function readColors() {
         var s = getComputedStyle(root);
@@ -300,7 +300,7 @@
 
     function wireViewSwitch(section, map, globe, presetsFor) {
         var seg = section.querySelector('.seg');
-        var cur = map;
+        var cur = globe || map;   // globe is the default view where there is one
         if (seg) {
             seg.addEventListener('click', function (e) {
                 var b = e.target.closest('button');
@@ -310,7 +310,7 @@
                 map.show(cur === map);
                 globe.show(cur === globe);
             });
-            globe.show(false);
+            map.show(false);
         }
         var chips = section.querySelector('[data-presets]');
         if (chips) {
@@ -576,96 +576,6 @@
         if (!p.visited) return 'Not yet';
         return p.first ? 'First logged ' + fmtMonth(isoDate(p.first)) : 'Visited';
     }
-
-    // ---------- 4. Heatmap ----------
-    (function heat() {
-        var section = document.getElementById('heatmap');
-        var box = document.getElementById('heat-viz');
-        var BIN = 2, R = 1, PASSES = 3;
-        var off = document.createElement('canvas'), offCtx = off.getContext('2d');
-        var lut = null;
-        function buildLut() {
-            var ramp = d3.scaleLinear().domain([0, 0.55, 1]).range([C['heat-0'], C['heat-1'], C['heat-2']]).interpolate(d3.interpolateLab);
-            lut = new Uint8ClampedArray(256 * 4);
-            for (var i = 0; i < 256; i++) {
-                var c = d3.rgb(ramp(i / 255));
-                lut[4 * i] = c.r; lut[4 * i + 1] = c.g; lut[4 * i + 2] = c.b;
-                lut[4 * i + 3] = Math.round(255 * (0.78 + 0.22 * i / 255));
-            }
-            var rampEl = document.querySelector('[data-heat-ramp]');
-            rampEl.style.background = 'linear-gradient(90deg,' + [0, 0.25, 0.55, 0.8, 1].map(function (t) { return ramp(t); }).join(',') + ')';
-        }
-        function blur(src, dst, W, H) {   // box blur, rows then columns
-            var x, y, s, n = 2 * R + 1;
-            for (y = 0; y < H; y++) {
-                var o = y * W; s = 0;
-                for (x = -R; x <= R; x++) s += src[o + Math.min(W - 1, Math.max(0, x))];
-                for (x = 0; x < W; x++) {
-                    dst[o + x] = s / n;
-                    s += src[o + Math.min(W - 1, x + R + 1)] - src[o + Math.max(0, x - R)];
-                }
-            }
-            for (x = 0; x < W; x++) {
-                s = 0;
-                for (y = -R; y <= R; y++) s += dst[Math.min(H - 1, Math.max(0, y)) * W + x];
-                var col = new Float32Array(H);
-                for (y = 0; y < H; y++) {
-                    col[y] = s / n;
-                    s += dst[Math.min(H - 1, y + R + 1) * W + x] - dst[Math.max(0, y - R) * W + x];
-                }
-                for (y = 0; y < H; y++) src[y * W + x] = col[y];
-            }
-        }
-        // how bright a lone single-day cell ends up after two blur passes: the visibility floor
-        var single = (function () {
-            var W = 25, a = new Float32Array(W * W), b = new Float32Array(W * W);
-            a[10 * W + 10] = Math.log(2);
-            for (var k = 0; k < PASSES; k++) blur(a, b, W, W);
-            return a[10 * W + 10];
-        })();
-
-        function draw(v) {
-            if (!lut) buildLut();
-            var ctx = v.ctx, pick = v.pick || (v.pick = Picker());
-            pick.reset();
-            drawLand(v, worldFC, C['map-land'], C['map-line'], 0.5);
-            if (v.k > 2.5) { ctx.beginPath(); v.path(admin1FC); ctx.strokeStyle = C['map-line']; ctx.lineWidth = 0.5; ctx.stroke(); }
-            var W = Math.ceil(v.w / BIN), H = Math.ceil(v.h / BIN);
-            var g = new Float32Array(W * H), tmp = new Float32Array(W * H);
-            for (var i = 0; i < N; i++) {
-                var p = v.proj([dLon[i], dLat[i]]);
-                if (!p || p[0] < 0 || p[1] < 0 || p[0] >= v.w || p[1] >= v.h) continue;
-                g[(p[1] / BIN | 0) * W + (p[0] / BIN | 0)] += dDays[i];
-                pick.add(p[0], p[1], i);
-            }
-            // log first, then blur: one day and a thousand days both stay round, visible blobs
-            for (i = 0; i < g.length; i++) if (g[i]) g[i] = Math.log(1 + g[i]);
-            for (var k = 0; k < PASSES; k++) blur(g, tmp, W, H);
-            var max = 0;
-            for (i = 0; i < g.length; i++) if (g[i] > max) max = g[i];
-            // below `floor` a cell fades out over a short ramp instead of stopping at a hard edge
-            var fade = single * 0.1, floor = single * 0.4, span = Math.max(max, single * 2) - floor;
-            off.width = W; off.height = H;
-            var img = offCtx.createImageData(W, H), px = img.data;
-            for (i = 0; i < g.length; i++) {
-                if (g[i] < fade) continue;
-                var t = g[i] < floor ? 0 : Math.min(255, Math.round(255 * Math.pow((g[i] - floor) / span, 0.6)));
-                var edge = g[i] < floor ? (g[i] - fade) / (floor - fade) : 1;
-                px[4 * i] = lut[4 * t]; px[4 * i + 1] = lut[4 * t + 1]; px[4 * i + 2] = lut[4 * t + 2]; px[4 * i + 3] = lut[4 * t + 3] * edge;
-            }
-            offCtx.putImageData(img, 0, 0);
-            ctx.imageSmoothingEnabled = true;
-            ctx.drawImage(off, 0, 0, W * BIN, H * BIN);
-        }
-        function hover(v, x, y, e) {
-            var d = v.pick && v.pick.find(x, y, 8);
-            if (d == null) return hideTip();
-            showTip(e.clientX, e.clientY, dDays[d] === 1 ? 'Seen on 1 day' : 'Seen on ' + fmt(dDays[d]) + ' days', ['First seen in ' + (T.year0 + dYr[d])]);
-        }
-        var map = MapView(box, { draw: draw, hover: hover, fit: FLAT_FIT, projection: d3.geoMercator });
-        redraws.unshift(function () { lut = null; });
-        wireViewSwitch(section, map, null, PRESETS);
-    })();
 
     // ---------- 5. Away from home: calendar, home bases, trips ----------
     var byDay = new Map(T.daily.map(function (d) { return [d[0], d]; }));

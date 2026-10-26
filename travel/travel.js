@@ -68,13 +68,13 @@
     addEventListener('scroll', hideTip, { passive: true });
 
     // ---------- Decode the dot cells ----------
-    var N = T.dots.length / 4;
-    var dLat = new Float64Array(N), dLon = new Float64Array(N), dYr = new Uint8Array(N), dDays = new Uint16Array(N);
+    // Each cell is [lat, lon, first year]; visit counts are not published.
+    var N = T.dots.length / 3;
+    var dLat = new Float64Array(N), dLon = new Float64Array(N), dYr = new Uint8Array(N);
     for (var i = 0; i < N; i++) {
-        dLat[i] = T.dots[4 * i] / 1000;
-        dLon[i] = T.dots[4 * i + 1] / 1000;
-        dYr[i] = T.dots[4 * i + 2];
-        dDays[i] = Math.min(65535, T.dots[4 * i + 3]);
+        dLat[i] = T.dots[3 * i] / 1000;
+        dLon[i] = T.dots[3 * i + 1] / 1000;
+        dYr[i] = T.dots[3 * i + 2];
     }
     var lastYearIdx = d3.max(dYr);
 
@@ -410,7 +410,7 @@
         function hover(v, x, y, e) {
             var d = v.pick && v.pick.find(x, y, 10);
             if (d == null) return hideTip();
-            showTip(e.clientX, e.clientY, dDays[d] === 1 ? 'Seen on 1 day' : 'Seen on ' + fmt(dDays[d]) + ' days', ['First seen in ' + (y0 + dYr[d])]);
+            showTip(e.clientX, e.clientY, 'First seen in ' + (y0 + dYr[d]));
         }
         var map = MapView(box, { draw: draw, hover: hover, fit: FLAT_FIT, projection: d3.geoMercator });
         var globe = MapView(box, { globe: true, draw: draw, hover: hover });
@@ -833,6 +833,6 @@
         document.querySelector('[data-fineprint]').textContent =
             'Built from my Google Timeline export (' + fmtMonth(isoDate(T.span[0])) + ' to ' + fmtMonth(isoDate(T.span[1])) +
             ') and hand-kept lists of earlier travel. Only places where the timeline logged a stop are mapped, not every GPS ping, and ' +
-            'every location is generalized to about a kilometer. Boundaries from Natural Earth and the National Park Service; place names from GeoNames.';
+            'every location is generalized to about a kilometer, and how often I visited any one spot is left out. Boundaries from Natural Earth and the National Park Service; place names from GeoNames.';
     })();
 })();

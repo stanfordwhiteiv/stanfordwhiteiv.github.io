@@ -1,0 +1,52 @@
+U.S. States:
+1. Washington
+2. Oregon
+3. California
+4. North Dakota
+5. South Dakota
+6. Montana
+7. Idaho
+8. Nevada
+9. Utah
+10. Arizona
+11. New Mexico
+12. Colorado
+13. Wyoming
+14. Nebraska
+15. Kansas
+16. Oklahoma
+17. Texas
+18. Missouri
+19. Iowa
+20. Minnesota
+21. Wisconsin
+22. Illinois
+23. Arkansas
+24. Louisiana
+25. Tennessee
+26. Mississippi
+27. Alabama
+28. Georgia
+29. Florida
+30. Indiana
+31. Kentucky
+32. South Carolina
+33. North Carolina
+34. Virginia
+35. West Virginia
+36. Maryland
+37. New York
+38. Pennsylvania
+39. New Jersey
+40. Alaska
+41. Hawaii
+
+U.S. Other:
+1. District of Columbia
+
+C. Provinces:
+1. British Columbia
+2. Ontario
+3. Quebec
+4. Alberta
+5. Saskatchewan

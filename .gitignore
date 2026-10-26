@@ -1,3 +1,7 @@
 # Full-resolution photo originals are never committed.
 # Watermarked web copies in photography/img/ are built by tools/build_photos.py.
 .photos/
+# Raw Google Timeline export and any other private inputs. Never commit.
+.private/
+# Downloaded boundary/gazetteer data used by the travel pipeline.
+pipeline/geo_cache/

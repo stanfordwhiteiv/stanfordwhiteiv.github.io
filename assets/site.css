@@ -660,7 +660,7 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
 
 /* ---------- Responsive ---------- */
 .brand { white-space: nowrap; }
-@media (max-width: 540px) { .menu .hide-xs { display: none; } }
+
 
 @media (max-width: 900px) {
     .courses { grid-template-columns: 1fr; }
@@ -680,4 +680,20 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
     .facts div + div { padding-left: 0; border-left: none; border-top: 1px solid var(--rule); padding-top: 0.9rem; margin-top: 0.9rem; }
     .lightbox { padding: 3rem 0.5rem; }
     .lb-prev, .lb-next { top: auto; bottom: 0.25rem; transform: none; }
+}
+
+/* Small phones: last so it wins over the 720px rules */
+@media (max-width: 540px) {
+    .menu .hide-xs { display: none; }
+    /* Brand + Photography + Travel + theme button must fit on a 360px phone */
+    .topbar .wrap { gap: 0.5rem; }
+    .brand { font-size: 1.12rem; }
+    .menu { gap: 0.8rem; }
+    .menu a { font-size: 0.7rem; letter-spacing: 0.08em; }
+    .theme-toggle { width: 30px; height: 30px; flex-shrink: 0; }
+}
+@media (max-width: 370px) {
+    .brand { font-size: 1rem; }
+    .menu { gap: 0.6rem; }
+    .menu a { letter-spacing: 0.04em; }
 }

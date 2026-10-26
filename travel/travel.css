@@ -245,8 +245,3 @@ table.data tbody tr { transition: background 0.15s; }
     .stats div:nth-child(4) { border-left: 1px solid var(--rule); padding-left: 1rem; }
     .parks-grid { grid-template-columns: repeat(2, 1fr); }
 }
-
-.brand { white-space: nowrap; }
-@media (max-width: 540px) {
-    .menu .hide-xs { display: none; }
-}

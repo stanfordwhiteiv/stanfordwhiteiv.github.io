@@ -86,12 +86,13 @@
     // Mercator is infinite at the poles, so flat maps fit to the inhabited band instead of the sphere.
     var FLAT_FIT = { type: 'MultiPoint', coordinates: [[-168, -56], [179, 76]] };
 
-    var home = T.homes.length ? T.homes[T.homes.length - 1] : null;
+    // Flat maps stop at about a 9°-wide view (state level), a little short of the globe's limit,
+    // so nobody can zoom down to individual neighborhoods.
+    var MAX_FLAT_ZOOM = 40;
     var PRESETS = [
         { label: 'World', bounds: null },
         { label: 'North America', bounds: [[-128, 15], [-62, 58]] },
         { label: 'The West', bounds: [[-125, 31], [-102, 50]] },
-        home && home.lat != null ? { label: 'Home', bounds: [[home.lon - 0.35, home.lat - 0.22], [home.lon + 0.35, home.lat + 0.22]] } : null,
         { label: 'Europe', bounds: [[-10, 36], [25, 58]] },
         { label: 'East Asia', bounds: [[98, -2], [145, 42]] }
     ].filter(Boolean);
@@ -185,7 +186,7 @@
         };
 
         var zoom = d3.zoom()
-            .scaleExtent(o.globe ? [0.75, 40] : [1, o.maxZoom || 30000])
+            .scaleExtent(o.globe ? [0.75, 40] : [1, o.maxZoom || MAX_FLAT_ZOOM])
             .filter(function (e) {
                 if (e.type === 'wheel') return v.engaged || e.ctrlKey || e.metaKey;
                 if (e.type === 'touchstart') return e.touches.length >= 2;
@@ -249,7 +250,7 @@
             }
             if (!bounds) { sel.call(zoom.transform, d3.zoomIdentity); return; }
             var p0 = base([bounds[0][0], bounds[1][1]]), p1 = base([bounds[1][0], bounds[0][1]]);
-            var kk = Math.min(o.maxZoom || 30000, 0.92 / Math.max((p1[0] - p0[0]) / v.w, (p1[1] - p0[1]) / v.h));
+            var kk = Math.min(o.maxZoom || MAX_FLAT_ZOOM, 0.92 / Math.max((p1[0] - p0[0]) / v.w, (p1[1] - p0[1]) / v.h));
             sel.call(zoom.transform, d3.zoomIdentity.translate(v.w / 2 - kk * (p0[0] + p1[0]) / 2, v.h / 2 - kk * (p0[1] + p1[1]) / 2).scale(kk));
         };
 

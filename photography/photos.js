@@ -5,8 +5,8 @@ window.PHOTOS = [
   "w": 2400,
   "h": 1350,
   "caption": "",
-  "featured": true,
   "location": "Hidden Lake, Glacier National Park",
+  "featured": true,
   "mobile": false
  },
  {
@@ -14,8 +14,8 @@ window.PHOTOS = [
   "w": 2400,
   "h": 1810,
   "caption": "",
-  "featured": true,
   "location": "Mt. Moran, Grand Teton National Park",
+  "featured": true,
   "mobile": false
  },
  {
@@ -23,8 +23,8 @@ window.PHOTOS = [
   "w": 2400,
   "h": 1350,
   "caption": "",
-  "featured": false,
   "location": "Downtown Singapore",
+  "featured": false,
   "mobile": false
  },
  {
@@ -32,8 +32,8 @@ window.PHOTOS = [
   "w": 2400,
   "h": 1600,
   "caption": "",
-  "featured": true,
   "location": "Theodore Roosevelt National Park, North Dakota",
+  "featured": true,
   "mobile": false
  },
  {
@@ -41,8 +41,8 @@ window.PHOTOS = [
   "w": 2400,
   "h": 1028,
   "caption": "",
-  "featured": true,
   "location": "The Loch, Rocky Mountain National Park",
+  "featured": true,
   "mobile": false
  },
  {
@@ -50,8 +50,8 @@ window.PHOTOS = [
   "w": 2400,
   "h": 1146,
   "caption": "",
-  "featured": true,
   "location": "Sunrise Point, Bryce Canyon National Park",
+  "featured": true,
   "mobile": false
  },
  {
@@ -59,8 +59,8 @@ window.PHOTOS = [
   "w": 2400,
   "h": 1600,
   "caption": "",
-  "featured": true,
   "location": "Buffalo National River, Arkansas",
+  "featured": true,
   "mobile": false
  },
  {
@@ -68,8 +68,8 @@ window.PHOTOS = [
   "w": 2400,
   "h": 1350,
   "caption": "",
-  "featured": true,
   "location": "Marina Bay Sands, Singapore",
+  "featured": true,
   "mobile": false
  },
  {
@@ -77,8 +77,8 @@ window.PHOTOS = [
   "w": 2400,
   "h": 808,
   "caption": "",
-  "featured": true,
   "location": "Big South Fork River, Tennessee",
+  "featured": true,
   "mobile": false
  },
  {
@@ -86,8 +86,8 @@ window.PHOTOS = [
   "w": 2400,
   "h": 1350,
   "caption": "",
-  "featured": false,
   "location": "Spirit Island, Jasper National Park",
+  "featured": false,
   "mobile": false
  },
  {
@@ -95,8 +95,8 @@ window.PHOTOS = [
   "w": 2400,
   "h": 2400,
   "caption": "",
-  "featured": false,
   "location": "Blue Whale, Channel Islands National Park",
+  "featured": false,
   "mobile": false
  },
  {
@@ -104,8 +104,8 @@ window.PHOTOS = [
   "w": 1601,
   "h": 2400,
   "caption": "",
-  "featured": false,
   "location": "Joshua Tree National Park",
+  "featured": false,
   "mobile": true
  },
  {
@@ -113,8 +113,8 @@ window.PHOTOS = [
   "w": 2400,
   "h": 2400,
   "caption": "",
-  "featured": false,
   "location": "Yellowstone National Park",
+  "featured": false,
   "mobile": false
  },
  {
@@ -122,8 +122,8 @@ window.PHOTOS = [
   "w": 1800,
   "h": 2400,
   "caption": "",
-  "featured": false,
   "location": "Lake Louise, Banff National Park",
+  "featured": false,
   "mobile": false
  },
  {
@@ -131,8 +131,8 @@ window.PHOTOS = [
   "w": 1600,
   "h": 2400,
   "caption": "",
-  "featured": false,
   "location": "Lake Louise, Banff National Park",
+  "featured": false,
   "mobile": true
  },
  {
@@ -140,8 +140,8 @@ window.PHOTOS = [
   "w": 2019,
   "h": 1346,
   "caption": "",
-  "featured": false,
   "location": "Total Solar Eclipse, Buffalo National River",
+  "featured": false,
   "mobile": false
  },
  {
@@ -149,8 +149,8 @@ window.PHOTOS = [
   "w": 1600,
   "h": 2400,
   "caption": "",
-  "featured": false,
   "location": "Chief Mountain, Glacier National Park",
+  "featured": false,
   "mobile": true
  },
  {
@@ -158,8 +158,8 @@ window.PHOTOS = [
   "w": 1800,
   "h": 2400,
   "caption": "",
-  "featured": false,
   "location": "Fushimi Inari Taisha, Kyoto",
+  "featured": false,
   "mobile": true
  },
  {
@@ -167,8 +167,8 @@ window.PHOTOS = [
   "w": 2400,
   "h": 1500,
   "caption": "",
-  "featured": false,
   "location": "Dolphins, Channel Islands National Park",
+  "featured": false,
   "mobile": false
  },
  {
@@ -176,8 +176,8 @@ window.PHOTOS = [
   "w": 1714,
   "h": 2400,
   "caption": "",
-  "featured": false,
   "location": "Charles Bridge, Prague",
+  "featured": false,
   "mobile": true
  },
  {
@@ -185,8 +185,8 @@ window.PHOTOS = [
   "w": 1600,
   "h": 2400,
   "caption": "",
-  "featured": false,
   "location": "Ophir Pass, Colorado",
+  "featured": false,
   "mobile": true
  },
  {
@@ -194,8 +194,8 @@ window.PHOTOS = [
   "w": 1600,
   "h": 2400,
   "caption": "",
-  "featured": false,
   "location": "Batu Caves, Kuala Lumpur",
+  "featured": false,
   "mobile": false
  },
  {
@@ -203,8 +203,8 @@ window.PHOTOS = [
   "w": 2400,
   "h": 1350,
   "caption": "",
-  "featured": false,
   "location": "Capitol Reef National Park",
+  "featured": false,
   "mobile": false
  },
  {
@@ -212,8 +212,8 @@ window.PHOTOS = [
   "w": 2400,
   "h": 1600,
   "caption": "",
-  "featured": false,
   "location": "4th of July, Morgantown, WV",
+  "featured": false,
   "mobile": false
  },
  {
@@ -221,8 +221,8 @@ window.PHOTOS = [
   "w": 1500,
   "h": 2400,
   "caption": "",
-  "featured": false,
   "location": "Mount Rainier National Park",
+  "featured": false,
   "mobile": true
  },
  {
@@ -230,8 +230,8 @@ window.PHOTOS = [
   "w": 2400,
   "h": 1600,
   "caption": "",
-  "featured": false,
   "location": "Balanced Rock, Arches National Park",
+  "featured": false,
   "mobile": false
  },
  {
@@ -239,8 +239,8 @@ window.PHOTOS = [
   "w": 2400,
   "h": 1600,
   "caption": "",
-  "featured": false,
   "location": "Canyon Overlook, Zion National Park",
+  "featured": false,
   "mobile": false
  },
  {
@@ -248,8 +248,8 @@ window.PHOTOS = [
   "w": 2400,
   "h": 1600,
   "caption": "",
-  "featured": false,
   "location": "The Subway, Zion National Park",
+  "featured": false,
   "mobile": false
  },
  {
@@ -257,8 +257,8 @@ window.PHOTOS = [
   "w": 2400,
   "h": 1600,
   "caption": "",
-  "featured": false,
   "location": "Bee on a Coneflower, Morgantown, WV",
+  "featured": false,
   "mobile": false
  },
  {
@@ -266,8 +266,8 @@ window.PHOTOS = [
   "w": 1600,
   "h": 2400,
   "caption": "",
-  "featured": false,
   "location": "Tsutenkaku Tower, Osaka",
+  "featured": false,
   "mobile": true
  },
  {
@@ -275,8 +275,8 @@ window.PHOTOS = [
   "w": 2400,
   "h": 1350,
   "caption": "",
-  "featured": false,
   "location": "Fortress Hohensalzburg, Salzburg",
+  "featured": false,
   "mobile": false
  },
  {
@@ -284,8 +284,8 @@ window.PHOTOS = [
   "w": 1600,
   "h": 2400,
   "caption": "",
-  "featured": false,
   "location": "Julia & Travis's Wedding",
+  "featured": false,
   "mobile": false
  },
  {
@@ -293,8 +293,8 @@ window.PHOTOS = [
   "w": 2400,
   "h": 1600,
   "caption": "",
-  "featured": false,
   "location": "4th of July, Morgantown, WV",
+  "featured": false,
   "mobile": false
  },
  {
@@ -302,8 +302,35 @@ window.PHOTOS = [
   "w": 2400,
   "h": 1350,
   "caption": "",
-  "featured": false,
   "location": "Devil's Garden, Arches National Park",
+  "featured": false,
+  "mobile": false
+ },
+ {
+  "file": "dsc02164-1.jpg",
+  "w": 1800,
+  "h": 2400,
+  "caption": "",
+  "location": "Quebec, Canada",
+  "featured": false,
+  "mobile": false
+ },
+ {
+  "file": "dsc07306.jpg",
+  "w": 2400,
+  "h": 2400,
+  "caption": "",
+  "location": "Haji Lane, Singapore",
+  "featured": false,
+  "mobile": false
+ },
+ {
+  "file": "dsc07419.jpg",
+  "w": 1600,
+  "h": 2400,
+  "caption": "",
+  "location": "A Night Out in Las Vegas, Nevada",
+  "featured": false,
   "mobile": false
  }
 ];

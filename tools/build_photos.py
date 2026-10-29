@@ -13,6 +13,7 @@ Usage: python tools/build_photos.py
 """
 
 import json
+import re
 import os
 from pathlib import Path
 
@@ -37,7 +38,8 @@ QUALITY = {"full": 84, "thumb": 80}
 
 # Optional per-photo captions, locations and ordering. Photos not listed here are appended
 # in file-name order. "featured": True puts a photo in the landing-page showcase;
-# "mobile": True puts it in the phone-width showcase (portrait photos work best).
+# "mobile": True puts it in the phone-width showcase (portrait photos work best);
+# "hidden": True leaves an original out of the site entirely.
 CAPTIONS_FILE = ROOT / "tools" / "photo_captions.json"
 
 
@@ -85,14 +87,18 @@ def main():
 
     manifest = []
     for path in files:
+        meta = captions.get(path.stem, {})
+        if meta.get("hidden"):
+            print(f"{path.name}: hidden, skipped")
+            continue
         im = ImageOps.exif_transpose(Image.open(path)).convert("RGB")
-        name = path.stem.lstrip("_").lower() + ".jpg"
+        # URL-safe name: "DSC02164 (1).jpg" -> "dsc02164-1.jpg"
+        name = re.sub(r"[^a-z0-9]+", "-", path.stem.lstrip("_").lower()).strip("-") + ".jpg"
         for kind, edge in SIZES.items():
             out = watermark(resized(im, edge))
             # Saved without EXIF so camera/GPS metadata is not published.
             out.save(OUT / kind / name, "JPEG", quality=QUALITY[kind], optimize=True, progressive=True)
         full_w, full_h = resized(im, SIZES["full"]).size
-        meta = captions.get(path.stem, {})
         manifest.append({
             "file": name,
             "w": full_w,

@@ -202,5 +202,30 @@
     "featured": false,
     "location": "Devil's Garden, Arches National Park",
     "mobile": false
+  },
+  "DSC02164 (1)": {
+    "caption": "",
+    "location": "Quebec, Canada",
+    "featured": false,
+    "mobile": false
+  },
+  "DSC07306": {
+    "caption": "",
+    "location": "Haji Lane, Singapore",
+    "featured": false,
+    "mobile": false
+  },
+  "DSC07419": {
+    "caption": "",
+    "location": "A Night Out in Las Vegas, Nevada",
+    "featured": false,
+    "mobile": false
+  },
+  "DSC00581": {
+    "caption": "",
+    "location": "",
+    "featured": false,
+    "mobile": false,
+    "hidden": true
   }
 }

@@ -1,0 +1,10 @@
+{
+  "collection: episodes": 50,
+  "collection: env steps": 13483,
+  "collection: wall time (s)": 6.5,
+  "fine-tuning: updates per branch": 300,
+  "fine-tuning: mean time per branch (s)": 0.63,
+  "fine-tuning: total for 6 branches (s)": 3.8,
+  "budget check on validation, incl. 900 val. episodes (s)": 138.7,
+  "Part 2 training time (s)": 193.5
+}

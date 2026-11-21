@@ -1,0 +1,34 @@
+{
+  "episodes_total": 206,
+  "episodes_train": 165,
+  "episodes_val": 41,
+  "timesteps_total": 25650,
+  "timesteps_train": 20684,
+  "timesteps_val": 4966,
+  "episode_length_min/median/max": [
+    49,
+    122,
+    246
+  ],
+  "chunks_train": 19529,
+  "chunks_val": 4679,
+  "obs_tensor_train": [
+    19529,
+    5
+  ],
+  "chunk_tensor_train": [
+    19529,
+    8,
+    2
+  ],
+  "obs_tensor_val": [
+    4679,
+    5
+  ],
+  "chunk_tensor_val": [
+    4679,
+    8,
+    2
+  ],
+  "windows_that_would_cross_a_boundary": 1435
+}

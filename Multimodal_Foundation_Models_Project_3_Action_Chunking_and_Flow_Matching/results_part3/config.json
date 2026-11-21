@@ -1,0 +1,27 @@
+{
+  "beta": 2.0,
+  "cap": 5.0,
+  "mix": 0.5,
+  "lr": 0.0001,
+  "batch_new": 64,
+  "batch_demo": 64,
+  "default_updates": 300,
+  "budget_candidates": [
+    300,
+    1000,
+    3000
+  ],
+  "finetune_seeds": [
+    0,
+    1,
+    2
+  ],
+  "K": 8,
+  "N": 10,
+  "collection_reset_seeds": "2000-2024",
+  "collection_policy_seed": "50000 + 2*(reset_seed-2000) + j, j in {0,1}",
+  "test_reset_seeds": "1000-1099",
+  "test_policy_seed": "reset_seed + offset (offset 0 primary; 10000, 20000 repeats)",
+  "part2_checkpoint_sha256": "319c4e455c89da578c013a19bd3bb95ee77a9bb01bdf95fcb5ef223a78f3ecf9",
+  "chosen_updates": 300
+}

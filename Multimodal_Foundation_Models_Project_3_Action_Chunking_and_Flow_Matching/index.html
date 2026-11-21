@@ -75,7 +75,7 @@
                        background: linear-gradient(to bottom, rgba(8, 14, 19, 0.5) 0%, rgba(8, 14, 19, 0.15) 35%, rgba(8, 14, 19, 0.45) 65%, var(--hero-fade) 94%); }
         .hero .wrap { position: relative; z-index: 1; width: 100%; padding-bottom: 5rem; }
         .hero-kicker { font-size: 0.78rem; font-weight: 500; letter-spacing: 0.22em; text-transform: uppercase; color: rgba(255, 255, 255, 0.82); }
-        .hero h1 { font-family: var(--serif); font-weight: 400; font-size: clamp(2.9rem, 8vw, 5.8rem); line-height: 0.98; letter-spacing: -0.01em;
+        .hero h1 { font-family: var(--serif); font-weight: 400; font-size: clamp(2.5rem, 6.4vw, 4.8rem); line-height: 1.02; letter-spacing: -0.01em;
                    margin: 0.6rem 0 1.1rem; text-shadow: 0 2px 30px rgba(0, 0, 0, 0.45); }
         .hero h1 em { font-style: italic; color: #a9e0da; }
         .hero p.lead { max-width: 40rem; font-size: 1.1rem; color: rgba(255, 255, 255, 0.9); text-shadow: 0 1px 12px rgba(0, 0, 0, 0.5); }
@@ -102,7 +102,7 @@
         .label { display: flex; align-items: center; gap: 1rem; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase;
                  color: var(--accent); margin-bottom: 2rem; }
         .label::after { content: ""; flex: 1; height: 1px; background: var(--rule); }
-        h2.display { font-family: var(--serif); font-weight: 400; font-size: clamp(2rem, 4.2vw, 2.9rem); line-height: 1.15; letter-spacing: -0.005em; max-width: 24ch; }
+        h2.display { font-family: var(--serif); font-weight: 400; font-size: clamp(2rem, 4.2vw, 2.9rem); line-height: 1.15; letter-spacing: -0.005em; max-width: 32ch; }
         h2.display em { font-style: italic; color: var(--accent); }
         h3.task { font-family: var(--serif); font-weight: 500; font-size: 1.6rem; line-height: 1.25; margin: 3.5rem 0 0.4rem; }
         h3.task .num { font-family: var(--sans); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent);
@@ -149,7 +149,7 @@
         .math-block { margin: 1.2rem 0 0.4rem; overflow-x: auto; color: var(--ink); }
 
         /* Photo band (same treatment as the portfolio showcase) */
-        .band { position: relative; margin-top: 7rem; padding: 0; min-height: 70vh; display: flex; align-items: flex-end; overflow: hidden; color: #fff; background: #111; }
+        .band { position: relative; margin-top: 7rem; padding: 0; min-height: 62vh; display: flex; align-items: flex-end; overflow: hidden; color: #fff; background: #111; }
         .band-img { position: absolute; inset: 0; background: #111 url('assets/dsc03532.jpg') center 40% / cover; }
         .band::after { content: ""; position: absolute; inset: 0;
                        background: linear-gradient(to bottom, var(--hero-fade) 0%, rgba(8, 14, 19, 0.15) 22%, rgba(8, 14, 19, 0.2) 50%, rgba(8, 14, 19, 0.75) 85%, rgba(8, 14, 19, 0.88) 100%); }
@@ -236,10 +236,10 @@
     <div class="hero-img" role="img" aria-label="Long-exposure photograph of a crowd at night, people blurred into ghostly paths under street lights"></div>
     <div class="wrap">
         <div class="hero-kicker">Multimodal Foundation Models &middot; Project 3</div>
-        <h1>Action chunking &amp;<br><em>flow</em> matching</h1>
-        <p class="lead">Teaching a pusher to slide a T into place from 206 human demonstrations. I compare direct regression against a generative flow-matching policy, then test whether giving the policy's better rollouts more weight makes it better still.</p>
+        <h1>Action Chunking and<br>Reward-Guided Flow Matching</h1>
+        <p class="lead">Technical report. Direct MSE regression and conditional flow matching for action-chunk policies on the PushT task, and a controlled study of reward-weighted flow-matching fine-tuning.</p>
         <div class="hero-actions">
-            <a class="btn btn-solid" href="https://github.com/stanfordwhiteiv/stanfordwhiteiv.github.io/tree/main/Multimodal_Foundation_Models_Project_3_Action_Chunking_and_Flow_Matching">Code &amp; notebooks</a>
+            <a class="btn btn-solid" href="#setup">Read the report</a>
             <a class="btn btn-ghost" href="#part1">Results</a>
             <a class="btn btn-ghost" href="https://github.com/berkeleydeeprlcourse/homework_spring2026/tree/main/hw1">Berkeley starter code</a>
         </div>
@@ -251,8 +251,8 @@
 <!-- ================= SETUP ================= -->
 <section id="setup">
     <div class="wrap">
-        <div class="label">Setup</div>
-        <h2 class="display reveal">Five numbers in, eight <em>way-points</em> out.</h2>
+        <div class="label">1 &middot; Setup</div>
+        <h2 class="display reveal">Experimental Setup</h2>
         <div class="prose reveal">
             <p class="intro">PushT (<code>gym_pusht/PushT-v0</code>) with state observations. The observation $o_t\in\mathbb R^5$ is the pusher position, the T position and the T angle. An action $a_t\in\mathbb R^2$ is the pixel position the pusher is driven toward. A policy outputs a chunk $A_t=[a_t,\dots,a_{t+7}]\in\mathbb R^{8\times 2}$ ($K=8$), the simulator executes all eight actions in order, and the policy is queried again from the newest observation. An episode stops the moment the simulator reports success (coverage &gt; 95%) or the 300-step limit.</p>
             <p>Every number on this page comes from the same protocol:</p>
@@ -263,7 +263,7 @@
                 <tbody>
                 <tr><td>Demonstrations</td><td>206 episodes, 25,650 steps; split <strong>by episode</strong> 80/20 with seed 0 &rarr; 165 train / 41 validation episodes</td></tr>
                 <tr><td>Normalization</td><td>mean/std of training episodes only, saved once and reused unchanged in Parts 1&ndash;3; predicted chunks are denormalized and clipped to $[0,512]^2$</td></tr>
-                <tr><td>Networks</td><td>MLP, 3 hidden layers &times; 256, ReLU. MSE: 5 &rarr; 16 outputs. Flow: 5 + 16 + 1 = 22 &rarr; 16 outputs. (A pilot with width 128 was clearly worse for flow; see the README.)</td></tr>
+                <tr><td>Networks</td><td>MLP, 3 hidden layers &times; 256, ReLU. MSE: 5 &rarr; 16 outputs. Flow: 5 + 16 + 1 = 22 &rarr; 16 outputs. (A width-128 pilot was clearly worse for flow matching.)</td></tr>
                 <tr><td>Training</td><td>Adam, lr 3&times;10<sup>&minus;4</sup>, batch 128, 150k steps, seed 0, laptop CPU</td></tr>
                 <tr><td>Checkpoint choice</td><td>best mean validation-rollout score on reset seeds <strong>0&ndash;49</strong>, evaluated every 5k steps</td></tr>
                 <tr><td>Final test</td><td>reset seeds <strong>1000&ndash;1099</strong> (100 episodes), never used for any choice; flow policy-noise seed = reset seed, plus two repeat passes with fresh noise seeds</td></tr>
@@ -274,7 +274,7 @@
         </div>
         <div class="callout reveal">
             <p class="k">Starter code and credit</p>
-            <p>Parts 1&ndash;2 build on the <a href="https://github.com/berkeleydeeprlcourse/homework_spring2026/tree/main/hw1">UC Berkeley CS 185/285 (Spring 2026) Assignment 1</a> starter code. I kept its dataset download/loader, <code>Normalizer</code>, sliding-window chunk dataset, policy class skeleton and receding-horizon evaluation loop. I implemented both policies, their losses and the Euler sampler, the training loop, the episode-level split, validation-based checkpoint selection, seeded rollouts, rollout recording and all of Part 3. W&amp;B logging was replaced by local CSV logs. Each module's docstring lists the exact changes.</p>
+            <p>Parts 1&ndash;2 build on the <a href="https://github.com/berkeleydeeprlcourse/homework_spring2026/tree/main/hw1">UC Berkeley CS 185/285 (Spring 2026) Assignment 1</a> starter code. I kept its dataset download/loader, <code>Normalizer</code>, sliding-window chunk dataset, policy class skeleton and receding-horizon evaluation loop. I implemented both policies, their losses and the Euler sampler, the training loop, the episode-level split, validation-based checkpoint selection, seeded rollouts, rollout recording and all of Part 3. W&amp;B logging was replaced by local CSV logs. Only the starter's <code>data.py</code> is imported as a module, unmodified. All other code, including the adapted pieces, is in the three project notebooks, with comments marking starter-derived logic. The code is submitted with the course deliverable and is not published on this site.</p>
         </div>
 
         <dl class="facts reveal">
@@ -289,8 +289,8 @@
 <!-- ================= PART 1 ================= -->
 <section id="part1">
     <div class="wrap">
-        <div class="label">Part 1 &middot; Direct MSE regression</div>
-        <h2 class="display reveal">Regress the chunk, then <em>see</em> what it does.</h2>
+        <div class="label">2 &middot; Part 1</div>
+        <h2 class="display reveal">Part 1: MSE Policy Results</h2>
 
         <h3 class="task reveal"><span class="num">Task 1</span>Prepare and inspect the demonstrations</h3>
         <div class="table-wrap reveal">
@@ -329,13 +329,13 @@
         </figure>
         <div class="two">
             <div class="prose reveal">
-                <h4>Why squared error drifts toward the conditional mean</h4>
+                <h4>Conditional-mean behavior of MSE regression</h4>
                 <p>For a fixed observation, $\mathbb E_{A\mid o}\|f-A\|^2$ is minimized by $f=\mathbb E[A\mid o]$. If one demonstrator went around the T clockwise and another counter-clockwise from nearly the same state, the loss-optimal answer lies between them, a path neither person would take. With a finite network, this pull acts over neighbourhoods of similar observations.</p>
-                <p>The figure picks the training observation whose 12 nearest neighbours (other episodes only) disagree most. The neighbour average itself (dashed) is a short hook between the two groups that no demonstrator executed, which is exactly the averaging risk. The trained network, however, does <strong>not</strong> average here: its chunk lies 17.6&nbsp;px from the closest expert chunk and 46&nbsp;px from the neighbour average (dashed). A 137k-parameter net can separate nearby observations, and its training loss of 0.010 against a validation loss of 0.110 says it largely memorized them. Averaging is a tendency, not a guarantee. Whether it hurts has to be measured in the simulator.</p>
+                <p>The figure picks the training observation whose 12 nearest neighbours (other episodes only) disagree most. The neighbour average itself (dashed) is a short curved path between the two groups that matches neither of them, which is the averaging risk in concrete form. The trained network, however, does <strong>not</strong> average here: its chunk lies 17.6&nbsp;px from the closest expert chunk and 46&nbsp;px from the neighbour average (dashed). A 137k-parameter net can separate nearby observations, and its training loss of 0.010 against a validation loss of 0.110 says it largely memorized them. Averaging is a tendency, not a guarantee. Whether it hurts has to be measured in the simulator.</p>
             </div>
             <figure class="reveal" style="margin-top:2.6rem">
                 <img src="results_part1/conditional_mean.png" alt="Twelve neighbouring expert chunks, their average, and the MSE prediction" loading="lazy">
-                <figcaption>Gray: 12 neighbouring expert chunks, one group heading up-left and one sweeping right. Dashed black: their average, a hook that goes nowhere. Orange: the MSE chunk, which follows the right-hand group.</figcaption>
+                <figcaption>Gray: 12 neighbouring expert chunks, one group heading up-left and one sweeping right. Dashed black: their average, which matches neither group. Orange: the MSE chunk, which follows the right-hand group.</figcaption>
             </figure>
         </div>
 
@@ -347,9 +347,9 @@
                 <tr class="hl"><td>Score, mean &plusmn; std of $R_e$</td><td class="n">0.575 &plusmn; 0.397</td></tr>
                 <tr class="hl"><td>Success rate</td><td class="n">11 / 100</td></tr>
                 <tr><td>Median score &middot; episodes &ge; 0.9 &middot; episodes &lt; 0.1</td><td class="n">0.74 &middot; 35 &middot; 22</td></tr>
-                <tr><td>Rollout runtime, 100 episodes (no rendering)</td><td class="n">7.2 s</td></tr>
-                <tr><td>Policy time per query</td><td class="n">0.13 ms</td></tr>
-                <tr><td>Training time (150k steps, CPU)</td><td class="n">272 s</td></tr>
+                <tr><td>Rollout runtime, 100 episodes (no rendering)</td><td class="n">7.7 s</td></tr>
+                <tr><td>Policy time per query</td><td class="n">0.11 ms</td></tr>
+                <tr><td>Training time (150k steps, CPU wall clock)</td><td class="n">180 s</td></tr>
                 </tbody>
             </table>
         </div>
@@ -364,9 +364,9 @@
             <figure><img src="results_part1/mse_seed1100.gif" alt="MSE rollout on seed 1100, pusher pinned at the wall" loading="lazy"><figcaption><strong>Illustration seed 1100:</strong> score 0. The predicted chunk points outside the arena, and after clipping the pusher stays pinned to the right wall.</figcaption></figure>
         </div>
         <div class="prose reveal">
-            <h4>Low imitation loss is not high task performance</h4>
+            <h4>Imitation loss vs. task performance</h4>
             <p>Imitation loss is measured <em>open loop</em> on expert states: one prediction, one target, every coordinate weighted equally. The score is <em>closed loop</em>. Each executed chunk changes the state the next prediction sees, small errors push the system into configurations the demonstrators never visited, and those errors compound over ~37 queries. Pushing also has decisive moments. A 10&nbsp;px miss at the moment of contact decides whether the T turns, while the same error in free space costs nothing. The loss cannot tell these apart, which is why the checkpoints kept improving as validation loss rose.</p>
-            <p><strong>Failures I observed</strong> were mostly <em>getting stuck</em>, not averaged motions cancelling out: dithering at a T corner (often near a wall) and, on unfamiliar starts, extrapolating out of the arena. MSE regression is far from hopeless here: 35 of 100 episodes reach &ge; 0.9 and 11 succeed.</p>
+            <p><strong>Observed failures</strong> were mostly <em>getting stuck</em>, not averaged motions cancelling out: dithering at a T corner (often near a wall) and, on unfamiliar starts, extrapolating out of the arena. MSE regression still performs reasonably here: 35 of 100 episodes reach &ge; 0.9 and 11 succeed.</p>
         </div>
     </div>
 </section>
@@ -375,18 +375,15 @@
 <div class="band" aria-label="Long-exposure photograph: still figures in a crowd blurred by motion">
     <div class="band-img"></div>
     <div class="wrap reveal">
-        <div class="hero-kicker">Interlude</div>
-        <h2 class="display">Average the crowd and you get a <em>ghost</em>.</h2>
-        <p>In a long exposure every passer-by contributes a little light to every pixel along their path, and the mean is a blur that no one walked. A regression policy faces the same pull. A generative policy instead draws one path at a time.</p>
-        <p class="place">4th of July, Morgantown, WV &middot; long exposure</p>
+        <p class="place">Long exposure &middot; 4th of July, Morgantown, WV</p>
     </div>
 </div>
 
 <!-- ================= PART 2 ================= -->
 <section id="part2">
     <div class="wrap">
-        <div class="label">Part 2 &middot; Conditional flow matching</div>
-        <h2 class="display reveal">From noise to a chunk in <em>ten</em> small steps.</h2>
+        <div class="label">3 &middot; Part 2</div>
+        <h2 class="display reveal">Part 2: Flow-Matching Policy Results</h2>
         <div class="prose reveal">
             <p class="intro">Same split, normalizer, $K$, network width/depth, optimizer and step budget as Part 1. Only the representation changes. Instead of predicting the chunk, the network predicts a <em>velocity</em> that carries Gaussian noise to a chunk.</p>
         </div>
@@ -394,7 +391,7 @@
         <h3 class="task reveal"><span class="num">Task 1</span>Construct conditional flow-matching examples</h3>
         <div class="prose reveal">
             <div class="math-block">$$A_\tau=(1-\tau)\,\epsilon+\tau A,\qquad u=A-\epsilon,\qquad \epsilon\sim\mathcal N(0,I),\ \tau\sim\mathcal U[0,1],$$</div>
-            <p>so $\tau=0$ is noise and $\tau=1$ is an action chunk. The velocity network $v_\theta(o,A_\tau,\tau)$ reads $[o, A_\tau, \tau]$ (5 + 16 + 1 = 22 values) and outputs 16. The notebook's checks all pass:</p>
+            <p>so $\tau=0$ is noise and $\tau=1$ is an action chunk. The velocity network $v_\theta(o,A_\tau,\tau)$ reads $[o, A_\tau, \tau]$ (5 + 16 + 1 = 22 values) and outputs 16. All shape and endpoint checks pass:</p>
             <ul>
                 <li>$A_\tau=\epsilon$ at $\tau=0$; $A_\tau=A$ at $\tau=1$; $A_{0.25}=0.75\epsilon+0.25A$.</li>
                 <li>The target $u$ has shape <code>[B, 8, 2]</code>, the network input width is 22, and the output is <code>[B, 8, 2]</code>.</li>
@@ -406,7 +403,7 @@
         <h3 class="task reveal"><span class="num">Task 2</span>Train the conditional velocity model</h3>
         <div class="prose reveal">
             <div class="math-block">$$\ell_{\mathrm{FM}}(o,A;\epsilon,\tau)=\tfrac{1}{2K}\big\|v_\theta(o,A_\tau,\tau)-(A-\epsilon)\big\|_F^2,\qquad \mathcal L_{\mathrm{FM}}=\mathbb E[\ell_{\mathrm{FM}}].$$</div>
-            <p>Fresh $\epsilon$ and $\tau$ are drawn every step. The training cost matches Part 1: 150k steps, batch 128, 141,584 parameters vs. 137,232, and 194&nbsp;s vs. 272&nbsp;s of CPU time. The per-step cost is the same; those wall-clock times are single runs and sensitive to background load.</p>
+            <p>Fresh $\epsilon$ and $\tau$ are drawn every step. The training cost matches Part 1: 150k steps, batch 128, 141,584 parameters vs. 137,232. Measured CPU wall-clock training time was 444&nbsp;s vs. 180&nbsp;s, but these times depend heavily on background load (an earlier identical run measured 194&nbsp;s vs. 272&nbsp;s); the per-step cost of the two networks is essentially the same.</p>
         </div>
         <figure class="reveal">
             <img src="results_part2/flow_losses.png" alt="Flow-matching training and validation loss, and validation rollout scores for flow and MSE" loading="lazy">
@@ -428,13 +425,13 @@
                 <tr><td>Median score</td><td class="n">0.74</td><td class="n">0.96</td></tr>
                 <tr><td>Episodes with $R_e&lt;0.1$</td><td class="n">22</td><td class="n">4</td></tr>
                 <tr><td>Repeat passes with new noise seeds (score / success)</td><td class="n">deterministic</td><td class="n">0.837 / 20% &middot; 0.870 / 27%</td></tr>
-                <tr><td>Policy time per query</td><td class="n">0.13 ms</td><td class="n">0.60 ms</td></tr>
-                <tr><td>Rollout runtime, 100 episodes</td><td class="n">7.2 s</td><td class="n">8.8 s</td></tr>
+                <tr><td>Policy time per query</td><td class="n">0.11 ms</td><td class="n">0.57 ms</td></tr>
+                <tr><td>Rollout runtime, 100 episodes</td><td class="n">7.7 s</td><td class="n">9.3 s</td></tr>
                 </tbody>
             </table>
         </div>
         <div class="prose reveal">
-            <p>On the same 100 seeds, flow &minus; MSE = <strong>+0.265</strong> (bootstrap 95% CI 0.174 to 0.356; sign-flip permutation p &lt; 10<sup>&minus;4</sup>). Flow wins 70 seeds, loses 25 and ties 5. The gap is about eight times larger than the 0.03 that the flow score moves between noise seeds. Sampling costs 10 network calls per query (4.6&times; the policy time), but physics dominates, so a whole rollout is only ~20% slower.</p>
+            <p>On the same 100 seeds, flow &minus; MSE = <strong>+0.265</strong> (bootstrap 95% CI 0.174 to 0.356; sign-flip permutation p &lt; 10<sup>&minus;4</sup>). Flow wins 70 seeds, loses 25 and ties 5. The gap is about eight times larger than the 0.03 that the flow score moves between noise seeds. Sampling costs 10 network calls per query (about 5&times; the policy time), but physics dominates, so a whole rollout is only ~20% slower.</p>
         </div>
         <figure class="reveal">
             <img src="results_part2/mse_vs_flow.png" alt="Per-seed scatter of flow versus MSE scores and histograms of both" loading="lazy">
@@ -443,7 +440,7 @@
 
         <div class="two">
             <div class="prose reveal">
-                <h4>How many integration steps?</h4>
+                <h4>Effect of the number of integration steps $N$</h4>
                 <p>Validation seeds only:</p>
                 <div class="table-wrap" style="margin-top:0.8rem">
                     <table>
@@ -451,10 +448,10 @@
                         <tbody>
                         <tr><td class="n">1</td><td class="n">0.62</td><td class="n">14%</td><td class="n">0.17</td></tr>
                         <tr><td class="n">2</td><td class="n">0.74</td><td class="n">24%</td><td class="n">0.23</td></tr>
-                        <tr><td class="n">4</td><td class="n">0.87</td><td class="n">22%</td><td class="n">0.31</td></tr>
-                        <tr class="hl"><td class="n">10</td><td class="n">0.89*</td><td class="n">26%</td><td class="n">0.59</td></tr>
-                        <tr><td class="n">20</td><td class="n">0.84</td><td class="n">14%</td><td class="n">1.02</td></tr>
-                        <tr><td class="n">50</td><td class="n">0.84</td><td class="n">28%</td><td class="n">2.46</td></tr>
+                        <tr><td class="n">4</td><td class="n">0.87</td><td class="n">22%</td><td class="n">0.28</td></tr>
+                        <tr class="hl"><td class="n">10</td><td class="n">0.89*</td><td class="n">26%</td><td class="n">0.56</td></tr>
+                        <tr><td class="n">20</td><td class="n">0.84</td><td class="n">14%</td><td class="n">1.10</td></tr>
+                        <tr><td class="n">50</td><td class="n">0.84</td><td class="n">28%</td><td class="n">2.24</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -476,7 +473,7 @@
             <figure><img src="results_part2/flow_seed1100.gif" alt="Flow rollout on seed 1100, near miss" loading="lazy"><figcaption><strong>Seed 1100:</strong> score 0.977, no success. The typical flow non-success is a near miss: 70 episodes reach &ge; 0.9, but only 22 cross 95% coverage.</figcaption></figure>
         </div>
         <div class="callout reveal">
-            <p class="k">Checkpoint handed to Part 3</p>
+            <p class="k">Part 2 checkpoint</p>
             <p>The Part 2 checkpoint was chosen on validation only and saved unchanged as <code>checkpoints/flow_policy.pt</code>. Part 3 checks its SHA-256 before collecting any data.</p>
         </div>
     </div>
@@ -485,8 +482,8 @@
 <!-- ================= PART 3 ================= -->
 <section id="part3">
     <div class="wrap">
-        <div class="label">Part 3 &middot; Reward-guided fine-tuning</div>
-        <h2 class="display reveal">Does weighting the <em>better</em> rollouts help?</h2>
+        <div class="label">4 &middot; Part 3</div>
+        <h2 class="display reveal">Part 3: Reward-Weighted Fine-Tuning Results</h2>
         <div class="prose reveal">
             <p class="intro">Reward-weighted flow-matching regression, a classroom adaptation of reward-weighted policy improvement (motivated by Fan et al., ICLR 2025, Sec. 4.2). Three conditions start from the same checkpoint:</p>
         </div>
@@ -511,7 +508,7 @@
                 <tbody>
                 <tr><td>Episodes &middot; environment steps &middot; policy queries</td><td class="n">50 &middot; 13,483 &middot; 1,710</td></tr>
                 <tr class="hl"><td>Retained complete chunks $M$ (incomplete final chunks dropped)</td><td class="n">1,663 (47 dropped)</td></tr>
-                <tr><td>Collection wall time</td><td class="n">6.5 s</td></tr>
+                <tr><td>Collection wall time</td><td class="n">4.8 s</td></tr>
                 <tr><td>Episode score: mean &plusmn; std &middot; median &middot; min</td><td class="n">0.920 &plusmn; 0.163 &middot; 0.973 &middot; 0.074</td></tr>
                 <tr><td>Success rate</td><td class="n">28%</td></tr>
                 <tr><td>Mean score gap between the two noise seeds of one reset seed</td><td class="n">0.106</td></tr>
@@ -523,7 +520,7 @@
             <figcaption>Left: the policy was already good on these seeds, and most scores pile up near 1. Middle: the same start with a different noise seed can change the score a lot. Right: failed episodes run the full 300 steps and contribute 37 chunks each, against ~24 for successes.</figcaption>
         </figure>
         <div class="callout reveal">
-            <p class="k">One saved tuple, traced</p>
+            <p class="k">Example collected tuple</p>
             <p>Tuple #37 comes from episode 1 (reset seed 2000, policy seed 50001), query 0. It starts at $o=(144, 280, 152.4, 385.4, 3.31)$ and executes eight actions moving the pusher from (132, 283) to (109, 338). The reward was <strong>0.051 for all 8 steps</strong>. The episode reached full coverage at step 163, so this chunk is labelled $R=1.0$ (the sum of rewards would have been 27.4). Every chunk in that episode gets the same credit, whether or not it helped.</p>
         </div>
 
@@ -571,15 +568,15 @@
             </table>
         </div>
         <div class="prose reveal">
-            <p><strong>Costs, reported separately:</strong> collection 50 episodes / 13,483 steps / 6.5&nbsp;s. Fine-tuning 300 updates &asymp; 0.6&nbsp;s per branch (3.8&nbsp;s for all six). The validation budget check took 139&nbsp;s, almost all of it 900 validation episodes. For reference, Part 2 training took 194&nbsp;s. Over all three noise passes (300 episodes per condition and seed) the picture is the same at a smaller scale: A 0.849, B 0.830&ndash;0.832, C 0.818&ndash;0.831.</p>
+            <p><strong>Costs, reported separately:</strong> collection 50 episodes / 13,483 steps / 4.8&nbsp;s. Fine-tuning 300 updates &asymp; 0.5&nbsp;s per branch (3.0&nbsp;s for all six). The validation budget check took 140&nbsp;s, almost all of it 900 validation episodes. For reference, Part 2 training took 444&nbsp;s of CPU wall-clock time. Over all three noise passes (300 episodes per condition and seed) the picture is the same at a smaller scale: A 0.849, B 0.830&ndash;0.832, C 0.818&ndash;0.831.</p>
         </div>
         <figure class="reveal">
             <img src="results_part3/abc_comparison.png" alt="C versus B per seed, C minus B versus A's score, and score distributions for A, B and C" loading="lazy">
             <figcaption>Left: C vs. B on every test seed for all three fine-tuning seeds. Middle: C &minus; B against A's score on that seed (a proxy for start difficulty). There is no pattern beyond scatter on both sides of zero, mostly among seeds A already solves. Right: the fine-tuned branches have a heavier low-score tail than A.</figcaption>
         </figure>
         <div class="prose reveal">
-            <h4>How far did fine-tuning move the policy?</h4>
-            <p>With identical starting noise on 2,000 validation observations, B and C shift the executed actions by about <strong>5&nbsp;px</strong> relative to A, while C differs from B by only <strong>0.5&nbsp;px</strong>. Yet B's and C's per-seed test scores differ from A's by 0.14 on average, and each branch has 9&ndash;15 seeds that drop by more than 0.3 and 5&ndash;7 that gain more than 0.3. Contact-rich pushing is chaotic enough that a few pixels can flip an episode. The rollouts below make this concrete.</p>
+            <h4>Policy change after fine-tuning</h4>
+            <p>With identical starting noise on 2,000 validation observations, B and C shift the executed actions by about <strong>5&nbsp;px</strong> relative to A, while C differs from B by only <strong>0.5&nbsp;px</strong>. Yet B's and C's per-seed test scores differ from A's by 0.14 on average, and each branch has 9&ndash;15 seeds that drop by more than 0.3 and 5&ndash;7 that gain more than 0.3. In this contact-rich task, small action differences can change an episode's outcome, as the rollouts below show.</p>
         </div>
         <p class="gif-row-label reveal">Seed 1082: the largest C &minus; B gain (fine-tuning seed 0)</p>
         <div class="gifs reveal">
@@ -597,15 +594,15 @@
         <div class="gifs reveal">
             <figure><img src="results_part3/A_seed1100.gif" alt="Condition A on seed 1100" loading="lazy"><figcaption><strong>A:</strong> 0.977, no success</figcaption></figure>
             <figure><img src="results_part3/B_seed1100.gif" alt="Condition B on seed 1100" loading="lazy"><figcaption><strong>B:</strong> 0.984, no success</figcaption></figure>
-            <figure><img src="results_part3/C_seed1100.gif" alt="Condition C on seed 1100" loading="lazy"><figcaption><strong>C:</strong> success in 264 steps. One rollout, not evidence: the full-test contrast is &minus;0.013.</figcaption></figure>
+            <figure><img src="results_part3/C_seed1100.gif" alt="Condition C on seed 1100" loading="lazy"><figcaption><strong>C:</strong> success in 264 steps. A single rollout; the full-test contrast is &minus;0.013.</figcaption></figure>
         </div>
 
         <div class="callout warn reveal">
-            <p class="k">Verdict</p>
+            <p class="k">Conclusion</p>
             <p><strong>The evidence does not support the hypothesis.</strong> With this collection, &beta; and cap, reward weighting produced no detectable improvement over the equal-weight control (C &minus; B = &minus;0.013, CI includes 0, all three fine-tuning seeds slightly negative). Fine-tuning on the policy's own rollouts, weighted or not, slightly <em>hurt</em> relative to leaving A alone (C &minus; A = &minus;0.053).</p>
         </div>
         <div class="prose reveal">
-            <h4>Why, and why episode scores can mislead</h4>
+            <h4>Discussion and limitations of episode scores</h4>
             <ol>
                 <li><strong>Saturated weights.</strong> A already scored 0.92 on the collection seeds, so the capped exponential gave 89% of chunks the same weight. The experiment barely varied the quantity it was meant to test.</li>
                 <li><strong>Coarse credit.</strong> Each chunk inherits its episode's best moment, including the wandering before it and the over-pushing after it (tuple #37 above).</li>
@@ -623,9 +620,9 @@
 <!-- ================= REPRODUCIBILITY ================= -->
 <section id="repro">
     <div class="wrap">
-        <div class="label">Reproducibility</div>
+        <div class="label">5 &middot; Reproducibility</div>
         <div class="prose reveal">
-            <p>Python 3.12.10, torch 2.15.0+cpu, gym-pusht 0.1.8, gymnasium 1.4.0, pymunk 6.11.1, on a laptop CPU with 4 torch threads. Seeds: split 0, training 0, fine-tuning 0/1/2, validation resets 0&ndash;49, test resets 1000&ndash;1099, collection resets 2000&ndash;2024, illustration reset 1100. Every rollout records its reset seed and policy-noise seed. Notebooks: <code>part1.ipynb</code>, <code>part2.ipynb</code> and <code>part3.ipynb</code> (about 7, 7 and 6 minutes end to end). Checkpoints, the normalizer, the split, the collection dataset and all per-episode CSVs are in the repository.</p>
+            <p>Python 3.12.10, torch 2.15.0+cpu, gym-pusht 0.1.8, gymnasium 1.4.0, pymunk 6.11.1, on a laptop CPU with 4 torch threads. Seeds: split 0, training 0, fine-tuning 0/1/2, validation resets 0&ndash;49, test resets 1000&ndash;1099, collection resets 2000&ndash;2024, illustration reset 1100. Every rollout records its reset seed and policy-noise seed. Notebooks: <code>part1.ipynb</code>, <code>part2.ipynb</code> and <code>part3.ipynb</code> (roughly 5(about 7, 7 and 6 minutes end to end)ndash;12 minutes each end to end on a laptop CPU, depending on load). Checkpoints, the normalizer, the split, the collection dataset and all per-episode CSVs are included with the submitted code.</p>
         </div>
         <div class="label" style="margin-top:4rem">References</div>
         <ul class="refs reveal">

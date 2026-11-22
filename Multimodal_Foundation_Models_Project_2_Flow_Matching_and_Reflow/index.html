@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Flow Matching &amp; Reflow &middot; Stanford White IV</title>
+    <meta name="description" content="Multimodal Foundation Models Project 2: flow-matching velocity models that transport a 3D Gaussian to a BCC cell, a Voronoi polycrystal and spur gears, a step-count study, and a controlled test of reflow.">
+    <script>try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+            onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false})"></script>
+    <style>
+        /* Design tokens and components follow the portfolio stylesheet (assets/site.css),
+           inlined so this page also works on its own inside the project folder. */
+        :root {
+            --bg: #eef2f3; --bg-deep: #e3e9eb; --surface: #f8fafa; --ink: #15212a; --ink-soft: #46555f;
+            --ink-faint: #7b8991; --rule: #d3dcdf; --accent: #23686c; --accent-soft: rgba(35, 104, 108, 0.08);
+            --glow: #9a5a30; --hero-fade: rgba(238, 242, 243, 1); --shadow: 0 20px 50px -25px rgba(21, 33, 42, 0.35);
+            --mse: #c26a2e; --flow: #23686c; --b: #8a6bb0;
+            --serif: 'Cormorant Garamond', Garamond, Georgia, serif;
+            --sans: 'Manrope', -apple-system, 'Segoe UI', Roboto, sans-serif;
+            color-scheme: light;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-theme="light"]) {
+                --bg: #0c1217; --bg-deep: #090e12; --surface: #121b22; --ink: #e4eaec; --ink-soft: #a3b0b7;
+                --ink-faint: #6d7c85; --rule: #1f2b33; --accent: #79c2bd; --accent-soft: rgba(121, 194, 189, 0.08);
+                --glow: #e2b48c; --hero-fade: rgba(12, 18, 23, 1); --shadow: 0 20px 50px -20px rgba(0, 0, 0, 0.7);
+                --mse: #e09a63; --flow: #79c2bd; --b: #b9a0d8;
+                color-scheme: dark;
+            }
+        }
+        :root[data-theme="dark"] {
+            --bg: #0c1217; --bg-deep: #090e12; --surface: #121b22; --ink: #e4eaec; --ink-soft: #a3b0b7;
+            --ink-faint: #6d7c85; --rule: #1f2b33; --accent: #79c2bd; --accent-soft: rgba(121, 194, 189, 0.08);
+            --glow: #e2b48c; --hero-fade: rgba(12, 18, 23, 1); --shadow: 0 20px 50px -20px rgba(0, 0, 0, 0.7);
+            --mse: #e09a63; --flow: #79c2bd; --b: #b9a0d8;
+            color-scheme: dark;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body { font-family: var(--sans); font-size: 16px; line-height: 1.7; color: var(--ink); background: var(--bg);
+               -webkit-font-smoothing: antialiased; transition: background 0.4s, color 0.4s; }
+        a { color: inherit; }
+        ::selection { background: var(--accent); color: var(--bg); }
+        .wrap { max-width: 1080px; margin: 0 auto; padding: 0 2rem; }
+
+        /* Top bar */
+        .topbar { position: fixed; inset: 0 0 auto 0; z-index: 20; transition: background 0.3s, border-color 0.3s; border-bottom: 1px solid transparent; }
+        .topbar.scrolled { background: color-mix(in srgb, var(--bg) 82%, transparent); backdrop-filter: blur(14px);
+                           -webkit-backdrop-filter: blur(14px); border-bottom-color: var(--rule); }
+        .topbar .wrap { display: flex; align-items: center; justify-content: space-between; height: 64px; gap: 1rem; }
+        .brand { font-family: var(--serif); font-size: 1.3rem; font-weight: 500; text-decoration: none; letter-spacing: 0.01em; white-space: nowrap; }
+        .menu { display: flex; align-items: center; gap: 1.6rem; list-style: none; }
+        .menu a { font-size: 0.78rem; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; text-decoration: none; color: var(--ink-soft); transition: color 0.2s; }
+        .menu a:hover { color: var(--ink); }
+        .theme-toggle { background: none; border: 1px solid var(--rule); color: var(--ink-soft); width: 34px; height: 34px; border-radius: 50%;
+                        cursor: pointer; display: grid; place-items: center; transition: color 0.2s, border-color 0.2s; }
+        .theme-toggle:hover { color: var(--accent); border-color: var(--accent); }
+        .theme-toggle svg { width: 16px; height: 16px; }
+        .on-photo .topbar:not(.scrolled) .brand, .on-photo .topbar:not(.scrolled) .menu a { color: rgba(255, 255, 255, 0.88); }
+        .on-photo .topbar:not(.scrolled) .theme-toggle { color: rgba(255, 255, 255, 0.85); border-color: rgba(255, 255, 255, 0.35); }
+
+        /* Hero */
+        .hero { position: relative; min-height: 92vh; display: flex; align-items: flex-end; color: #fff; overflow: hidden; background: #111; }
+        .hero-img { position: absolute; inset: 0; background: #111 url('results_part2/hero_polycrystal.jpg') 60% 50% / cover; transform: scale(1.04);
+                    animation: drift 30s ease-in-out infinite alternate; }
+        @keyframes drift { to { transform: scale(1.1) translateY(-1.5%); } }
+        .hero::after { content: ""; position: absolute; inset: 0;
+                       background: linear-gradient(to bottom, rgba(8, 14, 19, 0.5) 0%, rgba(8, 14, 19, 0.15) 35%, rgba(8, 14, 19, 0.45) 65%, var(--hero-fade) 94%); }
+        .hero .wrap { position: relative; z-index: 1; width: 100%; padding-bottom: 5rem; }
+        .hero-kicker { font-size: 0.78rem; font-weight: 500; letter-spacing: 0.22em; text-transform: uppercase; color: rgba(255, 255, 255, 0.82); }
+        .hero h1 { font-family: var(--serif); font-weight: 400; font-size: clamp(2.5rem, 6.4vw, 4.8rem); line-height: 1.02; letter-spacing: -0.01em;
+                   margin: 0.6rem 0 1.1rem; text-shadow: 0 2px 30px rgba(0, 0, 0, 0.45); }
+        .hero h1 em { font-style: italic; color: #a9e0da; }
+        .hero p.lead { max-width: 40rem; font-size: 1.1rem; color: rgba(255, 255, 255, 0.9); text-shadow: 0 1px 12px rgba(0, 0, 0, 0.5); }
+        .hero-actions { margin-top: 2rem; display: flex; flex-wrap: wrap; gap: 0.75rem; }
+        .btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.7rem 1.3rem; border-radius: 999px; font-size: 0.85rem; font-weight: 600;
+               letter-spacing: 0.02em; text-decoration: none; transition: background 0.2s, color 0.2s, border-color 0.2s, transform 0.2s; }
+        .btn:hover { transform: translateY(-1px); }
+        .btn-solid { background: var(--accent); color: var(--bg); border: 1px solid var(--accent); }
+        .btn-solid:hover { background: var(--ink); border-color: var(--ink); }
+        .btn-ghost { border: 1px solid var(--rule); color: var(--ink); }
+        .hero .btn-ghost { border-color: rgba(255, 255, 255, 0.4); background: rgba(10, 16, 20, 0.4); color: #fff; backdrop-filter: blur(6px); }
+        .hero .btn-ghost:hover { border-color: #fff; background: rgba(10, 16, 20, 0.6); }
+
+        /* Headline numbers */
+        .facts { margin-top: 2.5rem; display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--rule); }
+        .facts div { padding: 1.1rem 1rem 0 0; }
+        .facts div + div { padding-left: 1rem; border-left: 1px solid var(--rule); }
+        .facts dt { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-faint); }
+        .facts dd { font-family: var(--serif); font-size: 2rem; line-height: 1.15; margin-top: 0.2rem; }
+        .facts dd small { display: block; font-family: var(--sans); font-size: 0.8rem; color: var(--ink-soft); line-height: 1.4; margin-top: 0.2rem; }
+
+        /* Sections */
+        section { padding: 6rem 0 0; scroll-margin-top: 40px; }
+        .label { display: flex; align-items: center; gap: 1rem; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase;
+                 color: var(--accent); margin-bottom: 2rem; }
+        .label::after { content: ""; flex: 1; height: 1px; background: var(--rule); }
+        h2.display { font-family: var(--serif); font-weight: 400; font-size: clamp(2rem, 4.2vw, 2.9rem); line-height: 1.15; letter-spacing: -0.005em; max-width: 32ch; }
+        h2.display em { font-style: italic; color: var(--accent); }
+        h3.task { font-family: var(--serif); font-weight: 500; font-size: 1.6rem; line-height: 1.25; margin: 3.5rem 0 0.4rem; }
+        h3.task .num { font-family: var(--sans); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent);
+                       display: block; margin-bottom: 0.2rem; }
+        h4 { font-size: 0.78rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-faint); margin: 2rem 0 0.4rem; }
+        .prose p, .prose li { color: var(--ink-soft); max-width: 72ch; }
+        .prose p { margin-top: 1rem; }
+        .prose p strong, .prose li strong { color: var(--ink); font-weight: 600; }
+        .prose ul, .prose ol { margin: 0.8rem 0 0 1.3rem; }
+        .prose li { margin-top: 0.4rem; }
+        .intro { font-size: 1.08rem; }
+        code { font-family: ui-monospace, 'Cascadia Code', Consolas, monospace; font-size: 0.86em; background: var(--accent-soft); padding: 0.08em 0.35em; border-radius: 4px; color: var(--ink); }
+
+        /* Figures */
+        figure { margin: 2rem 0 0; }
+        figure img { display: block; width: 100%; height: auto; border-radius: 4px; background: #fff; box-shadow: var(--shadow); }
+        figcaption { margin-top: 0.7rem; font-size: 0.86rem; color: var(--ink-faint); max-width: 80ch; }
+        figcaption strong { color: var(--ink-soft); }
+        .fig-narrow { max-width: 620px; }
+        .fig-mid { max-width: 820px; }
+        .two { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; align-items: start; }
+        .gifs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 1.5rem; }
+        .gifs figure { margin: 0; }
+        .gifs img { box-shadow: none; border: 1px solid var(--rule); }
+        .gifs figcaption { font-size: 0.8rem; margin-top: 0.4rem; }
+        .gifs-wide img { background: #fff; }
+        .gif-row-label { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-faint); margin-top: 1.6rem; }
+
+        /* Tables */
+        .table-wrap { overflow-x: auto; margin-top: 1.5rem; }
+        table { border-collapse: collapse; width: 100%; font-size: 0.9rem; font-variant-numeric: tabular-nums; }
+        th, td { padding: 0.55rem 0.8rem; text-align: left; border-bottom: 1px solid var(--rule); vertical-align: top; }
+        th { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-faint); border-bottom-color: var(--ink-faint); }
+        td.n, th.n { text-align: right; white-space: nowrap; }
+        th:first-child, td:first-child { min-width: 11rem; }
+        tr.hl td { background: var(--accent-soft); }
+        td .sw { display: inline-block; width: 0.7rem; height: 0.7rem; border-radius: 2px; margin-right: 0.45rem; vertical-align: -0.05rem; }
+
+        .callout { margin-top: 2rem; padding: 1.2rem 1.4rem; border-left: 3px solid var(--accent); background: var(--surface); border-radius: 0 6px 6px 0; }
+        .callout p { margin-top: 0.5rem; color: var(--ink-soft); max-width: 74ch; }
+        .callout p:first-child { margin-top: 0; }
+        .callout .k { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); }
+        .callout.warn { border-left-color: var(--glow); }
+        .callout.warn .k { color: var(--glow); }
+        .math-block { margin: 1.2rem 0 0.4rem; overflow-x: auto; color: var(--ink); }
+
+        /* Photo band (same treatment as the portfolio showcase) */
+        .band { position: relative; margin-top: 7rem; padding: 0; min-height: 62vh; display: flex; align-items: flex-end; overflow: hidden; color: #fff; background: #111; }
+        .band-img { position: absolute; inset: 0; background: #111 url('results_part2/band_gears.jpg') 50% 50% / cover; }
+        .band::after { content: ""; position: absolute; inset: 0;
+                       background: linear-gradient(to bottom, var(--hero-fade) 0%, rgba(8, 14, 19, 0.15) 22%, rgba(8, 14, 19, 0.2) 50%, rgba(8, 14, 19, 0.75) 85%, rgba(8, 14, 19, 0.88) 100%); }
+        .band .wrap { position: relative; z-index: 1; width: 100%; padding-bottom: 4rem; }
+        .band h2.display { color: #fff; margin-top: 0.6rem; text-shadow: 0 2px 24px rgba(0, 0, 0, 0.5); }
+        .band h2.display em { color: #a9e0da; }
+        .band p { margin-top: 0.9rem; max-width: 40rem; color: rgba(255, 255, 255, 0.86); }
+        .band .place { margin-top: 1.4rem; font-size: 0.78rem; letter-spacing: 0.06em; color: rgba(255, 255, 255, 0.7); }
+
+        .refs { list-style: none; }
+        .refs li { padding: 0.9rem 0; border-top: 1px solid var(--rule); font-size: 0.92rem; color: var(--ink-soft); }
+        .refs li:last-child { border-bottom: 1px solid var(--rule); }
+        .refs a { color: var(--accent); }
+
+        footer { margin-top: 6rem; padding: 2rem 0 2.5rem; border-top: 1px solid var(--rule); font-size: 0.82rem; color: var(--ink-faint); }
+        footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; }
+
+        .reveal { opacity: 0; transform: translateY(18px); transition: opacity 0.9s ease, transform 0.9s ease; }
+        .reveal.in { opacity: 1; transform: none; }
+        @media (prefers-reduced-motion: reduce) {
+            .hero-img { animation: none; } .reveal { opacity: 1; transform: none; transition: none; } html { scroll-behavior: auto; }
+        }
+        @media (max-width: 900px) {
+            .two { grid-template-columns: 1fr; }
+            .facts { grid-template-columns: 1fr 1fr; }
+            .facts div:nth-child(3) { padding-left: 0; border-left: none; }
+        }
+        @media (max-width: 720px) {
+            .wrap { padding: 0 1rem; }
+            .menu { gap: 0.9rem; }
+            .menu .hide-sm { display: none; }
+            section { padding-top: 4.5rem; }
+            .hero { min-height: 85vh; }
+            .hero .wrap { padding-bottom: 3rem; }
+            .gifs { grid-template-columns: 1fr 1fr; }
+            .facts { grid-template-columns: 1fr; }
+            .facts div + div { padding-left: 0; border-left: none; border-top: 1px solid var(--rule); padding-top: 0.9rem; margin-top: 0.9rem; }
+            .band { min-height: 60vh; }
+        }
+        @media (max-width: 540px) {
+            .brand { font-size: 1.12rem; }
+            .menu a { font-size: 0.7rem; letter-spacing: 0.08em; }
+            .theme-toggle { width: 30px; height: 30px; flex-shrink: 0; }
+            .gifs { grid-template-columns: 1fr; }
+        }
+        @media print {
+            :root, :root[data-theme="dark"] { --bg: #fff; --surface: #f4f7f7; }
+            @page { margin: 12mm 0; }
+            .topbar, .theme-toggle { display: none; }
+            .hero { min-height: 0; padding-top: 2.5rem; }
+            .hero-img { animation: none; }
+            .reveal { opacity: 1; transform: none; }
+            .band { min-height: 320px; break-inside: avoid; }
+            section { padding-top: 2.5rem; }
+            figure, .callout, table, .gifs { break-inside: avoid; }
+            .two { grid-template-columns: 1fr 1fr; }
+            .gifs { grid-template-columns: repeat(3, 1fr); }
+            body { font-size: 12.5px; }
+        }
+    </style>
+</head>
+<body class="on-photo">
+
+<header class="topbar">
+    <div class="wrap">
+        <a class="brand" href="https://stanfordwhiteiv.github.io/">Stanford White IV</a>
+        <ul class="menu">
+            <li class="hide-sm"><a href="#setup">Setup</a></li>
+            <li><a href="#part1">Part 1</a></li>
+            <li><a href="#part2">Part 2</a></li>
+            <li><a href="#part3">Part 3</a></li>
+            <li class="hide-sm"><a href="https://stanfordwhiteiv.github.io/#projects">Projects</a></li>
+            <li>
+                <button class="theme-toggle" aria-label="Toggle light and dark theme">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+                </button>
+            </li>
+        </ul>
+    </div>
+</header>
+
+<!-- ================= HERO ================= -->
+<div class="hero" id="top">
+    <div class="hero-img" role="img" aria-label="Point cloud of a cube divided into 24 coloured Voronoi grains, generated by the learned flow from Gaussian noise"></div>
+    <div class="wrap">
+        <div class="hero-kicker">Multimodal Foundation Models &middot; Project 2</div>
+        <h1>Flow Matching and<br>3D Point-Cloud Transport</h1>
+        <p class="lead">Technical report. Velocity models trained by flow matching carry a 3D Gaussian to a BCC unit cell, a Voronoi polycrystal, a spur gear and a meshing gear pair. Includes a study of Euler step count and a controlled test of one round of reflow.</p>
+        <div class="hero-actions">
+            <a class="btn btn-solid" href="#setup">Read the report</a>
+            <a class="btn btn-ghost" href="#animation">Animation</a>
+            <a class="btn btn-ghost" href="#part3">Reflow study</a>
+        </div>
+    </div>
+</div>
+
+<main>
+
+<!-- ================= SETUP ================= -->
+<section id="setup">
+    <div class="wrap">
+        <div class="label">1 &middot; Setup</div>
+        <h2 class="display reveal">Experimental Setup</h2>
+        <div class="prose reveal">
+            <p class="intro">A velocity network $v_\theta(x,t)$ is trained to move points from a source distribution to a target distribution. The model works only on point <strong>coordinates</strong>; colours on this page are visualization attributes and never enter training. All distributions are three-dimensional.</p>
+            <div class="math-block">$$x_t=(1-t)\,x_0+t\,x_1,\qquad u=x_1-x_0,\qquad \mathcal L(\theta)=\mathbb E_{x_0,x_1,t}\big\|v_\theta(x_t,t)-u\big\|_2^2,\quad t\sim\mathcal U[0,1],$$</div>
+            <p>with $t=0$ the source and $t=1$ the target. Unless stated otherwise, $x_0$ and $x_1$ are drawn <em>independently</em> (random pairing). Sampling uses forward Euler, $z_{k+1}=z_k+\tfrac1K v_\theta(z_k,k/K)$, so $K$ steps cost exactly $K$ network evaluations (NFE).</p>
+        </div>
+        <div class="table-wrap reveal">
+            <table>
+                <thead><tr><th>Item</th><th>Choice</th></tr></thead>
+                <tbody>
+                <tr><td>Source</td><td>$\mathcal N(0,I_3)$ for Parts 1, 3 and the first Part 2 leg; Part 2 legs 2&ndash;4 start from the previous shape</td></tr>
+                <tr><td>Targets</td><td>Part 1: BCC unit cell (9 Gaussian blobs). Part 2: 24-grain Voronoi polycrystal, 24-tooth spur gear, a 16 + 12-tooth meshing gear pair, and back to $\mathcal N(0,I_3)$. Part 3: the polycrystal.</td></tr>
+                <tr><td>Part 1 network</td><td>MLP $(x,y,z,t)\to\mathbb R^3$, 3 hidden layers &times; 128, SiLU (34,051 parameters); batch 256, 20,000 steps</td></tr>
+                <tr><td>Part 2/3 network</td><td>MLP, 4 &times; 512, SiLU; inputs $x$, 8 sin/cos frequencies of $t$, 128 fixed random Fourier features of $x$ (930,819 parameters); batch 4096, 40,000 steps</td></tr>
+                <tr><td>Optimizer</td><td>Adam, learning rate 10<sup>&minus;3</sup> with cosine decay to 10<sup>&minus;5</sup>; training data drawn with replacement from a fixed pool of 10<sup>6</sup> target points</td></tr>
+                <tr><td>Quality metrics</td><td>histogram total variation (TV) on a fixed 16&sup3; grid over $[-2,2]^3$ plus one overflow cell; sliced Wasserstein-2; shape-specific fractions (points in grain-boundary slabs, outside the cube). Always against <em>independent</em> target samples; the noise floor is two independent target draws.</td></tr>
+                <tr><td>Hardware</td><td>NVIDIA RTX 5090 Laptop GPU, Python 3.12.10, torch 2.11.0+cu128. Training, sampling and timings use the GPU. Another process shared the GPU during the runs, so absolute times are indicative.</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="callout reveal">
+            <p class="k">Changes from the assignment (approved by the instructor)</p>
+            <p>(1) Every distribution is 3D instead of 2D. (2) Training runs on a GPU instead of a CPU; CPU timings for sampling are reported for reference. (3) The Part 2 target is a sequence of shapes that follows a metal's life cycle: noise &rarr; polycrystal &rarr; gear &rarr; rotating gear &rarr; two meshing gears &rarr; rotating pair &rarr; noise. Each shape-to-shape transport is a separately trained flow; the rotations are exact rigid-body motions and are labelled as such. All tasks of Parts 1&ndash;3 are otherwise answered as specified.</p>
+        </div>
+
+        <dl class="facts reveal">
+            <div><dt>Part 1 loss</dt><dd>3.642<small>irreducible floor 3.614; field error 0.028</small></dd></div>
+            <div><dt>Boundary leakage</dt><dd>10.7%<small>of points in grain-boundary slabs (uniform cube: 19.7%)</small></dd></div>
+            <div><dt>One Euler step</dt><dd>0.088<small>TV after reflow vs. 0.992 for the baseline</small></dd></div>
+            <div><dt>Path excess</dt><dd>0.510 &rarr; 0.0001<small>length &minus; chord, baseline &rarr; reflow</small></dd></div>
+        </dl>
+    </div>
+</section>
+
+<!-- ================= PART 1 ================= -->
+<section id="part1">
+    <div class="wrap">
+        <div class="label">2 &middot; Part 1</div>
+        <h2 class="display reveal">Part 1: A 3D Flow from Scratch</h2>
+
+        <h3 class="task reveal"><span class="num">Task 1</span>Source, target and training pairs</h3>
+        <div class="prose reveal">
+            <p><strong>Target.</strong> A body-centred cubic unit cell: the eight corners $(\pm1,\pm1,\pm1)$ and the body centre $(0,0,0)$, each chosen with probability 1/9, plus isotropic Gaussian noise of standard deviation $\sigma=0.15$. The coordinates are in arbitrary units with the cube edge equal to 2, so the target has about the same spread as the source (per-axis std 0.95 vs. 1). <strong>Source:</strong> $x_0\sim\mathcal N(0,I_3)$. <strong>Pairs:</strong> $x_0$ and $x_1$ independent, $t\sim\mathcal U[0,1]$, $x_t=(1-t)x_0+tx_1$, $u=x_1-x_0$.</p>
+        </div>
+        <figure class="reveal">
+            <img src="results_part1/source_target_pairs.png" alt="Gaussian source cloud, BCC target cloud with nine blobs, and 60 random pairs joined by straight lines with points at six times" loading="lazy">
+            <figcaption><strong>Left:</strong> source. <strong>Middle:</strong> target (the body-centre blob overlaps two corners in this view). <strong>Right:</strong> 60 random pairs; dots mark $x_t$ at $t=0,0.2,\dots,1$.</figcaption>
+        </figure>
+        <div class="prose reveal">
+            <p><strong>Why the velocity is constant along each training path.</strong> For a fixed pair, $x_t$ is linear in $t$, so $\frac{d}{dt}x_t=x_1-x_0$ for every $t$: each path is a straight segment traversed at constant speed. Numerically, finite differences between the six time slices match $x_1-x_0$ to $10^{-7}$ (float32 round-off). Because the pairs are random, the segments cross: many different targets $u$ occur at the same $(x_t,t)$.</p>
+        </div>
+
+        <h3 class="task reveal"><span class="num">Task 2</span>Train the velocity model</h3>
+        <div class="prose reveal">
+            <p>The network receives only $(x_t,t)$, never $x_0$ or $x_1$. At a given $(x,t)$ the loss is minimized by the conditional mean of the targets that pass through that point, $v^*(x,t)=\mathbb E[x_1-x_0\mid x_t=x]$, the <em>marginal velocity</em>. The remaining spread of $u$ around $v^*$ cannot be predicted, so the loss does not go to zero. For this Gaussian-mixture target $v^*$ has a closed form. Given the blob $k$, $(x_t,u)$ is jointly Gaussian, which gives</p>
+            <div class="math-block">$$v^*(x,t)=\sum_k w_k(x,t)\Big[\mu_k+\frac{t\sigma^2-(1-t)}{(1-t)^2+t^2\sigma^2}\,(x-t\mu_k)\Big],\qquad w_k\propto\mathcal N\big(x;\,t\mu_k,\,[(1-t)^2+t^2\sigma^2]I\big).$$</div>
+            <p>I use $v^*$ only for checking, never for training. Monte Carlo over 400,000 fresh $(x_0,x_1,t)$ gives the decomposition $\mathcal L(\theta)=\mathbb E\|u-v^*\|^2+\mathbb E\|v_\theta-v^*\|^2$:</p>
+        </div>
+        <div class="two">
+            <div class="table-wrap reveal">
+                <table>
+                    <thead><tr><th>Quantity</th><th class="n">Value</th></tr></thead>
+                    <tbody>
+                    <tr><td>Total variance of $u$, $\mathbb E\|u-\bar u\|^2$</td><td class="n">5.73</td></tr>
+                    <tr class="hl"><td>Model loss $\mathbb E\|v_\theta-u\|^2$</td><td class="n">3.642</td></tr>
+                    <tr class="hl"><td>Irreducible floor $\mathbb E\|v^*-u\|^2$</td><td class="n">3.614</td></tr>
+                    <tr><td>Field error $\mathbb E\|v_\theta-v^*\|^2$</td><td class="n">0.028</td></tr>
+                    <tr><td>Training time (34,051 params, 20k steps, GPU)</td><td class="n">36 s</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <figure class="reveal" style="margin-top:1.5rem">
+                <img src="results_part1/loss.png" alt="Training loss over 20,000 steps approaching the dashed irreducible floor" loading="lazy">
+                <figcaption>Training loss (100-step means) and the exact floor. Over 99% of the final loss is unpredictable pairing noise.</figcaption>
+            </figure>
+        </div>
+
+        <h3 class="task reveal"><span class="num">Task 3</span>Generate new points with the learned field</h3>
+        <div class="prose reveal">
+            <p>50,000 fresh starts $z_0\sim\mathcal N(0,I_3)$, no endpoints supplied, $K=100$ Euler steps (54 ms on the GPU). Particles are coloured by the azimuth of their <em>starting</em> point so that their motion can be followed.</p>
+        </div>
+        <figure class="reveal">
+            <img src="results_part1/generation_snapshots.png" alt="Generated point cloud at t = 0, 0.25, 0.5, 0.75, 0.9 and 1, contracting and then splitting into nine blobs" loading="lazy">
+            <figcaption>The cloud first contracts as a whole; the nine blobs separate only after $t\approx0.6$. Neighbouring starts end in the same blob, so the colours stay grouped.</figcaption>
+        </figure>
+        <figure class="reveal fig-narrow">
+            <img src="results_part1/flow_bcc.gif" alt="Animation: Gaussian noise flowing into the nine blobs of a BCC unit cell while the camera turns" loading="lazy">
+            <figcaption><strong>The learned flow, every second Euler step of the $K=100$ run.</strong> 8,000 of the generated particles, coloured by the azimuth of their starting point; the camera turns slowly to show the 3D arrangement.</figcaption>
+        </figure>
+        <figure class="reveal">
+            <img src="results_part1/velocity_field.png" alt="Quiver plots of learned and exact velocity on the diagonal plane x = y at four times" loading="lazy">
+            <figcaption><strong>Velocity field on the diagonal plane $x=y$</strong>, which contains the body centre and four corners (crosses mark the moving blob centres $t\mu_k$; colour = speed). Top: learned. Bottom: exact. Early on, the field points everywhere toward the mean of the whole target. Later it splits into basins around each blob. At $t=0.95$ the two disagree only in empty regions between the blobs, which hold almost no probability mass at that time, so the loss never trained them. Along the actual sampling paths the median relative error $|v_\theta-v^*|/|v^*|$ is 3%&ndash;30% (largest at $t\approx0.45$, just before the blobs separate).</figcaption>
+        </figure>
+        <div class="two">
+            <figure class="reveal">
+                <img src="results_part1/trajectories.png" alt="Left: straight random-pair training lines. Right: curved learned sampling trajectories from the same starts" loading="lazy">
+                <figcaption>Same 40 starts. <strong>Left:</strong> training construction: each start joined to a random target point by a straight line; the lines cross. <strong>Right:</strong> the learned sampling trajectories are curved; in 3D they cannot cross (lines may overlap in this projection).</figcaption>
+            </figure>
+            <div class="prose reveal">
+                <h4>Training paths vs. sampling paths</h4>
+                <p>The training segments are straight by construction (length &minus; chord = 0). The learned trajectories follow the <em>average</em> of all segments through each point. An ODE trajectory cannot cross another one, so particles first move toward the global mean and then turn toward a blob. This gives a mean excess length of <strong>0.52</strong> (median length/chord 1.70) on the same 100-step grid. Straight training paths do not produce straight sampling paths. Part 3 tests whether reflow can change that.</p>
+                <h4>Sample quality (50,000 points)</h4>
+                <div class="table-wrap" style="margin-top:0.6rem">
+                    <table>
+                        <thead><tr><th>Points</th><th class="n">TV</th><th class="n">SW&#8322;</th><th class="n">blob share</th></tr></thead>
+                        <tbody>
+                        <tr><td>learned field, $K=100$</td><td class="n">0.078</td><td class="n">0.0258</td><td class="n">10.7%&ndash;12.1%</td></tr>
+                        <tr><td>exact field $v^*$, $K=100$</td><td class="n">0.047</td><td class="n">0.0163</td><td class="n">10.8%&ndash;11.5%</td></tr>
+                        <tr><td>independent target draw</td><td class="n">0.044</td><td class="n">0.0119</td><td class="n">10.9%&ndash;11.3%</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p>All nine blobs are covered (ideal share 11.1%). The exact field integrated with the same Euler grid sits at the sampling noise floor. The remaining gap of the learned model is therefore model error, not discretization error.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ================= PHOTO BAND ================= -->
+<div class="band" aria-label="Point cloud of two meshing spur gears coloured by grain">
+    <div class="band-img"></div>
+    <div class="wrap reveal">
+        <p class="place">Two meshing gears &middot; 150,000 particles after noise &rarr; polycrystal &rarr; gear &rarr; 180&deg; rotation &rarr; gear pair, coloured by grain</p>
+    </div>
+</div>
+
+<!-- ================= PART 2 ================= -->
+<section id="part2">
+    <div class="wrap">
+        <div class="label">3 &middot; Part 2</div>
+        <h2 class="display reveal">Part 2: A Metal's Life Cycle as Learned Transport</h2>
+
+        <h3 class="task reveal"><span class="num">Task 1</span>Creative targets</h3>
+        <div class="prose reveal">
+            <p>All targets are generated procedurally in the notebook. No external images or data are used, so no licence or permission applies.</p>
+            <ul>
+                <li><strong>Polycrystal.</strong> 24 seed points, uniform in the cube $[-1.2,1.2]^3$. Every point of the cube belongs to the grain of its nearest seed (a 3D Voronoi tessellation). A point's distance to the grain boundary is its distance to the bisector plane between the nearest seed $s_1$ and second-nearest seed $s_2$, $\big(\|x-s_2\|^2-\|x-s_1\|^2\big)/(2\|s_2-s_1\|)$. Points closer than 0.04 are rejected. The grains are therefore separated by empty slabs 0.08 wide, which occupy 19.7% of the cube volume, and the microstructure is part of the coordinate distribution itself. Sampling: uniform proposals in the cube, rejection.</li>
+                <li><strong>Gear.</strong> Spur gear in the $xy$-plane: 24 trapezoidal teeth, module 0.1 (pitch radius 1.2, root 1.075, tip 1.3), thickness 0.5, bore radius 0.28, six lightening holes. Uniform density over the solid (rejection sampling).</li>
+                <li><strong>Two meshing gears.</strong> Same module, so they can mesh: 16 teeth (pitch radius 0.8) and 12 teeth (pitch radius 0.6), centre distance 1.4, thickness 0.4. The 12-tooth gear is offset by half a tooth so its teeth sit in the other gear's gaps. Uniform density over the union; the 16-tooth gear holds 61.2% of the volume.</li>
+            </ul>
+        </div>
+        <figure class="reveal">
+            <img src="results_part2/targets.png" alt="Target samples: polycrystal coloured by grain, a z-slice showing empty boundary slabs, the gear and the gear pair" loading="lazy">
+            <figcaption>Independent target samples. Second panel: a thin slice $|z|&lt;0.04$ through the polycrystal shows the empty boundary slabs.</figcaption>
+        </figure>
+        <div class="prose reveal">
+            <h4>Four learned legs</h4>
+            <p>Every shape-to-shape transport is a separate velocity model trained with the Part 1 loss and independent random pairs between its two endpoint distributions. Flow matching does not require a Gaussian source, so polycrystal &rarr; gear is learned in exactly the same way as noise &rarr; polycrystal. A capacity pilot (in <code>results_part2/pilot_capacity/</code>) showed that width and depth alone sharpen the cube faces but leave the internal slabs unresolved: a 6 &times; 512 MLP put 14.0% of its points into slabs that a uniform cube fills at 15.0%. Random Fourier features of $x$ (Tancik et al. 2020) helped most, so all legs use 4 &times; 512 with 128 features ($B\sim\mathcal N(0,2^2)$).</p>
+        </div>
+        <div class="two">
+            <div class="table-wrap reveal">
+                <table>
+                    <thead><tr><th>Leg</th><th class="n">Final loss</th><th class="n">Train s</th></tr></thead>
+                    <tbody>
+                    <tr><td>L1 noise &rarr; polycrystal</td><td class="n">3.192</td><td class="n">92</td></tr>
+                    <tr><td>L2 polycrystal &rarr; gear</td><td class="n">1.447</td><td class="n">93</td></tr>
+                    <tr><td>L3 gear &rarr; gear pair</td><td class="n">1.089</td><td class="n">102</td></tr>
+                    <tr><td>L4 gear pair &rarr; noise</td><td class="n">1.942</td><td class="n">67</td></tr>
+                    <tr><td>L1 with the Part 1 net (3 &times; 128)</td><td class="n">3.209</td><td class="n">28</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <figure class="reveal" style="margin-top:1.5rem">
+                <img src="results_part2/losses.png" alt="Training losses of the four legs, and the L1 loss for the large and small networks" loading="lazy">
+                <figcaption>The loss levels differ between legs because the pairing noise (the irreducible part) depends on the two distributions. They are not comparable across legs.</figcaption>
+            </figure>
+        </div>
+
+        <h3 class="task reveal" id="animation"><span class="num">Task 2</span>Animate the learned transport</h3>
+        <figure class="reveal">
+            <img src="results_part2/metal_lifecycle.gif" alt="Animation: noise flows into a coloured polycrystal, then a gear that rotates, then two meshing gears that rotate together, then back into noise" loading="lazy">
+            <figcaption><strong>The same particles throughout</strong> (GIF: every third frame, a third of the particles, 10 fps; the full-quality MP4 below has all 30,000 particles: 28 s, 30 fps, 1280 &times; 720, 11.3 MB). Every frame of a learned leg is one Euler step of that leg's network ($K=120$ per leg). The two rotations are exact rigid-body rotations about each gear axis and are not learned. The camera orbits slowly. <a href="results_part2/metal_lifecycle.mp4">Direct link to the MP4.</a></figcaption>
+        </figure>
+        <figure class="reveal">
+            <video src="results_part2/metal_lifecycle.mp4" controls loop muted playsinline preload="none" poster="results_part2/hero_polycrystal.jpg" style="width:100%;display:block;border-radius:4px;background:#0c1217;box-shadow:var(--shadow)"></video>
+            <figcaption>Full-quality MP4 of the same animation.</figcaption>
+        </figure>
+        <figure class="reveal">
+            <img src="results_part2/animation_stills.png" alt="Twelve still frames: noise, L1 halfway, polycrystal, L2 halfway, gear, gear rotating, L3 halfway, two gears, pair rotating, L4 halfway, noise again" loading="lazy">
+            <figcaption>Representative still frames from the animation.</figcaption>
+        </figure>
+        <div class="prose reveal">
+            <h4>How colours are assigned</h4>
+            <p>After L1, each particle is labelled with the grain whose seed is nearest to its <em>generated</em> endpoint and gets that grain's colour (24 distinct hues). The label is computed after sampling and plays no part in training: every network sees only coordinates and predicts only coordinate velocities. Before the grains form, the particles are grey. The grain colour fades in over $t\in[0.6,1]$ of L1 and then stays attached to the same particle for the rest of the film, so one can follow where each grain's material ends up in the gear, in the gear pair, and back in the noise. The transport is continuous, so each grain stays a coherent patch in the gear. It does not end up in the corresponding place of the gear in any physical sense.</p>
+            <h4>Why these rotation angles</h4>
+            <p>A rotated shape is a valid input for the next learned leg only if its distribution equals that of the unrotated training shape. 180&deg; maps the 24-tooth, 6-hole gear onto itself. For the pair, the 16-tooth gear turns +180&deg; and the 12-tooth gear turns $-180^\circ\times16/12=-240^\circ$ (the meshing ratio), and each angle is a symmetry of its own gear. Particles are assigned to a gear by their distance to its axis relative to its tip radius.</p>
+        </div>
+        <div class="table-wrap reveal">
+            <table>
+                <thead><tr><th>Check on the tracked particles</th><th class="n">Value</th></tr></thead>
+                <tbody>
+                <tr><td>After L1: in a grain / in a boundary slab / outside the cube</td><td class="n">88.4% / 11.1% / 0.6%</td></tr>
+                <tr><td>After L2: inside the gear solid</td><td class="n">98.0%</td></tr>
+                <tr><td>After the 180&deg; rotation: inside the (unrotated) gear</td><td class="n">98.0%</td></tr>
+                <tr><td>After L3: inside the gear pair</td><td class="n">97.3%</td></tr>
+                <tr><td>After the paired rotation: inside the gear pair</td><td class="n">96.1%</td></tr>
+                <tr><td>Share of particles on the 16-tooth gear (target share)</td><td class="n">64.1% (61.2%)</td></tr>
+                <tr><td>After L4: per-axis std ($x$ / $y$ / $z$); sliced W&#8322; to $\mathcal N(0,I)$ (noise floor)</td><td class="n">0.97 / 0.94 / 0.88; 0.080 (0.016)</td></tr>
+                <tr><td>After L4: mean distance to the particle's own starting noise</td><td class="n">1.57</td></tr>
+                <tr><td>Sampling time per leg, 120 steps, 30,000 particles (rendering excluded)</td><td class="n">600 / 429 / 416 / 425 ms</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="prose reveal">
+            <p>Errors compound along the chain. Each leg starts from the previous leg's <em>generated</em> points, not from perfect samples. Points that L3 left between the two gears no longer sit on a gear, so the paired rotation moves them with the wrong gear and the inside fraction drops from 97.3% to 96.1%. The final cloud is close to, but measurably narrower than, $\mathcal N(0,I)$ along $z$, the axis along which the flat gears were thinnest. The particles do not return to their own starting noise (mean distance 1.57): L4 is a new transport, not the inverse of L1&ndash;L3.</p>
+        </div>
+
+        <h3 class="task reveal"><span class="num">Task 3</span>The sampling trade-off (L1, noise &rarr; polycrystal)</h3>
+        <div class="prose reveal">
+            <p>The weights are fixed, and so are 50,000 Gaussian starts. The number of Euler steps $K$ is varied (NFE = $K$). Quality is measured against 50,000 independent target samples. The histogram uses one fixed $16^3$ grid (cell 0.25) on $[-2,2]^3$ plus an overflow cell for points outside it, so points that leave the plotted range are counted, not dropped. Grain TV is the TV between per-grain point shares. GPU times are medians of 5 runs, with sampling only (rendering excluded). CPU times are single runs with 4 threads.</p>
+        </div>
+        <div class="table-wrap reveal">
+            <table>
+                <thead><tr><th class="n">$K$ = NFE</th><th class="n">GPU ms</th><th class="n">CPU</th><th class="n">TV</th><th class="n">SW&#8322;</th><th class="n">in slabs</th><th class="n">outside</th><th class="n">grain TV</th><th class="n">TV, 3&times;128</th><th class="n">slabs, 3&times;128</th></tr></thead>
+                <tbody>
+<tr><td class="n">1</td><td class="n">6.1</td><td class="n">0.46 s</td><td class="n">0.992</td><td class="n">0.6821</td><td class="n">68.8%</td><td class="n">0.0%</td><td class="n">0.877</td><td class="n">0.991</td><td class="n">66.9%</td></tr>
+<tr><td class="n">2</td><td class="n">12.6</td><td class="n">0.72 s</td><td class="n">0.746</td><td class="n">0.3537</td><td class="n">23.1%</td><td class="n">0.0%</td><td class="n">0.568</td><td class="n">0.768</td><td class="n">22.5%</td></tr>
+<tr><td class="n">5</td><td class="n">34.6</td><td class="n">2.19 s</td><td class="n">0.346</td><td class="n">0.1336</td><td class="n">19.8%</td><td class="n">0.0%</td><td class="n">0.195</td><td class="n">0.357</td><td class="n">21.9%</td></tr>
+<tr><td class="n">10</td><td class="n">64.6</td><td class="n">3.72 s</td><td class="n">0.173</td><td class="n">0.0666</td><td class="n">14.7%</td><td class="n">0.0%</td><td class="n">0.093</td><td class="n">0.230</td><td class="n">20.3%</td></tr>
+<tr class="hl"><td class="n">25</td><td class="n">147.6</td><td class="n">11.10 s</td><td class="n">0.102</td><td class="n">0.0277</td><td class="n">11.7%</td><td class="n">0.1%</td><td class="n">0.037</td><td class="n">0.177</td><td class="n">18.8%</td></tr>
+<tr class="hl"><td class="n">50</td><td class="n">310.7</td><td class="n">18.59 s</td><td class="n">0.087</td><td class="n">0.0151</td><td class="n">11.0%</td><td class="n">0.3%</td><td class="n">0.022</td><td class="n">0.165</td><td class="n">18.5%</td></tr>
+<tr><td class="n">100</td><td class="n">606.3</td><td class="n">34.07 s</td><td class="n">0.084</td><td class="n">0.0093</td><td class="n">10.8%</td><td class="n">0.5%</td><td class="n">0.016</td><td class="n">0.162</td><td class="n">18.4%</td></tr>
+<tr><td class="n">200</td><td class="n">1234.7</td><td class="n">79.95 s</td><td class="n">0.082</td><td class="n">0.0069</td><td class="n">10.7%</td><td class="n">0.8%</td><td class="n">0.014</td><td class="n">0.161</td><td class="n">18.3%</td></tr>
+<tr><td class="n">target</td><td class="n">&ndash;</td><td class="n">&ndash;</td><td class="n">0.077</td><td class="n">0.0052</td><td class="n">0.0%</td><td class="n">0.0%</td><td class="n">0.013</td><td class="n">&ndash;</td><td class="n">&ndash;</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <figure class="reveal">
+            <img src="results_part2/step_sweep_clouds.png" alt="Generated polycrystals for K = 1, 5, 10, 25, 50, 200 and thin slices for the large and small networks" loading="lazy">
+            <figcaption><strong>Top:</strong> 4 &times; 512 samples for increasing $K$. <strong>Middle:</strong> slice $|z|&lt;0.04$ (400,000 points per panel). <strong>Bottom:</strong> the same slice for the Part 1-size network. Its grains bleed into each other at every $K$.</figcaption>
+        </figure>
+        <figure class="reveal">
+            <img src="results_part2/step_sweep_metrics.png" alt="Histogram TV, boundary and outside fractions, and sampling time against the number of Euler steps" loading="lazy">
+            <figcaption>TV and shape fractions versus $K$ for both networks; sampling time on GPU and CPU. Time grows linearly in $K$ (CPU: about 80.0 s for $K=200$ with the 4 &times; 512 net).</figcaption>
+        </figure>
+        <figure class="reveal fig-mid">
+            <img src="results_part2/steps_K5_vs_K50.gif" alt="Animation: the same starts integrated with 5 and with 50 Euler steps; the 5-step run moves in five straight jumps and ends blurred" loading="lazy">
+            <figcaption><strong>Same weights, same 8,000 starts, $K=5$ vs. $K=50$</strong>, played back along each run's Euler polygon (straight segments between the Euler states). The 5-step run moves in five straight jumps and ends too compact, with blurred grains.</figcaption>
+        </figure>
+        <div class="prose reveal">
+            <h4>What changes with fewer steps</h4>
+            <ul>
+                <li><strong>$K=1$ collapses the cloud.</strong> At $t=0$ the source and target are independent, so the ideal field is $v^*(x,0)=\mathbb E[x_1]-x$ and one Euler step sends <em>every</em> start to the target mean, here the cube centre (TV 0.992).</li>
+                <li><strong>Small $K$ shrinks the cloud and blurs the grains.</strong> Early velocities point toward the mean, and with large steps the later, outward-correcting velocities are evaluated too rarely. At $K=5$ the cloud is still too compact (no point lands outside the cube) and 19.8% of the points sit in boundary slabs.</li>
+                <li><strong>Diminishing returns.</strong> TV falls from 0.173 ($K=10$) to 0.102 ($K=25$) and 0.087 ($K=50$), then only to 0.082 at $K=200$, at four times the cost of $K=50$. The noise floor between two independent target draws is 0.077.</li>
+            </ul>
+            <h4>Which errors are not caused by the step count</h4>
+            <ul>
+                <li><strong>Model error.</strong> The Part 1-size network plateaus at TV 0.161 and 18.3% slab leakage even at $K=200$ (uniform cube: 19.7%). The large network reaches 0.082 and 10.7%. More steps solve the learned ODE more accurately, but they cannot fix the field itself.</li>
+                <li><strong>A small trade-off at the faces.</strong> The share of points outside the cube <em>grows</em> with $K$ (0.0% at $K=10$, 0.8% at $K=200$). The coarse integrator's contraction hides a slight overshoot of the learned field at the faces.</li>
+                <li><strong>Target representation and metric.</strong> The TV grid cell (0.25) is three times wider than the boundary slabs (0.08). TV therefore measures how mass is spread over the cube and is nearly blind to the microstructure, and it saturates near its noise floor while 10% of points still sit in boundaries. The slab fraction and grain TV are the shape-aware checks. A finer TV grid would raise its own noise floor at 50,000 samples.</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<!-- ================= PART 3 ================= -->
+<section id="part3">
+    <div class="wrap">
+        <div class="label">4 &middot; Part 3</div>
+        <h2 class="display reveal">Part 3: Does Reflow Straighten the Paths?</h2>
+
+        <h3 class="task reveal"><span class="num">Task 1</span>Hypothesis and the reflow dataset</h3>
+        <div class="callout reveal">
+            <p class="k">Hypothesis</p>
+            <p>One round of reflow on L1 (noise &rarr; polycrystal) makes the learned sampling paths straighter and keeps the generated distribution close to the target with far fewer Euler steps than the baseline needs.</p>
+        </div>
+        <div class="prose reveal">
+            <p>The baseline (the Part 2 L1 model, and two more trained from scratch with seeds 1 and 2) is frozen. For each seed, 1,000,000 fresh Gaussian starts are integrated with 200 Euler steps, and each start is stored with <strong>its own</strong> endpoint, $(z_0, \hat x_1=\Phi^{\text{base}}_{200}(z_0))$. The pairs are never reshuffled, and the target shape is not used to build them. Because the endpoints come from the baseline, they inherit its errors: in all three seeds about 11% of the teacher endpoints already lie in boundary slabs.</p>
+        </div>
+
+        <h3 class="task reveal"><span class="num">Task 2</span>Reflow vs. a compute-matched control</h3>
+        <div class="table-wrap reveal">
+            <table>
+                <thead><tr><th>Arm</th><th>Starting weights</th><th>Extra training</th><th>Pairs</th></tr></thead>
+                <tbody>
+                <tr><td><span class="sw" style="background:#1f77b4"></span><strong>baseline</strong></td><td>&ndash;</td><td>none (40k steps total)</td><td>random (noise, target)</td></tr>
+                <tr><td><span class="sw" style="background:#ff7f0e"></span><strong>continued</strong></td><td>baseline</td><td>+10k steps, lr 2&times;10<sup>&minus;4</sup> cosine</td><td>random (noise, target)</td></tr>
+                <tr><td><span class="sw" style="background:#2ca02c"></span><strong>reflow</strong></td><td>baseline</td><td>+10k steps, lr 2&times;10<sup>&minus;4</sup> cosine</td><td>saved (noise, own baseline endpoint)</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="prose reveal">
+            <p>All arms use the same architecture, batch and evaluation: 50,000 held-out Gaussian starts (not used for the pairs), $K\in\{1,\dots,128\}$, metrics against independent target samples. The continued-training arm gets the same extra optimizer steps on the original objective. Any gain that comes merely from 10,000 more updates shows up there too. The <strong>teacher gap</strong> compares coupled endpoints of the <em>same</em> start, $\mathbb E\|x_K(z)-\Phi^{\text{base}}_{200}(z)\|$, and is not a distance between independent clouds. <strong>Straightness</strong> is measured for every model on one common 256-step grid: mean over 10,000 particles of path length minus start-to-end distance.</p>
+        </div>
+        <div class="table-wrap reveal">
+            <table>
+                <thead>
+                <tr><th class="n" rowspan="2">$K$</th><th class="n" colspan="2">baseline</th><th class="n" colspan="2">continued</th><th class="n" colspan="2">reflow</th><th class="n" colspan="2">teacher gap</th><th class="n" rowspan="2">ms (reflow)</th></tr>
+                <tr><th class="n">TV</th><th class="n">slabs</th><th class="n">TV</th><th class="n">slabs</th><th class="n">TV</th><th class="n">slabs</th><th class="n">baseline</th><th class="n">reflow</th></tr>
+                </thead>
+                <tbody>
+<tr class="hl"><td class="n">1</td><td class="n">0.992</td><td class="n">78.2%</td><td class="n">0.992</td><td class="n">81.4%</td><td class="n">0.088</td><td class="n">14.0%</td><td class="n">1.158</td><td class="n">0.016</td><td class="n">6</td></tr>
+<tr class="hl"><td class="n">2</td><td class="n">0.746</td><td class="n">23.0%</td><td class="n">0.746</td><td class="n">23.0%</td><td class="n">0.086</td><td class="n">13.4%</td><td class="n">0.594</td><td class="n">0.010</td><td class="n">13</td></tr>
+<tr><td class="n">4</td><td class="n">0.417</td><td class="n">21.1%</td><td class="n">0.417</td><td class="n">21.1%</td><td class="n">0.085</td><td class="n">13.1%</td><td class="n">0.280</td><td class="n">0.008</td><td class="n">25</td></tr>
+<tr><td class="n">8</td><td class="n">0.212</td><td class="n">16.2%</td><td class="n">0.211</td><td class="n">16.1%</td><td class="n">0.085</td><td class="n">12.9%</td><td class="n">0.138</td><td class="n">0.008</td><td class="n">54</td></tr>
+<tr><td class="n">16</td><td class="n">0.125</td><td class="n">12.8%</td><td class="n">0.124</td><td class="n">12.5%</td><td class="n">0.085</td><td class="n">12.8%</td><td class="n">0.066</td><td class="n">0.007</td><td class="n">99</td></tr>
+<tr><td class="n">32</td><td class="n">0.094</td><td class="n">11.4%</td><td class="n">0.094</td><td class="n">11.0%</td><td class="n">0.085</td><td class="n">12.7%</td><td class="n">0.030</td><td class="n">0.007</td><td class="n">199</td></tr>
+<tr><td class="n">64</td><td class="n">0.085</td><td class="n">10.9%</td><td class="n">0.085</td><td class="n">10.5%</td><td class="n">0.085</td><td class="n">12.7%</td><td class="n">0.012</td><td class="n">0.007</td><td class="n">392</td></tr>
+<tr><td class="n">128</td><td class="n">0.083</td><td class="n">10.7%</td><td class="n">0.083</td><td class="n">10.3%</td><td class="n">0.085</td><td class="n">12.7%</td><td class="n">0.003</td><td class="n">0.007</td><td class="n">781</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="prose reveal"><p>Means over the three seeds; independent-target TV floor 0.077. Seed ranges are narrow: at $K=1$ reflow TV spans 0.087&ndash;0.089, and at $K=128$ the baseline slab fraction spans 10.6&ndash;10.7% and reflow 12.6&ndash;12.7%. Times are GPU sampling times for 50,000 points and are the same for all arms at equal $K$.</p></div>
+        <figure class="reveal">
+            <img src="results_part3/reflow_metrics.png" alt="TV, slab fraction, teacher gap and sliced W2 against Euler steps for baseline, continued and reflow" loading="lazy">
+            <figcaption>Lines: mean of three seeds; bands: min&ndash;max. The baseline and continued curves nearly coincide.</figcaption>
+        </figure>
+        <div class="two">
+            <div class="table-wrap reveal">
+                <table>
+                    <thead><tr><th>Straightness (256-step grid)</th><th class="n">length &minus; chord</th><th class="n">median length/chord</th><th class="n">$\|x_1^{K=1}-x_1^{K=256}\|$</th></tr></thead>
+                    <tbody>
+                    <tr><td>baseline</td><td class="n">0.510</td><td class="n">2.800</td><td class="n">1.156</td></tr>
+                    <tr><td>continued</td><td class="n">0.510</td><td class="n">2.804</td><td class="n">1.156</td></tr>
+                    <tr class="hl"><td>reflow</td><td class="n">0.0001</td><td class="n">1.000</td><td class="n">0.013</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="table-wrap reveal">
+                <table>
+                    <thead><tr><th>Cost per seed (GPU, mean of 3)</th><th class="n">Seconds</th></tr></thead>
+                    <tbody>
+                    <tr><td>Baseline training, 40k steps</td><td class="n">84</td></tr>
+                    <tr><td>Pair generation: 1,000,000 starts &times; 200 NFE</td><td class="n">25 (25&ndash;25)</td></tr>
+                    <tr><td>Reflow training, 10k steps</td><td class="n">22</td></tr>
+                    <tr><td>Continued training, 10k steps (control)</td><td class="n">22</td></tr>
+                    <tr class="hl"><td>Extra cost of reflow (pairs + training)</td><td class="n">47</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <figure class="reveal">
+            <img src="results_part3/reflow_trajectories.png" alt="Sixty sampling trajectories for baseline, continued and reflow; reflow paths are straight lines" loading="lazy">
+            <figcaption>The same 60 held-out starts (seed 0), 128 steps, projected; colour = grain of the endpoint. Baseline paths overshoot and hook back, and reflow paths are straight lines. The endpoints differ only slightly between arms.</figcaption>
+        </figure>
+        <figure class="reveal fig-mid">
+            <img src="results_part3/baseline_vs_reflow.gif" alt="Animation in four panels: baseline and reflow with 4 and 128 Euler steps; reflow moves straight and is already correct with 4 steps" loading="lazy">
+            <figcaption><strong>Baseline (top) vs. reflow (bottom), $K=4$ (left) and $K=128$ (right)</strong>, seed 0, the same 6,000 held-out starts, played back along each Euler polygon; colour = grain of the baseline's 128-step endpoint. The baseline's 4-step run ends too compact; reflow's 4- and 128-step runs are nearly identical because its paths are straight.</figcaption>
+        </figure>
+        <figure class="reveal">
+            <img src="results_part3/reflow_slices.png" alt="Slices of generated polycrystals for K = 1, 2, 4, 16 for each arm" loading="lazy">
+            <figcaption>Slice $|z|&lt;0.04$ through the generated polycrystal (seed 0, 400,000 points). Reflow is usable from a single step. At larger $K$ its grain boundaries are slightly less sharp than the baseline's.</figcaption>
+        </figure>
+        <figure class="reveal fig-narrow">
+            <img src="results_part3/extra_training_loss.png" alt="Loss during the extra 10k steps: reflow drops by orders of magnitude, continued stays flat" loading="lazy">
+            <figcaption>During the extra training the reflow loss falls by more than two orders of magnitude. Each start now has a single target, so the pairing noise that set the floor in Part 1 is gone. The continued arm stays at its random-pair floor.</figcaption>
+        </figure>
+
+        <h3 class="task reveal"><span class="num">Task 3</span>What the evidence supports</h3>
+        <div class="callout reveal">
+            <p class="k">Conclusion</p>
+            <p><strong>The straightness part of the hypothesis is supported, and so is few-step quality at the level the histogram measures.</strong> Excess path length drops from 0.510 to 0.0001. With one network evaluation reflow reaches TV 0.088, against 0.992 for the baseline at $K=1$ and 0.085 at $K=64$. The compute-matched control matches the baseline's TV at every $K$ (and leaks slightly less into the slabs, 10.3% vs. 10.7% at $K=128$), so 10,000 extra updates on random pairs do not explain the gain. <strong>The fine microstructure is not fully preserved:</strong> reflow leaves 12.7% of points in grain-boundary slabs at any $K$, against 10.7% for the baseline at $K=128$, and its histogram TV plateaus slightly above the baseline's (0.085 vs. 0.083).</p>
+        </div>
+        <div class="prose reveal">
+            <h4>Interpretation and alternative explanations</h4>
+            <ol>
+                <li><strong>Why the paths straighten.</strong> Random pairs give a target velocity that is ambiguous at every $(x_t,t)$. The fitted field is the average, and its integral curves bend (Part 1). Reflow pairs are a deterministic coupling, the baseline's own ODE map, so the straight interpolations of different pairs rarely cross. The conditional mean then equals the pair velocity, and the integral curves are the straight lines themselves. The near-zero reflow loss confirms this.</li>
+                <li><strong>Reflow inherits the baseline's errors.</strong> Reflow regresses onto the baseline's endpoints, not onto the target. Its best possible result is the teacher's distribution, which already has ~11% slab leakage. Its teacher gap levels off at 0.007 rather than reaching 0. The extra slab leakage beyond the teacher's (about +2 points) is the price of compressing a whole ODE map into one straight-line field: the map must be fitted to 0.04 precision at grain boundaries, and a small fitting error there moves points into the slabs.</li>
+                <li><strong>Straighter is not the same as better.</strong> Path straightness says nothing about the target. A model that sent every start straight to the cube centre would be perfectly straight. Quality is therefore judged only against independent target samples, and on the shape-aware metric reflow is slightly <em>worse</em> than its teacher at large $K$.</li>
+                <li><strong>Initialization.</strong> Reflow and the control both start from the baseline weights. This is a fine-tuning comparison. Reflow trained from scratch would need its own budget and was not run.</li>
+                <li><strong>Cost.</strong> Reflow's extra cost is about 47 s per model (25 s of pair generation, 200 million NFE, plus 22 s of training). Sampling 50,000 points with reflow at $K=1$ instead of the baseline at $K=64$ saves about 389 ms, so the extra cost is recovered after roughly 120 such batches (6.0 million points).</li>
+            </ol>
+            <p><strong>Scope.</strong> One target (the polycrystal), one architecture, one reflow round with a fixed budget, three seeds with small spread. The baselines differ only in their training seed. Their teacher endpoints and all metrics agree closely, so the seed variation is much smaller than the effects reported. The histogram TV cannot resolve the boundaries, so conclusions about the microstructure rest on the slab fraction. Whether a second reflow round or a longer reflow training run would close the slab gap is untested.</p>
+        </div>
+    </div>
+</section>
+
+<!-- ================= REPRODUCIBILITY ================= -->
+<section id="repro">
+    <div class="wrap">
+        <div class="label">5 &middot; Reproducibility</div>
+        <div class="prose reveal">
+            <p>Python 3.12.10, torch 2.11.0+cu128, numpy 2.4.6, matplotlib 3.11.1, imageio-ffmpeg 0.8.1, on an NVIDIA RTX 5090 Laptop GPU (Windows 11). Seeds: Part 1 training 0, target pool 0, generation starts 2024; Part 2 target pools 1, legs 0, animation starts 31, sweep starts 4242; Part 3 baselines 0/1/2, pair starts 10000 + seed, extra training 100 + seed, held-out starts 4242; polycrystal seeds 7. Notebooks: <code>part1.ipynb</code> (~1 min), <code>part2.ipynb</code> (~10 min, of which training ~353 s and rendering ~2 min), <code>part3.ipynb</code> (~10 min). Training is skipped when a checkpoint exists in <code>checkpoints/</code>. The code is submitted with the course deliverable and is not published on this site.</p>
+        </div>
+        <div class="label" style="margin-top:4rem">References</div>
+        <ul class="refs reveal">
+            <li>Y. Lipman, R. T. Q. Chen, H. Ben-Hamu, M. Nickel, M. Le. <em>Flow Matching for Generative Modeling.</em> ICLR 2023.</li>
+            <li>X. Liu, C. Gong, Q. Liu. <em>Flow Straight and Fast: Learning to Generate and Transfer Data with Rectified Flow.</em> ICLR 2023.</li>
+            <li>Y. Lipman, M. Havasi, P. Holderrieth, N. Shaul, M. Le, B. Karrer, R. T. Q. Chen, D. Lopez-Paz, H. Ben-Hamu, I. Gat. <em>Flow Matching Guide and Code.</em> arXiv:2412.06264, 2024.</li>
+            <li>M. Tancik, P. P. Srinivasan, B. Mildenhall et al. <em>Fourier Features Let Networks Learn High Frequency Functions in Low Dimensional Domains.</em> NeurIPS 2020.</li>
+        </ul>
+    </div>
+</section>
+
+</main>
+
+<footer>
+    <div class="wrap">
+        <span>&copy; 2026 Stanford White IV.</span>
+        <span><a href="https://stanfordwhiteiv.github.io/">stanfordwhiteiv.github.io</a></span>
+    </div>
+</footer>
+
+<script>
+(function () {
+    var root = document.documentElement;
+    var toggle = document.querySelector('.theme-toggle');
+    if (toggle) toggle.addEventListener('click', function () {
+        var dark = root.dataset.theme ? root.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+        root.dataset.theme = dark ? 'light' : 'dark';
+        try { localStorage.setItem('theme', root.dataset.theme); } catch (e) {}
+    });
+    var bar = document.querySelector('.topbar');
+    function onScroll() { bar.classList.toggle('scrolled', scrollY > 40); }
+    addEventListener('scroll', onScroll, { passive: true }); onScroll();
+    var els = document.querySelectorAll('.reveal');
+    if ('IntersectionObserver' in window) {
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+        }, { rootMargin: '0px 0px -8% 0px' });
+        els.forEach(function (el) { io.observe(el); });
+    } else { els.forEach(function (el) { el.classList.add('in'); }); }
+    addEventListener('beforeprint', function () { els.forEach(function (el) { el.classList.add('in'); }); });
+})();
+</script>
+</body>
+</html>

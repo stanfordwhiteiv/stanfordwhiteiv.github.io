@@ -128,6 +128,7 @@
         .gifs figure { margin: 0; }
         .gifs img { box-shadow: none; border: 1px solid var(--rule); }
         .gifs figcaption { font-size: 0.8rem; margin-top: 0.4rem; }
+        .gifs-wide img { background: #fff; }
         .gif-row-label { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-faint); margin-top: 1.6rem; }
 
         /* Tables */
@@ -221,6 +222,7 @@
             <li><a href="#part1">Part 1</a></li>
             <li><a href="#part2">Part 2</a></li>
             <li><a href="#part3">Part 3</a></li>
+            <li class="hide-sm"><a href="#extra">Extra</a></li>
             <li class="hide-sm"><a href="https://stanfordwhiteiv.github.io/#projects">Projects</a></li>
             <li>
                 <button class="theme-toggle" aria-label="Toggle light and dark theme">
@@ -617,12 +619,88 @@
     </div>
 </section>
 
+<!-- ================= EXTRA ================= -->
+<section id="extra">
+    <div class="wrap">
+        <div class="label">5 &middot; Extra</div>
+        <h2 class="display reveal">Extra: Ant-Maze PushT</h2>
+        <div class="prose reveal">
+            <p class="intro">A harder variant, modelled on the ant-versus-human "piano-movers" maze (Dreyer et al., PNAS 2025): a long-stemmed T has to be pushed along a corridor divided into three chambers by two walls, each with a central slit that is <strong>narrower than the T's crossbar</strong>, into the "nest" on the right. The middle chamber is narrower than the T is long, so the T cannot be lined up and pushed straight through; it has to be tilted and turned through each slit. I repeated Part 2 and Part 3 on this task with a mid-sized network trained on a GPU.</p>
+        </div>
+        <div class="table-wrap reveal">
+            <table>
+                <thead><tr><th>Item</th><th>Choice</th></tr></thead>
+                <tbody>
+                <tr><td>Maze</td><td>500 &times; 300 px corridor inside the PushT arena; 10 px walls at $x=266$ and $x=391$ (115 px middle chamber); 78 px slits at mid-height</td></tr>
+                <tr><td>Load</td><td>T with a 90 &times; 15 px crossbar, 130 px stem and 30 px foot (175 px long)</td></tr>
+                <tr><td>Physics, control</td><td>unchanged from PushT (10 Hz PD pusher, action = target position); the pusher is a heavy velocity-controlled body so that walls stop it</td></tr>
+                <tr><td>Reward</td><td>$\mathrm{clip}(f/0.95,0,1)$ with $f$ the fraction of the load inside the nest; success $f&gt;0.95$; 2000-step limit</td></tr>
+                <tr><td>Demonstrations</td><td>a scripted, simulation-based expert (only successful episodes kept): 250 of 280 episodes, median 365 steps</td></tr>
+                <tr><td>Policy</td><td>conditional flow matching exactly as in Part 2 ($K=8$, $N=10$), ~4M-parameter residual MLP with FiLM conditioning, dropout, weight decay and an exponential moving average of the weights; mirror augmentation (the maze is symmetric top-to-bottom); 40k steps, 4 min on an RTX 5090 Laptop GPU</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="two">
+            <div class="prose reveal">
+                <h4>Rotation is required</h4>
+                <p>Treating the load as a free rigid body on a 4 px &times; 4 px &times; 3&deg; pose grid, a breadth-first search from the nest shows that the load cannot reach it at any fixed angle, nor within any 30&deg; window of angles; it needs at least a 60&deg; window. One shortest free-body path (right) enters crossbar-first, swings the stem up inside the narrow middle chamber and turns again to pass the second slit (198&deg; of rotation in total). The same distance-to-nest field guides the scripted expert, which tries pushes from 55 contact points in a copy of the simulator and executes the one that brings the load closest to the nest.</p>
+            </div>
+            <figure class="reveal" style="margin-top:2.6rem">
+                <img src="results_extras/cspace_path.png" alt="A shortest free-body path of the T through both slits, coloured by time" loading="lazy">
+                <figcaption>One shortest free-body path from the left chamber to the nest (colour = time).</figcaption>
+            </figure>
+        </div>
+        <h3 class="task reveal"><span class="num">Part 2</span>Flow-matching policy on the maze</h3>
+        <div class="table-wrap reveal">
+            <table>
+                <thead><tr><th>Test starts 1000&ndash;1049</th><th class="n">Score</th><th class="n">Success</th><th class="n">Mean steps</th></tr></thead>
+                <tbody>
+                <tr><td>Scripted expert (demonstrator, reference)</td><td class="n">0.921</td><td class="n">92%</td><td class="n">586</td></tr>
+                <tr class="hl"><td>Flow-matching policy (condition A below)</td><td class="n">0.915</td><td class="n">90%</td><td class="n">768</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="prose reveal">
+            <p>The policy nearly matches its demonstrator. Validation loss decreased steadily and levelled off (train 0.245, validation 0.292), so with mirror augmentation, dropout and the shorter schedule this model does not over-fit the way a larger, unregularized one did in an earlier attempt.</p>
+        </div>
+        <p class="gif-row-label reveal">Rollouts (4&times; speed; blue pusher, gray load, green nest, red cross = current action)</p>
+        <div class="gifs gifs-wide reveal">
+            <figure><img src="results_extras/expert_demo.gif" alt="Scripted expert demonstration" loading="lazy"><figcaption><strong>Scripted expert</strong> (one training demonstration).</figcaption></figure>
+            <figure><img src="results_extras/A_fast.gif" alt="Flow-matching policy, fast success" loading="lazy"><figcaption><strong>Learned policy, start 1023:</strong> through both slits in 168 steps.</figcaption></figure>
+            <figure><img src="results_extras/A_worst.gif" alt="Flow-matching policy, failure" loading="lazy"><figcaption><strong>Learned policy, start 1034:</strong> failure. The load starts lying along the bottom wall and the pusher keeps pinning it there.</figcaption></figure>
+        </div>
+        <h3 class="task reveal"><span class="num">Part 3</span>Reward-weighted fine-tuning on the maze</h3>
+        <div class="prose reveal">
+            <p>Same protocol as Part 3: 50 collection episodes with the frozen policy (94% successful), weights $\min(e^{2R},5)$ normalized to mean 1, 300 updates per branch with demonstration replay, B and C matched in minibatches, noise and flow times, 3 fine-tuning seeds. Here the weights carry a real signal: the three failed collection episodes ran to the time limit and supplied 18% of the collected chunks, which C down-weights by about 5&times; while B imitates them as much as the successes.</p>
+        </div>
+        <div class="table-wrap reveal">
+            <table>
+                <thead><tr><th>Test starts 1000&ndash;1049</th><th class="n">Success (per fine-tuning seed)</th><th class="n">Mean steps</th></tr></thead>
+                <tbody>
+                <tr><td><span class="sw" style="background:#7b8991"></span>A &middot; original policy</td><td class="n">90%</td><td class="n">768</td></tr>
+                <tr><td><span class="sw" style="background:var(--b)"></span>B &middot; equal weights</td><td class="n">72 / 86 / 78%</td><td class="n">882&ndash;1104</td></tr>
+                <tr class="hl"><td><span class="sw" style="background:var(--flow)"></span>C &middot; reward weights</td><td class="n">88 / 86 / 92%</td><td class="n">813&ndash;850</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="prose reveal">
+            <p>Paired over the 50 test starts (B and C averaged over their three copies): <strong>C &minus; B = +10 points of success</strong> (95% CI +5 to +15) and 157 fewer steps (CI 67 to 248); B &minus; A = &minus;11 points (CI &minus;18 to &minus;4); C &minus; A = &minus;1 point (CI &minus;6 to +5). Unlike the original task, reward weighting clearly beats the equal-weight control here: fine-tuning on the policy's own rollouts without weights also imitates its failures and hurts, and the weights prevent that. They do not, however, improve on the original policy within this one round of fine-tuning.</p>
+        </div>
+        <p class="gif-row-label reveal">Start 1049, fine-tuning seed 0, same policy-noise seed</p>
+        <div class="gifs gifs-wide reveal">
+            <figure><img src="results_extras/A_compare.gif" alt="Condition A on start 1049" loading="lazy"><figcaption><strong>A:</strong> success in 215 steps.</figcaption></figure>
+            <figure><img src="results_extras/B_compare.gif" alt="Condition B on start 1049" loading="lazy"><figcaption><strong>B:</strong> success, but only after 1289 steps.</figcaption></figure>
+            <figure><img src="results_extras/C_compare.gif" alt="Condition C on start 1049" loading="lazy"><figcaption><strong>C:</strong> success in 148 steps.</figcaption></figure>
+        </div>
+    </div>
+</section>
+
 <!-- ================= REPRODUCIBILITY ================= -->
 <section id="repro">
     <div class="wrap">
-        <div class="label">5 &middot; Reproducibility</div>
+        <div class="label">6 &middot; Reproducibility</div>
         <div class="prose reveal">
-            <p>Python 3.12.10, torch 2.15.0+cpu, gym-pusht 0.1.8, gymnasium 1.4.0, pymunk 6.11.1, on a laptop CPU with 4 torch threads. Seeds: split 0, training 0, fine-tuning 0/1/2, validation resets 0&ndash;49, test resets 1000&ndash;1099, collection resets 2000&ndash;2024, illustration reset 1100. Every rollout records its reset seed and policy-noise seed. Notebooks: <code>part1.ipynb</code>, <code>part2.ipynb</code> and <code>part3.ipynb</code> (roughly 5(about 7, 7 and 6 minutes end to end)ndash;12 minutes each end to end on a laptop CPU, depending on load). Checkpoints, the normalizer, the split, the collection dataset and all per-episode CSVs are included with the submitted code.</p>
+            <p>Python 3.12.10, torch 2.15.0+cpu, gym-pusht 0.1.8, gymnasium 1.4.0, pymunk 6.11.1, on a laptop CPU with 4 torch threads. Seeds: split 0, training 0, fine-tuning 0/1/2, validation resets 0&ndash;49, test resets 1000&ndash;1099, collection resets 2000&ndash;2024, illustration reset 1100. Every rollout records its reset seed and policy-noise seed. Notebooks: <code>part1.ipynb</code>, <code>part2.ipynb</code> and <code>part3.ipynb</code> (roughly 5&ndash;12 minutes each end to end on a laptop CPU, depending on load). Checkpoints, the normalizer, the split, the collection dataset and all per-episode CSVs are included with the submitted code. The Extra section comes from <code>extras.ipynb</code> (Python 3.12, torch 2.11+cu128, RTX 5090 Laptop GPU; about 35 minutes end to end, mostly demonstration generation and rollouts).</p>
         </div>
         <div class="label" style="margin-top:4rem">References</div>
         <ul class="refs reveal">
@@ -631,6 +709,7 @@
             <li>C. Chi, S. Feng, Y. Du, Z. Xu, E. Cousineau, B. Burchfiel, S. Song. <em>Diffusion Policy: Visuomotor Policy Learning via Action Diffusion.</em> RSS 2023. (Source of the PushT demonstrations.)</li>
             <li>J. Fan et al. <em>Online Reward-Weighted Fine-Tuning of Flow Matching with Wasserstein Regularization.</em> ICLR 2025, Sec. 4.2.</li>
             <li><code>gym-pusht</code> environment (Hugging Face LeRobot), reward $=\mathrm{clip}(\text{coverage}/0.95,0,1)$.</li>
+            <li>T. Dreyer et al. <em>Comparing cooperative geometric puzzle solving in ants versus humans.</em> PNAS 2025. (Inspiration for the Extra maze.)</li>
         </ul>
     </div>
 </section>

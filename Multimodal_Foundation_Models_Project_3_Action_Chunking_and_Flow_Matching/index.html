@@ -402,11 +402,11 @@
         <div class="prose reveal">
             <p>A harder layout modelled on the ant-versus-human "piano-movers" maze (Dreyer et al., PNAS 2025): a long-stemmed T (90 px crossbar, 130 px stem) must be pushed through two 78 px slits, narrower than its crossbar, into a nest. A configuration-space search confirms it cannot pass at any fixed angle or within any 30&deg; window; it needs at least a 60&deg; turn. Light-gray doors let only the pusher change chambers. PushT's kinematic pusher is replaced by a force-limited one so it cannot pass through walls or the T (worst measured overlap about 3 px). With no human demonstrations available, 250 demonstrations came from a scripted simulation-based planner. A ~4M-parameter flow-matching policy trained with the Part 2 recipe ($K=8$, $N=10$) on a GPU reaches 84% success on 50 test starts (planner: 100%).</p>
         </div>
-        <p class="gif-row-label reveal">Ant maze (4&times; speed; green = nest). GIFs replay the recorded states of the reported test episodes.</p>
+        <p class="gif-row-label reveal">Ant maze, successful test rollouts of the learned policy (4&times; speed; green = nest)</p>
         <div class="gifs gifs-wide reveal">
-            <figure><img src="results_extras/expert_demo.gif" alt="Scripted planner demonstration" loading="lazy"><figcaption><strong>Planner</strong> (one training demonstration).</figcaption></figure>
-            <figure><img src="results_extras/A_success.gif" alt="Learned policy, success" loading="lazy"><figcaption><strong>Learned policy, start 1045:</strong> success in 505 steps.</figcaption></figure>
-            <figure><img src="results_extras/A_failure.gif" alt="Learned policy, failure" loading="lazy"><figcaption><strong>Learned policy, start 1000:</strong> failure; at most ~72% of the T reaches the nest.</figcaption></figure>
+            <figure><img src="results_extras/A_success_20.gif" alt="Learned policy, start 1049, success" loading="lazy"><figcaption><strong>Start 1049:</strong> 380 steps.</figcaption></figure>
+            <figure><img src="results_extras/A_success_50.gif" alt="Learned policy, start 1031, success" loading="lazy"><figcaption><strong>Start 1031:</strong> 504 steps (median success).</figcaption></figure>
+            <figure><img src="results_extras/A_success_80.gif" alt="Learned policy, start 1038, success" loading="lazy"><figcaption><strong>Start 1038:</strong> 812 steps.</figcaption></figure>
         </div>
     </div>
 </section>
@@ -489,11 +489,11 @@
         <div class="prose reveal">
             <p>Same protocol with the ant-maze policy as A (collection 94% successful; the 3 failed episodes supply 15% of the chunks, which C down-weights ~5&times;). On 50 test starts, success is A 84%, B 76 / 82 / 86%, C 80 / 86 / 90% (fine-tuning seeds 0 / 1 / 2): C &minus; B = +4 points (95% CI &minus;3 to +11), C &minus; A = +1 point (&minus;9 to +12). C is ahead of B on every seed, but the difference is not distinguishable from noise at this size.</p>
         </div>
-        <p class="gif-row-label reveal">Ant maze, start 1049 (where B and C differ most), fine-tuning seed 0:</p>
+        <p class="gif-row-label reveal">Ant maze, start 1019 (all three succeed), fine-tuning seed 0:</p>
         <div class="gifs gifs-wide reveal">
-            <figure><img src="results_extras/A_compare.gif" alt="Condition A on start 1049" loading="lazy"><figcaption><strong>A:</strong> success in 380 steps.</figcaption></figure>
-            <figure><img src="results_extras/B_compare.gif" alt="Condition B on start 1049" loading="lazy"><figcaption><strong>B:</strong> success in 310 steps.</figcaption></figure>
-            <figure><img src="results_extras/C_compare.gif" alt="Condition C on start 1049" loading="lazy"><figcaption><strong>C:</strong> failure (at most 85% in the nest); a single start.</figcaption></figure>
+            <figure><img src="results_extras/A_compare.gif" alt="Condition A on start 1019" loading="lazy"><figcaption><strong>A:</strong> 271 steps.</figcaption></figure>
+            <figure><img src="results_extras/B_compare.gif" alt="Condition B on start 1019" loading="lazy"><figcaption><strong>B:</strong> 1354 steps.</figcaption></figure>
+            <figure><img src="results_extras/C_compare.gif" alt="Condition C on start 1019" loading="lazy"><figcaption><strong>C:</strong> 414 steps.</figcaption></figure>
         </div>
     </div>
 </section>

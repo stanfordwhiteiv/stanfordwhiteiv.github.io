@@ -284,7 +284,7 @@
 
         <h3 class="task reveal"><span class="num">Task 1</span>Source, target and training pairs</h3>
         <div class="prose reveal">
-            <p><strong>Target.</strong> For this project, I wanted to theme it based on my own research in materials science and applied machine learning in engineering. So, each learned distribution here is a 3D shape inspired by materials science. I chose this shape because it represents a common crystal structure in materials science; steel, for example, is commonly BCC. For part 1, I learn a body-centred cubic (BCC) unit cell. To construct this distribution, the eight corners $(\pm1,\pm1,\pm1)$ and the body centre $(0,0,0)$, each chosen with probability 1/9, plus isotropic Gaussian noise of standard deviation $\sigma=0.15$. The coordinates are in arbitrary units with the cube edge equal to 2, so the target has about the same spread as the source (per-axis std 0.95 vs. 1). <strong>Source:</strong> $x_0\sim\mathcal N(0,I_3)$. <strong>Pairs:</strong> $x_0$ and $x_1$ independent, $t\sim\mathcal U[0,1]$, $x_t=(1-t)x_0+tx_1$, $u=x_1-x_0$.</p>
+            <p><strong>Target.</strong> For this project, I wanted to theme it based on my own research in materials science and applied machine learning in engineering. So, each learned distribution here is a 3D shape inspired by materials science. I chose this shape because it represents a common crystal structure in materials science; steel, for example, is commonly BCC. For part 1, I learn a body-centred cubic (BCC) unit cell. To construct this distribution, I sample the eight corners $(\pm1,\pm1,\pm1)$ and the body centre $(0,0,0)$, each chosen with probability 1/9, and add isotropic Gaussian noise of standard deviation $\sigma=0.15$. The coordinates are in arbitrary units with the cube edge equal to 2, so the target has about the same spread as the source (per-axis std 0.95 vs. 1). <strong>Source:</strong> $x_0\sim\mathcal N(0,I_3)$. <strong>Pairs:</strong> $x_0$ and $x_1$ independent, $t\sim\mathcal U[0,1]$, $x_t=(1-t)x_0+tx_1$, $u=x_1-x_0$. For a fixed pair, $x_t$ is linear in $t$, so $\frac{d}{dt}x_t=x_1-x_0$ does not depend on $t$: the velocity is constant along each straight training path.</p>
         </div>
         <figure class="reveal">
             <img src="results_part1/source_target_pairs.png" alt="Gaussian source cloud, BCC target cloud with nine blobs, and 60 random pairs joined by straight lines with points at six times" loading="lazy">
@@ -293,7 +293,7 @@
 
         <h3 class="task reveal"><span class="num">Task 2</span>Train the velocity model</h3>
         <div class="prose reveal">
-            <p>The network receives only $(x_t,t)$. At a given $(x,t)$ the loss is minimized by the conditional mean of the targets that pass through that point, $v^*(x,t)=\mathbb E[x_1-x_0\mid x_t=x]$, the <em>marginal velocity</em>. The remaining spread of $u$ around $v^*$ cannot be predicted, so the loss does not go to zero. 
+            <p>The network receives only $(x_t,t)$. At a given $(x,t)$ the loss is minimized by the conditional mean of the targets that pass through that point, $v^*(x,t)=\mathbb E[x_1-x_0\mid x_t=x]$, the <em>marginal velocity</em>. The remaining spread of $u$ around $v^*$ cannot be predicted, so the loss does not go to zero. For this Gaussian-mixture target, $v^*$ has a closed form; I use it only for checking (the "exact" field and loss floor below), never for training.</p>
         </div>
         <div class="two">
             <figure class="reveal" style="margin-top:1.5rem">

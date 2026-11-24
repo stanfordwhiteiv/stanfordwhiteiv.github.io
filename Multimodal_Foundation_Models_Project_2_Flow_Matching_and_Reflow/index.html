@@ -255,7 +255,7 @@
         <div class="label">1 &middot; Setup</div>
         <h2 class="display reveal">Experimental Setup</h2>
         <div class="prose reveal">
-            <p class="intro">A velocity network $v_\theta(x,t)$ is trained to move points from a source distribution to a target distribution. The model works only on point <strong>coordinates</strong>; colours on this page are visualization attributes and never enter training. All distributions are three-dimensional.</p>
+            <p class="intro">A velocity network $v_\theta(x,t)$ is trained to move points from a source distribution to a target distribution. The model works only on point <strong>coordinates</strong>. All distributions are three-dimensional.</p>
             <div class="math-block">$$x_t=(1-t)\,x_0+t\,x_1,\qquad u=x_1-x_0,\qquad \mathcal L(\theta)=\mathbb E_{x_0,x_1,t}\big\|v_\theta(x_t,t)-u\big\|_2^2,\quad t\sim\mathcal U[0,1],$$</div>
             <p>with $t=0$ the source and $t=1$ the target. Unless stated otherwise, $x_0$ and $x_1$ are drawn <em>independently</em> (random pairing). Sampling uses forward Euler, $z_{k+1}=z_k+\tfrac1K v_\theta(z_k,k/K)$, so $K$ steps cost exactly $K$ network evaluations (NFE).</p>
         </div>
@@ -269,21 +269,10 @@
                 <tr><td>Part 2/3 network</td><td>MLP, 4 &times; 512, SiLU; inputs $x$, 8 sin/cos frequencies of $t$, 128 fixed random Fourier features of $x$ (930,819 parameters); batch 4096, 40,000 steps</td></tr>
                 <tr><td>Optimizer</td><td>Adam, learning rate 10<sup>&minus;3</sup> with cosine decay to 10<sup>&minus;5</sup>; training data drawn with replacement from a fixed pool of 10<sup>6</sup> target points</td></tr>
                 <tr><td>Quality metrics</td><td>histogram total variation (TV) on a fixed 16&sup3; grid over $[-2,2]^3$ plus one overflow cell; sliced Wasserstein-2; shape-specific fractions (points in grain-boundary slabs, outside the cube). Always against <em>independent</em> target samples; the noise floor is two independent target draws.</td></tr>
-                <tr><td>Hardware</td><td>NVIDIA RTX 5090 Laptop GPU, Python 3.12.10, torch 2.11.0+cu128. Training, sampling and timings use the GPU. Another process shared the GPU during the runs, so absolute times are indicative.</td></tr>
+                <tr><td>Hardware</td><td>NVIDIA RTX 5090 Laptop GPU, Python 3.12.10, torch 2.11.0+cu128. Training, sampling and timings use the GPU.</td></tr>
                 </tbody>
             </table>
         </div>
-        <div class="callout reveal">
-            <p class="k">Changes from the assignment (approved by the instructor)</p>
-            <p>(1) Every distribution is 3D instead of 2D. (2) Training runs on a GPU instead of a CPU; CPU timings for sampling are reported for reference. (3) The Part 2 target is a sequence of shapes that follows a metal's life cycle: noise &rarr; polycrystal &rarr; gear &rarr; rotating gear &rarr; two meshing gears &rarr; rotating pair &rarr; noise. Each shape-to-shape transport is a separately trained flow; the rotations are exact rigid-body motions and are labelled as such. All tasks of Parts 1&ndash;3 are otherwise answered as specified.</p>
-        </div>
-
-        <dl class="facts reveal">
-            <div><dt>Part 1 loss</dt><dd>3.642<small>irreducible floor 3.614; field error 0.028</small></dd></div>
-            <div><dt>Boundary leakage</dt><dd>10.7%<small>of points in grain-boundary slabs (uniform cube: 19.7%)</small></dd></div>
-            <div><dt>One Euler step</dt><dd>0.088<small>TV after reflow vs. 0.992 for the baseline</small></dd></div>
-            <div><dt>Path excess</dt><dd>0.510 &rarr; 0.0001<small>length &minus; chord, baseline &rarr; reflow</small></dd></div>
-        </dl>
     </div>
 </section>
 
@@ -295,35 +284,18 @@
 
         <h3 class="task reveal"><span class="num">Task 1</span>Source, target and training pairs</h3>
         <div class="prose reveal">
-            <p><strong>Target.</strong> A body-centred cubic unit cell: the eight corners $(\pm1,\pm1,\pm1)$ and the body centre $(0,0,0)$, each chosen with probability 1/9, plus isotropic Gaussian noise of standard deviation $\sigma=0.15$. The coordinates are in arbitrary units with the cube edge equal to 2, so the target has about the same spread as the source (per-axis std 0.95 vs. 1). <strong>Source:</strong> $x_0\sim\mathcal N(0,I_3)$. <strong>Pairs:</strong> $x_0$ and $x_1$ independent, $t\sim\mathcal U[0,1]$, $x_t=(1-t)x_0+tx_1$, $u=x_1-x_0$.</p>
+            <p><strong>Target.</strong> For this project, I wanted to theme it based on my own research in materials science and applied machine learning in engineering. So, each learned distribution here is a 3D shape inspired by materials science. I chose this shape because it represents a common crystal structure in materials science; steel, for example, is commonly BCC. For part 1, I learn a body-centred cubic (BCC) unit cell. To construct this distribution, the eight corners $(\pm1,\pm1,\pm1)$ and the body centre $(0,0,0)$, each chosen with probability 1/9, plus isotropic Gaussian noise of standard deviation $\sigma=0.15$. The coordinates are in arbitrary units with the cube edge equal to 2, so the target has about the same spread as the source (per-axis std 0.95 vs. 1). <strong>Source:</strong> $x_0\sim\mathcal N(0,I_3)$. <strong>Pairs:</strong> $x_0$ and $x_1$ independent, $t\sim\mathcal U[0,1]$, $x_t=(1-t)x_0+tx_1$, $u=x_1-x_0$.</p>
         </div>
         <figure class="reveal">
             <img src="results_part1/source_target_pairs.png" alt="Gaussian source cloud, BCC target cloud with nine blobs, and 60 random pairs joined by straight lines with points at six times" loading="lazy">
             <figcaption><strong>Left:</strong> source. <strong>Middle:</strong> target (the body-centre blob overlaps two corners in this view). <strong>Right:</strong> 60 random pairs; dots mark $x_t$ at $t=0,0.2,\dots,1$.</figcaption>
         </figure>
-        <div class="prose reveal">
-            <p><strong>Why the velocity is constant along each training path.</strong> For a fixed pair, $x_t$ is linear in $t$, so $\frac{d}{dt}x_t=x_1-x_0$ for every $t$: each path is a straight segment traversed at constant speed. Numerically, finite differences between the six time slices match $x_1-x_0$ to $10^{-7}$ (float32 round-off). Because the pairs are random, the segments cross: many different targets $u$ occur at the same $(x_t,t)$.</p>
-        </div>
 
         <h3 class="task reveal"><span class="num">Task 2</span>Train the velocity model</h3>
         <div class="prose reveal">
-            <p>The network receives only $(x_t,t)$, never $x_0$ or $x_1$. At a given $(x,t)$ the loss is minimized by the conditional mean of the targets that pass through that point, $v^*(x,t)=\mathbb E[x_1-x_0\mid x_t=x]$, the <em>marginal velocity</em>. The remaining spread of $u$ around $v^*$ cannot be predicted, so the loss does not go to zero. For this Gaussian-mixture target $v^*$ has a closed form. Given the blob $k$, $(x_t,u)$ is jointly Gaussian, which gives</p>
-            <div class="math-block">$$v^*(x,t)=\sum_k w_k(x,t)\Big[\mu_k+\frac{t\sigma^2-(1-t)}{(1-t)^2+t^2\sigma^2}\,(x-t\mu_k)\Big],\qquad w_k\propto\mathcal N\big(x;\,t\mu_k,\,[(1-t)^2+t^2\sigma^2]I\big).$$</div>
-            <p>I use $v^*$ only for checking, never for training. Monte Carlo over 400,000 fresh $(x_0,x_1,t)$ gives the decomposition $\mathcal L(\theta)=\mathbb E\|u-v^*\|^2+\mathbb E\|v_\theta-v^*\|^2$:</p>
+            <p>The network receives only $(x_t,t)$. At a given $(x,t)$ the loss is minimized by the conditional mean of the targets that pass through that point, $v^*(x,t)=\mathbb E[x_1-x_0\mid x_t=x]$, the <em>marginal velocity</em>. The remaining spread of $u$ around $v^*$ cannot be predicted, so the loss does not go to zero. 
         </div>
         <div class="two">
-            <div class="table-wrap reveal">
-                <table>
-                    <thead><tr><th>Quantity</th><th class="n">Value</th></tr></thead>
-                    <tbody>
-                    <tr><td>Total variance of $u$, $\mathbb E\|u-\bar u\|^2$</td><td class="n">5.73</td></tr>
-                    <tr class="hl"><td>Model loss $\mathbb E\|v_\theta-u\|^2$</td><td class="n">3.642</td></tr>
-                    <tr class="hl"><td>Irreducible floor $\mathbb E\|v^*-u\|^2$</td><td class="n">3.614</td></tr>
-                    <tr><td>Field error $\mathbb E\|v_\theta-v^*\|^2$</td><td class="n">0.028</td></tr>
-                    <tr><td>Training time (34,051 params, 20k steps, GPU)</td><td class="n">36 s</td></tr>
-                    </tbody>
-                </table>
-            </div>
             <figure class="reveal" style="margin-top:1.5rem">
                 <img src="results_part1/loss.png" alt="Training loss over 20,000 steps approaching the dashed irreducible floor" loading="lazy">
                 <figcaption>Training loss (100-step means) and the exact floor. Over 99% of the final loss is unpredictable pairing noise.</figcaption>
@@ -332,7 +304,7 @@
 
         <h3 class="task reveal"><span class="num">Task 3</span>Generate new points with the learned field</h3>
         <div class="prose reveal">
-            <p>50,000 fresh starts $z_0\sim\mathcal N(0,I_3)$, no endpoints supplied, $K=100$ Euler steps (54 ms on the GPU). Particles are coloured by the azimuth of their <em>starting</em> point so that their motion can be followed.</p>
+            <p>50,000 fresh starts $z_0\sim\mathcal N(0,I_3)$, $K=100$ Euler steps (54 ms on the GPU).</p>
         </div>
         <figure class="reveal">
             <img src="results_part1/generation_snapshots.png" alt="Generated point cloud at t = 0, 0.25, 0.5, 0.75, 0.9 and 1, contracting and then splitting into nine blobs" loading="lazy">
@@ -340,7 +312,7 @@
         </figure>
         <figure class="reveal fig-narrow">
             <img src="results_part1/flow_bcc.gif" alt="Animation: Gaussian noise flowing into the nine blobs of a BCC unit cell while the camera turns" loading="lazy">
-            <figcaption><strong>The learned flow, every second Euler step of the $K=100$ run.</strong> 8,000 of the generated particles, coloured by the azimuth of their starting point; the camera turns slowly to show the 3D arrangement.</figcaption>
+            <figcaption><strong>The learned flow, every second Euler step of the $K=100$ run.</strong> 8,000 of the generated particles, coloured by the azimuth of their starting point.</figcaption>
         </figure>
         <figure class="reveal">
             <img src="results_part1/velocity_field.png" alt="Quiver plots of learned and exact velocity on the diagonal plane x = y at four times" loading="lazy">
@@ -387,7 +359,6 @@
 
         <h3 class="task reveal"><span class="num">Task 1</span>Creative targets</h3>
         <div class="prose reveal">
-            <p>All targets are generated procedurally in the notebook. No external images or data are used, so no licence or permission applies.</p>
             <ul>
                 <li><strong>Polycrystal.</strong> 24 seed points, uniform in the cube $[-1.2,1.2]^3$. Every point of the cube belongs to the grain of its nearest seed (a 3D Voronoi tessellation). A point's distance to the grain boundary is its distance to the bisector plane between the nearest seed $s_1$ and second-nearest seed $s_2$, $\big(\|x-s_2\|^2-\|x-s_1\|^2\big)/(2\|s_2-s_1\|)$. Points closer than 0.04 are rejected. The grains are therefore separated by empty slabs 0.08 wide, which occupy 19.7% of the cube volume, and the microstructure is part of the coordinate distribution itself. Sampling: uniform proposals in the cube, rejection.</li>
                 <li><strong>Gear.</strong> Spur gear in the $xy$-plane: 24 trapezoidal teeth, module 0.1 (pitch radius 1.2, root 1.075, tip 1.3), thickness 0.5, bore radius 0.28, six lightening holes. Uniform density over the solid (rejection sampling).</li>
